@@ -1,0 +1,136 @@
+erDiagram
+  Account ||--o| Tenant : "là (1–1)"
+  Account ||--o{ RentalRequest : "quản lý quyết định (decidedBy)"
+  Account {
+    int accountId PK
+    varchar username UK "4–30 ký tự"
+    varchar passwordHash "pbkdf2_sha256$600000$salt$hash"
+    nvarchar fullName
+    varchar phone "NULL, 10 chữ số"
+    varchar email "NULL"
+    varchar role "ADMIN | MANAGER | TENANT"
+    bit active "mặc định 1; 0 = bị khoá"
+    datetime2 createdAt
+  }
+  Tenant {
+    int tenantId PK, FK "→ Account.accountId"
+    varchar idCardNo UK "CCCD 12 chữ số"
+    nvarchar school "NULL"
+    date dateOfBirth "NULL"
+    nvarchar hometown "NULL"
+  }
+  RoomType ||--o{ Room : "phân loại"
+  RoomType {
+    int roomTypeId PK
+    nvarchar name UK
+    int capacity "1–8"
+    nvarchar description "NULL"
+  }
+  Room {
+    int roomId PK
+    varchar roomCode UK
+    int roomTypeId FK
+    int floor ">= 1"
+    decimal area "NULL, > 0"
+    decimal monthlyPrice "> 0, giá hiện tại"
+    varchar status "ACTIVE | MAINTENANCE | HIDDEN"
+    varchar imageUrl "NULL"
+    nvarchar description "NULL"
+  }
+  UtilityPrice ||--o{ Invoice : "dùng để tính"
+  UtilityPrice {
+    int priceId PK
+    decimal electricPrice ">= 0, đ/kWh"
+    decimal waterPrice ">= 0, đ/m3"
+    decimal serviceFeePerPerson ">= 0"
+    date effectiveFrom UK "ngày hiệu lực"
+    datetime2 createdAt
+  }
+  Tenant ||--o{ RentalRequest : "gửi"
+  Room ||--o{ RentalRequest : "được xin thuê"
+  RentalRequest {
+    int requestId PK
+    int tenantId FK "UNIQUE khi PENDING"
+    int roomId FK
+    date moveInDate
+    int months "1–24"
+    int numPeople "1–8"
+    nvarchar note "NULL"
+    varchar status "PENDING | APPROVED | REJECTED | CANCELLED"
+    datetime2 createdAt
+    datetime2 decidedAt "NULL khi PENDING"
+    int decidedBy FK "NULL → Account"
+    nvarchar decisionNote "NULL, lý do từ chối"
+  }
+  RentalRequest ||--o| Contract : "duyệt thành"
+  Tenant ||--o{ Contract : "ký"
+  Room ||--o{ Contract : "cho thuê"
+  Contract {
+    int contractId PK
+    int requestId FK "UNIQUE"
+    int tenantId FK "UNIQUE khi ACTIVE"
+    int roomId FK "UNIQUE khi ACTIVE"
+    date startDate
+    date endDate "> startDate"
+    decimal monthlyRent "> 0, chụp lúc ký"
+    decimal deposit ">= 0"
+    int numPeople "1–8"
+    int startElectricIndex ">= 0"
+    int startWaterIndex ">= 0"
+    varchar status "ACTIVE | ENDED"
+    datetime2 createdAt
+    datetime2 endedAt "NULL khi ACTIVE"
+  }
+  Room ||--o{ MeterReading : "ghi chỉ số"
+  MeterReading {
+    int readingId PK
+    int roomId FK "UNIQUE(roomId, year, month)"
+    int year "2020–2100"
+    int month "1–12"
+    int electricIndex ">= 0"
+    int waterIndex ">= 0"
+    datetime2 recordedAt
+  }
+  Contract ||--o{ Invoice : "sinh hoá đơn"
+  Invoice {
+    int invoiceId PK
+    int contractId FK "UNIQUE(contractId, year, month)"
+    int priceId FK
+    int year
+    int month "1–12"
+    decimal roomFee
+    int electricUsed
+    decimal electricFee
+    int waterUsed
+    decimal waterFee
+    decimal serviceFee
+    decimal total "= tổng 4 khoản (CHECK)"
+    varchar status "UNPAID | PAID"
+    date dueDate
+    datetime2 createdAt
+    datetime2 paidAt "NULL khi UNPAID, chỉ IPN ghi"
+  }
+  Invoice ||--o{ Payment : "mỗi lần thử trả"
+  Payment {
+    int paymentId PK
+    int invoiceId FK "UNIQUE khi SUCCESS"
+    varchar txnRef UK
+    decimal amount "> 0"
+    varchar status "PENDING | SUCCESS | FAILED"
+    varchar vnpTransactionNo "NULL"
+    varchar bankCode "NULL"
+    varchar responseCode "NULL"
+    datetime2 createdAt
+    datetime2 paidAt "NULL trừ khi SUCCESS"
+  }
+  Contract ||--o{ MaintenanceRequest : "báo sự cố"
+  MaintenanceRequest {
+    int ticketId PK
+    int contractId FK
+    nvarchar title
+    nvarchar description "NULL"
+    varchar status "OPEN | IN_PROGRESS | DONE"
+    nvarchar managerNote "NULL"
+    datetime2 createdAt
+    datetime2 resolvedAt "chỉ có khi DONE"
+  }
