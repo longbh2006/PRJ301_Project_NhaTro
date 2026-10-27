@@ -2,28 +2,26 @@ package dal;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import model.Contract;
 import model.RentalRequest;
 
-/** Standalone integration check against setup.sql; removes its own test request. */
+/** Chạy trong môi trường web để DBContext gốc phân giải đúng resource cấu hình. */
 public class RentalDAOIntegrationTest {
 
     public static void main(String[] args) throws SQLException {
         Connection ownedConnection;
-        try (RentalDAO dao = new RentalDAO()) {
+        try (RentalDAO dao = new RentalDAO(); RentalTestDAO testDAO = new RentalTestDAO()) {
             ownedConnection = dao.getConnection();
-            runChecks(dao);
+            runChecks(dao, testDAO);
         }
         require(ownedConnection.isClosed(), "Closing the DAO must close its inherited connection");
         System.out.println("PASS: DAO closes its inherited connection");
     }
 
-    private static void runChecks(RentalDAO dao) throws SQLException {
-        RentalRequest request = sampleRequest();
+    private static void runChecks(RentalDAO dao, RentalTestDAO testDAO) throws SQLException {
+        RentalRequest request = testDAO.findSampleRequest();
         request.setStatus("APPROVED");
         request.setNote("NT-26: Tiếng Việt '); DROP TABLE RentalRequest; --");
         int requestId = dao.insertRequest(request);
@@ -58,28 +56,22 @@ public class RentalDAOIntegrationTest {
             try (Connection con = new DBContext().getConnection()) {
                 con.setAutoCommit(false);
                 try {
-                    approve(con, requestId);
+                    require(testDAO.approveRequest(con, requestId) == 1, "Approval must update exactly one request");
                     contractId = dao.insertContract(con, contract);
                     require(!con.isClosed() && !con.getAutoCommit(), "DAO must leave caller's transaction open");
-                    try (PreparedStatement ps = con.prepareStatement(
-                            "SELECT monthlyRent, deposit, startElectricIndex, startWaterIndex, endedAt FROM Contract WHERE contractId = ?")) {
-                        ps.setInt(1, contractId);
-                        try (ResultSet rs = ps.executeQuery()) {
-                            require(rs.next(), "Contract must exist in the caller's transaction");
-                            require(contract.getMonthlyRent().compareTo(rs.getBigDecimal("monthlyRent")) == 0,
-                                    "Monthly rent must preserve DECIMAL(12,0) precision");
-                            require(contract.getDeposit().compareTo(rs.getBigDecimal("deposit")) == 0,
-                                    "Deposit must preserve DECIMAL(12,0) precision");
-                            require(rs.getInt("startElectricIndex") == 125 && rs.getInt("startWaterIndex") == 40,
-                                    "Initial meter readings must round-trip");
-                            require(contract.getEndedAt().equals(rs.getTimestamp("endedAt").toLocalDateTime()),
-                                    "endedAt must round-trip");
-                        }
-                    }
+                    Contract savedContract = testDAO.findContract(con, contractId);
+                    require(savedContract != null, "Contract must exist in the caller's transaction");
+                    require(contract.getMonthlyRent().compareTo(savedContract.getMonthlyRent()) == 0,
+                            "Monthly rent must preserve DECIMAL(12,0) precision");
+                    require(contract.getDeposit().compareTo(savedContract.getDeposit()) == 0,
+                            "Deposit must preserve DECIMAL(12,0) precision");
+                    require(savedContract.getStartElectricIndex() == 125 && savedContract.getStartWaterIndex() == 40,
+                            "Initial meter readings must round-trip");
+                    require(contract.getEndedAt().equals(savedContract.getEndedAt()), "endedAt must round-trip");
                 } finally {
                     con.rollback();
                 }
-                require(contractCount(con, requestId) == 0, "Rollback must remove the contract");
+                require(testDAO.countContracts(con, requestId) == 0, "Rollback must remove the contract");
                 con.rollback();
             }
             require("PENDING".equals(dao.findById(requestId).getStatus()),
@@ -89,7 +81,7 @@ public class RentalDAOIntegrationTest {
             try (Connection con = new DBContext().getConnection()) {
                 con.setAutoCommit(false);
                 try {
-                    approve(con, requestId);
+                    require(testDAO.approveRequest(con, requestId) == 1, "Approval must update exactly one request");
                     dao.insertContract(con, contract);
                     boolean duplicateFailed = false;
                     try {
@@ -102,68 +94,17 @@ public class RentalDAOIntegrationTest {
                 } finally {
                     con.rollback();
                 }
-                require(contractCount(con, requestId) == 0, "Failure rollback must remove the first insert");
+                require(testDAO.countContracts(con, requestId) == 0, "Failure rollback must remove the first insert");
                 con.rollback();
             }
             require("PENDING".equals(dao.findById(requestId).getStatus()),
                     "Failure rollback must undo request approval");
             System.out.println("PASS: UNIQUE violation propagates and caller can roll back both writes");
         } finally {
-            try (Connection con = new DBContext().getConnection();
-                    PreparedStatement ps = con.prepareStatement("DELETE FROM RentalRequest WHERE requestId = ?")) {
-                ps.setInt(1, requestId);
-                ps.executeUpdate();
-            }
+            testDAO.deleteRequest(requestId);
         }
         require(dao.findById(requestId) == null, "Test request must be removed");
         System.out.println("PASS: test data cleaned up");
-    }
-
-    private static RentalRequest sampleRequest() throws SQLException {
-        String sql = """
-                SELECT TOP (1) t.tenantId, r.roomId, r.moveInDate, r.months, r.numPeople
-                FROM RentalRequest r
-                CROSS JOIN Tenant t
-                WHERE r.status = ?
-                  AND NOT EXISTS (SELECT 1 FROM RentalRequest pending WHERE pending.tenantId = t.tenantId AND pending.status = ?)
-                ORDER BY t.tenantId, r.requestId
-                """;
-        try (Connection con = new DBContext().getConnection();
-                PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, "PENDING");
-            ps.setString(2, "PENDING");
-            try (ResultSet rs = ps.executeQuery()) {
-                require(rs.next(), "Seed a PENDING request and a separate tenant without a PENDING request first");
-                return new RentalRequest(0, rs.getInt("tenantId"), rs.getInt("roomId"),
-                        rs.getDate("moveInDate").toLocalDate(), rs.getInt("months"),
-                        rs.getInt("numPeople"), null, null, null, null, null);
-            }
-        }
-    }
-
-    private static void approve(Connection con, int requestId) throws SQLException {
-        String sql = """
-                UPDATE RentalRequest
-                SET status = ?, decidedAt = SYSDATETIME(),
-                    decidedBy = (SELECT MIN(accountId) FROM Account WHERE role = ?)
-                WHERE requestId = ?
-                """;
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, "APPROVED");
-            ps.setString(2, "MANAGER");
-            ps.setInt(3, requestId);
-            require(ps.executeUpdate() == 1, "Approval must update exactly one request");
-        }
-    }
-
-    private static int contractCount(Connection con, int requestId) throws SQLException {
-        try (PreparedStatement ps = con.prepareStatement("SELECT COUNT(*) FROM Contract WHERE requestId = ?")) {
-            ps.setInt(1, requestId);
-            try (ResultSet rs = ps.executeQuery()) {
-                rs.next();
-                return rs.getInt(1);
-            }
-        }
     }
 
     private static void require(boolean condition, String message) {

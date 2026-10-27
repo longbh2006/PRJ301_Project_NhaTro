@@ -13,10 +13,10 @@ import java.util.List;
 import model.Contract;
 import model.RentalRequest;
 
-/** Close the DAO after use to release the connection inherited from DBContext. */
+/** Giữ connection kế thừa đến khi đóng DAO để có thể gọi nhiều truy vấn liên tiếp. */
 public class RentalDAO extends DBContext implements AutoCloseable {
 
-    /** Inserts a new PENDING request and returns its generated requestId. */
+    /** Luôn tạo request PENDING và trả ID để caller có thể tra cứu bản ghi vừa tạo. */
     public int insertRequest(RentalRequest request) throws SQLException {
         String sql = """
                 INSERT INTO RentalRequest
@@ -76,7 +76,7 @@ public class RentalDAO extends DBContext implements AutoCloseable {
         }
     }
 
-    /** Returns null when the request does not exist. */
+    /** Trả null để caller phân biệt request không tồn tại với lỗi truy vấn. */
     public RentalRequest findById(int id) throws SQLException {
         String sql = """
                 SELECT requestId, tenantId, roomId, moveInDate, months, numPeople,
@@ -93,8 +93,8 @@ public class RentalDAO extends DBContext implements AutoCloseable {
     }
 
     /**
-     * Returns the generated contractId. The caller owns con and manages its
-     * transaction; this method never closes, commits or rolls back con.
+     * Trả contractId vừa tạo. Service sở hữu con và điều khiển transaction,
+     * nên DAO chỉ đóng statement, không đóng, commit hay rollback con.
      */
     public int insertContract(Connection con, Contract c) throws SQLException {
         String sql = """

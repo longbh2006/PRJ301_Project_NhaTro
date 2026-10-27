@@ -11,8 +11,7 @@ Run from the project directory in PowerShell:
 $classes = Join-Path $env:TEMP 'nhatro-nt26-check/tomcat/webapps/nt26/WEB-INF/classes'
 New-Item -ItemType Directory -Path $classes -Force | Out-Null
 Copy-Item web/WEB-INF/ConnectDB.properties (Join-Path (Split-Path $classes) 'ConnectDB.properties')
-$java = Join-Path (Split-Path (Get-Command javac).Source) 'java.exe'
-javac --release 17 -encoding UTF-8 -Xlint:all -d $classes src/java/model/RentalRequest.java src/java/model/Contract.java src/java/dal/DBContext.java src/java/dal/RentalDAO.java src/java/dal/RentalDAODemo.java test/dal/RentalDAOIntegrationTest.java
+javac --release 17 -encoding UTF-8 -Xlint:all -d $classes src/java/model/RentalRequest.java src/java/model/Contract.java src/java/dal/DBContext.java src/java/dal/RentalDAO.java src/java/dal/RentalDAODemo.java test/dal/RentalTestDAO.java test/dal/RentalDAOIntegrationTest.java
 if ($LASTEXITCODE -ne 0) { throw 'Compilation failed' }
 Select-String -LiteralPath src/java/dal/RentalDAO.java -SimpleMatch '" +'
 ```
@@ -32,6 +31,9 @@ Unicode binding, nullable decision fields, filtering and missing IDs, then tests
 contract insertion and atomic rollback, including a UNIQUE violation. Its ENDED
 test contract avoids the sample tenants' existing ACTIVE contracts. All contract
 writes are rolled back; the test request is deleted in `finally`.
+All fixture queries and cleanup SQL live in `test/dal/RentalTestDAO.java`, which
+extends the original DBContext; the integration-test class contains assertions
+and transaction orchestration only.
 
 `RentalDAO extends DBContext` and uses the inherited `connection`. Keep it open
 for the DAO's lifetime so repeated queries work; statements and result sets use
@@ -47,3 +49,6 @@ Validation on 2026-10-27 with the original DBContext under Tomcat 10.1:
 compilation succeeded, the demo returned 3 PENDING
 requests, all five integration-check groups passed, and the SQL concatenation
 search returned no matches.
+
+After applying AGENTS.md, the five integration-check groups still pass with
+fixture SQL isolated in RentalTestDAO.

@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 import model.RentalRequest;
 
-/** Run after setup.sql and ConnectDB.properties configuration to check the pending query. */
+/** Chạy sau setup.sql và cấu hình ConnectDB.properties để xác nhận truy vấn PENDING. */
 public class RentalDAODemo {
 
     public static void main(String[] args) throws SQLException {
