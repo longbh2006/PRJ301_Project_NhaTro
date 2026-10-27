@@ -1,0 +1,73 @@
+<%@ page pageEncoding="UTF-8" %>
+<%-- The login controller owns sessionScope.role; request parameters never select a role. --%>
+<c:set var="layoutRole" value="${fn:toUpperCase(sessionScope.role)}" />
+<c:choose>
+    <c:when test="${layoutRole eq 'TENANT'}"><c:set var="layoutRoleLabel" value="Người thuê" /></c:when>
+    <c:when test="${layoutRole eq 'MANAGER'}"><c:set var="layoutRoleLabel" value="Quản lý" /></c:when>
+    <c:when test="${layoutRole eq 'ADMIN'}"><c:set var="layoutRoleLabel" value="Admin" /></c:when>
+    <c:otherwise>
+        <c:set var="layoutRole" value="GUEST" />
+        <c:set var="layoutRoleLabel" value="Khách" />
+    </c:otherwise>
+</c:choose>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><c:out value="${requestScope.pageTitle}" default="RoomRent | Cổng thông tin nhà trọ" /></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet" crossorigin="anonymous"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB">
+    <link href="<c:url value='/css/app.css' />" rel="stylesheet">
+</head>
+<body>
+<a class="visually-hidden-focusable skip-link" href="#main-content">Đến nội dung chính</a>
+<div class="roomrent-shell">
+    <header class="roomrent-header d-flex flex-wrap align-items-center justify-content-between gap-3 d-print-none">
+        <a class="roomrent-brand text-decoration-none" href="<c:url value='/' />">ROOMRENT</a>
+        <div class="d-flex flex-wrap align-items-center gap-3">
+            <span class="small text-secondary"><c:out value="${layoutRoleLabel}" /></span>
+            <c:choose>
+                <c:when test="${layoutRole eq 'GUEST'}">
+                    <a class="btn btn-outline-secondary btn-sm" href="<c:url value='/login' />">Đăng nhập</a>
+                    <a class="btn btn-primary btn-sm" href="<c:url value='/register' />">Đăng ký</a>
+                </c:when>
+                <c:otherwise>
+                    <form method="post" action="<c:url value='/logout' />" class="m-0">
+                        <button class="btn btn-outline-secondary btn-sm px-3" type="submit">Đăng xuất</button>
+                    </form>
+                </c:otherwise>
+            </c:choose>
+        </div>
+    </header>
+    <div class="roomrent-layout">
+        <aside class="roomrent-sidebar d-print-none">
+            <p class="roomrent-nav-label">Điều hướng</p>
+            <nav class="nav nav-pills flex-column gap-2" aria-label="Điều hướng chính">
+                <c:choose>
+                    <c:when test="${layoutRole eq 'TENANT'}">
+                        <rr:navLink path="/" label="Trang chủ" />
+                        <rr:navLink path="/tenant/requests" label="Yêu cầu thuê" />
+                        <rr:navLink path="/tenant/contract" label="Hợp đồng" />
+                        <rr:navLink path="/tenant/invoices" label="Hóa đơn" />
+                        <rr:navLink path="/tenant/incidents" label="Báo sự cố" />
+                    </c:when>
+                    <c:when test="${layoutRole eq 'MANAGER'}">
+                        <rr:navLink path="/manager/requests" label="Duyệt yêu cầu" />
+                        <rr:navLink path="/manager/meters" label="Điện nước" />
+                        <rr:navLink path="/manager/invoices" label="Hóa đơn" />
+                        <rr:navLink path="/manager/revenue" label="Doanh thu" />
+                        <rr:navLink path="/manager/incidents" label="Xử lý sự cố" />
+                    </c:when>
+                    <c:when test="${layoutRole eq 'ADMIN'}">
+                        <rr:navLink path="/admin/rooms" label="Quản lý phòng" />
+                        <rr:navLink path="/admin/accounts" label="Tài khoản" />
+                    </c:when>
+                    <c:otherwise>
+                        <rr:navLink path="/" label="Phòng trống" />
+                    </c:otherwise>
+                </c:choose>
+            </nav>
+        </aside>
+        <main id="main-content" class="roomrent-content" tabindex="-1">
