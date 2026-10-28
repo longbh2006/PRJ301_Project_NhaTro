@@ -4,6 +4,7 @@
 
 ## Servlet và điều hướng
 
+- Mọi Servlet và URL mapping của Servlet phải được khai báo tập trung bằng `<servlet>` và `<servlet-mapping>` trong `web/WEB-INF/web.xml`; không dùng `@WebServlet`.
 - Servlet chỉ đọc tham số → kiểm tra → gọi service → `setAttribute` → forward tới `/WEB-INF/views/...`.
 - Sau mọi POST thành công, dùng redirect theo mẫu Post/Redirect/Get (PRG).
 - Luật nghiệp vụ nằm trong service; truy vấn SQL nằm trong DAO.

@@ -4,6 +4,33 @@
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
     <display-name>RoomRent</display-name>
+
+    <servlet>
+        <servlet-name>LayoutDemoServlet</servlet-name>
+        <servlet-class>controller.LayoutDemoServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>RoomDetailController</servlet-name>
+        <servlet-class>controller.RoomDetailController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>TenantRequestController</servlet-name>
+        <servlet-class>controller.TenantRequestController</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>LayoutDemoServlet</servlet-name>
+        <url-pattern>/layout-demo</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RoomDetailController</servlet-name>
+        <url-pattern>/rooms/detail</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>TenantRequestController</servlet-name>
+        <url-pattern>/tenant/requests</url-pattern>
+    </servlet-mapping>
+
     <error-page>
         <error-code>403</error-code>
         <location>/WEB-INF/views/error/403.jsp</location>

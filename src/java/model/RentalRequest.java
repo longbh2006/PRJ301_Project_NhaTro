@@ -2,6 +2,8 @@ package model;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public class RentalRequest {
 
@@ -16,6 +18,23 @@ public class RentalRequest {
     private LocalDateTime createdAt;
     private LocalDateTime decidedAt;
     private Integer decidedBy;
+    private String roomCode;
+
+    public String getRoomCode() {
+        return roomCode;
+    }
+
+    public void setRoomCode(String roomCode) {
+        this.roomCode = roomCode;
+    }
+
+    public String getRequestCode() {
+        return String.format(Locale.ROOT, "YC%03d", requestId);
+    }
+
+    public String getCreatedAtDisplay() {
+        return createdAt == null ? "" : createdAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    }
 
     public RentalRequest() {
     }
