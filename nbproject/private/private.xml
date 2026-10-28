@@ -3,7 +3,25 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/src/java/model/Room.java</file>
+            <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/web/WEB-INF/web.xml</file>
+            <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/web/WEB-INF/views/rooms/index.jsp</file>
+            <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/web/WEB-INF/views/layout-demo.jsp</file>
+            <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/web/WEB-INF/ConnectDB.properties</file>
+            <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/web/index.html</file>
+            <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/web/WEB-INF/views/error/500.jsp</file>
+            <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/src/java/controller/LayoutDemoServlet.java</file>
+            <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/src/java/service/RoomService.java</file>
+            <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/web/WEB-INF/views/rooms/detail.jsp</file>
+            <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/web/META-INF/context.xml</file>
+            <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/web/WEB-INF/views/common/_top.jspf</file>
+            <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/src/java/tags/PagerTag.java</file>
+            <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/web/WEB-INF/views/error/404.jsp</file>
+            <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/web/WEB-INF/tags/navLink.tag</file>
+            <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/web/WEB-INF/views/common/_bottom.jspf</file>
+            <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/src/java/dal/DBContext.java</file>
+            <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/web/WEB-INF/nt.tld</file>
+            <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/src/java/controller/RoomController.java</file>
+            <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/web/css/app.css</file>
             <file>file:/C:/Users/ADMIN/OneDrive/Desktop/PRJ301/Project_PRJ301/Project_NhaTro/src/java/dal/RoomDAO.java</file>
         </group>
     </open-files>

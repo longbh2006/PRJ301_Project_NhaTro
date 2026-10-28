@@ -1,19 +1,133 @@
-<%-- 
-    Document   : index
-    Created on : Oct 28, 2026, 4:32:43 PM
-    Author     : ADMIN
---%>
-
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ page pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/views/common/_taglibs.jspf" %>
 <%@ taglib prefix="nt" uri="/WEB-INF/nt" %>
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
-    </head>
-    <body>
-        <nt:pager page="${currentPage}" totalPages="${totalPages}" url="/rooms"/>
-        
-    </body>
-</html>
+<c:set var="pageTitle" value="RoomRent | Phòng trống" scope="request" />
+<c:set var="activeNav" value="/" scope="request" />
+<%@ include file="/WEB-INF/views/common/_top.jspf" %>
+
+<div class="mb-4">
+    <h1 class="h3 fw-bold mb-1">Phòng trống</h1>
+    <p class="text-secondary mb-0">Danh sách các phòng còn trống tại nhà trọ.</p>
+</div>
+
+<%-- ===== Thông báo lỗi ===== --%>
+<c:if test="${not empty errorMessage}">
+    <div class="alert alert-danger" role="alert">
+        <c:out value="${errorMessage}" />
+    </div>
+</c:if>
+
+<%-- ===== Bộ lọc ===== --%>
+<section class="card roomrent-card mb-4" aria-labelledby="filter-title">
+    <div class="card-body p-4">
+        <h2 id="filter-title" class="h6 fw-bold mb-3">Bộ lọc</h2>
+        <form method="get" action="<c:url value='/rooms' />" class="row g-3 align-items-end">
+
+            <div class="col-md-3 col-sm-6">
+                <label class="form-label" for="filterRoomTypeId">Loại phòng</label>
+                <select class="form-select" id="filterRoomTypeId" name="roomTypeId">
+                    <option value="">Tất cả</option>
+                    <option value="1" ${filterRoomTypeId eq 1 ? 'selected' : ''}>Phòng đơn</option>
+                    <option value="2" ${filterRoomTypeId eq 2 ? 'selected' : ''}>Phòng đôi</option>
+                    <option value="3" ${filterRoomTypeId eq 3 ? 'selected' : ''}>Phòng 4 người</option>
+                </select>
+            </div>
+
+            <div class="col-md-2 col-sm-6">
+                <label class="form-label" for="filterMinPrice">Giá tối thiểu (₫)</label>
+                <input type="number" class="form-control" id="filterMinPrice" name="minPrice"
+                       min="0" step="100000" placeholder="0"
+                       value="<c:out value='${filterMinPrice}' />" />
+            </div>
+
+            <div class="col-md-2 col-sm-6">
+                <label class="form-label" for="filterMaxPrice">Giá tối đa (₫)</label>
+                <input type="number" class="form-control" id="filterMaxPrice" name="maxPrice"
+                       min="0" step="100000" placeholder="Không giới hạn"
+                       value="<c:out value='${filterMaxPrice}' />" />
+            </div>
+
+            <div class="col-md-2 col-sm-6">
+                <label class="form-label" for="filterFloor">Tầng</label>
+                <select class="form-select" id="filterFloor" name="floor">
+                    <option value="">Tất cả</option>
+                    <option value="1" ${filterFloor eq 1 ? 'selected' : ''}>Tầng 1</option>
+                    <option value="2" ${filterFloor eq 2 ? 'selected' : ''}>Tầng 2</option>
+                    <option value="3" ${filterFloor eq 3 ? 'selected' : ''}>Tầng 3</option>
+                </select>
+            </div>
+
+            <div class="col-md-3 col-sm-12 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Lọc</button>
+                <a href="<c:url value='/rooms' />" class="btn btn-outline-secondary">Xóa lọc</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<%-- ===== Bảng danh sách phòng ===== --%>
+<c:choose>
+    <c:when test="${empty rooms}">
+        <c:if test="${empty errorMessage}">
+            <div class="alert alert-info" role="status">
+                Không tìm thấy phòng nào phù hợp với bộ lọc.
+            </div>
+        </c:if>
+    </c:when>
+    <c:otherwise>
+        <section class="card roomrent-card mb-4">
+            <div class="table-responsive">
+                <table class="table roomrent-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Mã phòng</th>
+                            <th scope="col">Loại phòng</th>
+                            <th scope="col">Tầng</th>
+                            <th scope="col" class="text-end">Giá/tháng (₫)</th>
+                            <th scope="col" class="text-center">Chi tiết</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:forEach var="r" items="${rooms}">
+                            <tr>
+                                <td class="fw-semibold"><c:out value="${r.roomCode}" /></td>
+                                <td><c:out value="${r.roomTypeName}" /></td>
+                                <td>Tầng <c:out value="${r.floor}" /></td>
+                                <td class="text-end">
+                                    <fmt:formatNumber value="${r.monthlyPrice}" type="number" groupingUsed="true" />
+                                </td>
+                                <td class="text-center">
+                                    <a class="btn btn-sm roomrent-btn-soft"
+                                       href="<c:url value='/rooms/detail'>
+                                                 <c:param name='code' value='${r.roomCode}' />
+                                             </c:url>">
+                                        Xem
+                                    </a>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </c:otherwise>
+</c:choose>
+
+<%-- ===== Phân trang (giữ bộ lọc qua URL) ===== --%>
+<c:set var="pagerUrl" value="/rooms" />
+<c:if test="${not empty filterRoomTypeId}">
+    <c:set var="pagerUrl" value="${pagerUrl}?roomTypeId=${filterRoomTypeId}" />
+</c:if>
+<c:if test="${not empty filterMinPrice}">
+    <c:set var="pagerUrl" value="${pagerUrl}${fn:contains(pagerUrl, '?') ? '&' : '?'}minPrice=${filterMinPrice}" />
+</c:if>
+<c:if test="${not empty filterMaxPrice}">
+    <c:set var="pagerUrl" value="${pagerUrl}${fn:contains(pagerUrl, '?') ? '&' : '?'}maxPrice=${filterMaxPrice}" />
+</c:if>
+<c:if test="${not empty filterFloor}">
+    <c:set var="pagerUrl" value="${pagerUrl}${fn:contains(pagerUrl, '?') ? '&' : '?'}floor=${filterFloor}" />
+</c:if>
+
+<nt:pager page="${currentPage}" totalPages="${totalPages}" url="${pagerUrl}"/>
+
+<%@ include file="/WEB-INF/views/common/_bottom.jspf" %>

@@ -65,7 +65,7 @@ public class RoomDAO extends DBContext {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi đếm số phòng.", e);
         }
         return 0;
     }
@@ -74,7 +74,7 @@ public class RoomDAO extends DBContext {
     public List<Room> findRoomsPage(Integer roomTypeId, Integer minPrice, Integer maxPrice, Integer floor, int page, int pageSize) {
         List<Room> list = new ArrayList<>();
 
-        String sql = "SELECT r.roomCode, rt.name AS roomTypeName, r.monthlyPrice, r.floor, r.imageUrl "
+        String sql = "SELECT r.roomId, r.roomCode, rt.name AS roomTypeName, r.monthlyPrice, r.floor, r.imageUrl "
                 + "FROM Room r "
                 + "JOIN RoomType rt ON r.roomTypeId = rt.roomTypeId "
                 + "WHERE " + buildWhere(roomTypeId, minPrice, maxPrice, floor)
@@ -96,6 +96,7 @@ public class RoomDAO extends DBContext {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Room room = new Room();
+                    room.setRoomId(rs.getInt("roomId"));
                     room.setRoomCode(rs.getString("roomCode"));
                     room.setRoomTypeName(rs.getString("roomTypeName"));
                     room.setMonthlyPrice(rs.getInt("monthlyPrice"));
@@ -106,8 +107,41 @@ public class RoomDAO extends DBContext {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi truy vấn danh sách phòng.", e);
         }
         return list;
+    }
+
+    // Bước 5: Tìm phòng theo roomCode (cho trang chi tiết)
+    public Room findByRoomCode(String roomCode) {
+        String sql = "SELECT r.roomId, r.roomCode, rt.name AS roomTypeName, rt.capacity, "
+                + "r.monthlyPrice, r.floor, r.area, r.status, r.imageUrl, r.description "
+                + "FROM Room r "
+                + "JOIN RoomType rt ON r.roomTypeId = rt.roomTypeId "
+                + "WHERE r.roomCode = ?";
+
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, roomCode);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Room room = new Room();
+                    room.setRoomId(rs.getInt("roomId"));
+                    room.setRoomCode(rs.getString("roomCode"));
+                    room.setRoomTypeName(rs.getString("roomTypeName"));
+                    room.setCapacity(rs.getInt("capacity"));
+                    room.setMonthlyPrice(rs.getInt("monthlyPrice"));
+                    room.setFloor(rs.getInt("floor"));
+                    room.setArea(rs.getDouble("area"));
+                    room.setStatus(rs.getString("status"));
+                    room.setImageUrl(rs.getString("imageUrl"));
+                    room.setDescription(rs.getString("description"));
+                    return room;
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi khi truy vấn chi tiết phòng.", e);
+        }
+        return null;
     }
 }

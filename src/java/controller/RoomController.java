@@ -1,11 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,36 +10,11 @@ import model.Room;
 import service.RoomService;
 
 /**
+ * Controller xử lý danh sách phòng (/rooms) và chi tiết phòng (/rooms/detail).
  *
  * @author ADMIN
  */
 public class RoomController extends HttpServlet {
-
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet RoomController</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet RoomController at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -57,6 +27,21 @@ public class RoomController extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String servletPath = request.getServletPath();
+
+        if ("/rooms/detail".equals(servletPath)) {
+            doGetDetail(request, response);
+        } else {
+            doGetList(request, response);
+        }
+    }
+
+    /**
+     * GET /rooms — Danh sách phòng trống có phân trang và bộ lọc.
+     */
+    private void doGetList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
             // 1. Lấy param từ request (do người dùng truyền qua URL)
@@ -91,12 +76,21 @@ public class RoomController extends HttpServlet {
             request.setAttribute("currentPage", currentPage);
             request.setAttribute("totalPages", totalPages);
 
+            // 6. Giữ giá trị bộ lọc để hiển thị lại trên form và dùng trong phân trang
+            request.setAttribute("filterRoomTypeId", roomTypeId);
+            request.setAttribute("filterMinPrice", minPrice);
+            request.setAttribute("filterMaxPrice", maxPrice);
+            request.setAttribute("filterFloor", floor);
+
         } catch (NumberFormatException e) {
             // Lỗi này xảy ra khi người dùng cố tình nhập chữ vào ô bộ lọc giá/tầng trên URL
             request.setAttribute("errorMessage", "Dữ liệu lọc không hợp lệ. Vui lòng chỉ nhập số.");
         } catch (IllegalArgumentException e) {
             // Lỗi logic từ Service (ví dụ: min > max, hoặc giá âm)
             request.setAttribute("errorMessage", e.getMessage());
+        } catch (RuntimeException e) {
+            // Lỗi CSDL bọc trong RuntimeException từ DAO
+            request.setAttribute("errorMessage", "Có lỗi xảy ra khi truy vấn dữ liệu. Vui lòng thử lại sau.");
         }
 
         // Chuyển tiếp (forward) sang file JSP
@@ -104,17 +98,36 @@ public class RoomController extends HttpServlet {
     }
 
     /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * GET /rooms/detail?code=P101 — Chi tiết một phòng.
+     */
+    private void doGetDetail(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String roomCode = request.getParameter("code");
+
+        try {
+            RoomService rs = new RoomService();
+            Room room = rs.getRoomByCode(roomCode);
+
+            if (room == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+
+            request.setAttribute("room", room);
+        } catch (RuntimeException e) {
+            request.setAttribute("errorMessage", "Có lỗi xảy ra khi truy vấn dữ liệu. Vui lòng thử lại sau.");
+        }
+
+        request.getRequestDispatcher("/WEB-INF/views/rooms/detail.jsp").forward(request, response);
+    }
+
+    /**
+     * POST không dùng ở trang phòng công khai — trả 405 Method Not Allowed.
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }
 
     /**
@@ -124,7 +137,7 @@ public class RoomController extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
+        return "Controller quản lý danh sách và chi tiết phòng trọ.";
     }// </editor-fold>
 
 }

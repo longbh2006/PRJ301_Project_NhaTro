@@ -9,21 +9,26 @@ package model;
  * @author ADMIN
  */
 public class Room {
+    private int roomId;
     private String roomCode;
     private String roomTypeName;
     private int monthlyPrice;
     private int floor;
+    private double area;
+    private String status;
     private String imageUrl;
+    private String description;
+    private int capacity;
 
     public Room() {
     }
 
-    public Room(String roomCode, String roomTypeName, int monthlyPrice, int floor, String imageUrl) {
-        this.roomCode = roomCode;
-        this.roomTypeName = roomTypeName;
-        this.monthlyPrice = monthlyPrice;
-        this.floor = floor;
-        this.imageUrl = imageUrl;
+    public int getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(int roomId) {
+        this.roomId = roomId;
     }
 
     public String getRoomCode() {
@@ -58,6 +63,22 @@ public class Room {
         this.floor = floor;
     }
 
+    public double getArea() {
+        return area;
+    }
+
+    public void setArea(double area) {
+        this.area = area;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public String getImageUrl() {
         return imageUrl;
     }
@@ -65,6 +86,20 @@ public class Room {
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
-    
-    
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
+    }
 }

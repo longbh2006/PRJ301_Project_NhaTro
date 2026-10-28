@@ -73,4 +73,12 @@ public class RoomService {
         }
         return roomDAO.findRoomsPage(roomTypeId, minPrice, maxPrice, floor, currentPage, PAGE_SIZE);
     }
+
+    // 6. Tìm phòng theo roomCode (cho trang chi tiết)
+    public Room getRoomByCode(String roomCode) {
+        if (roomCode == null || roomCode.trim().isEmpty()) {
+            return null;
+        }
+        return roomDAO.findByRoomCode(roomCode.trim());
+    }
 }

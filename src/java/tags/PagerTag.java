@@ -25,7 +25,8 @@ public class PagerTag extends SimpleTagSupport {
         this.url = url;
     }
 
-    // Hàm tự viết: Chuyển đổi các ký tự đặc biệt thành thực thể HTML để tránh vỡ giao diện / XSS
+    // Hàm tự viết: Chuyển đổi các ký tự đặc biệt thành thực thể HTML để tránh vỡ
+    // giao diện / XSS
     private String escape(String input) {
         if (input == null) {
             return "";
@@ -40,7 +41,8 @@ public class PagerTag extends SimpleTagSupport {
     @Override
     public void doTag() throws JspException, IOException {
         // BƯỚC 6: Ca rỗng (Chặn đầu hàm)
-        // Nếu không có dữ liệu (0 trang) hoặc quy định riêng của nhóm, thoát ngay không in gì cả.
+        // Nếu không có dữ liệu (0 trang) hoặc quy định riêng của nhóm, thoát ngay không
+        // in gì cả.
         if (totalPages <= 0) {
             return;
         }
@@ -53,7 +55,9 @@ public class PagerTag extends SimpleTagSupport {
         String safeUrl = escape(this.url);
 
         // Kiểm tra xem URL đã có tham số nào chưa (có dấu '?' chưa)
-        String separator = safeUrl.contains("?") ? "&" : "?";
+        // Nếu url đã chứa query string (vd: /rooms?roomTypeId=1&floor=2)
+        // thì nối thêm &page=, ngược lại nối ?page=
+        String separator = safeUrl.contains("?") ? "&amp;" : "?";
         String baseUrl = safeUrl + separator + "page=";
 
         // Dùng StringBuilder để gom HTML in một lần cho gọn
