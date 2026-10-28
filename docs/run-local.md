@@ -11,9 +11,8 @@ Các đường dẫn mặc định sử dụng bản cài NetBeans 17 và Tomcat
 Có thể truyền `-JdkPath`, `-AntPath`, `-TomcatPath` hoặc `-Port` khi cần.
 
 - Chi tiết phòng: <http://127.0.0.1:8080/Project_NhaTro/rooms/detail?roomId=1>
-- Giao diện mẫu: <http://127.0.0.1:8080/Project_NhaTro/layout-demo>
 
-Chạy lại lệnh sau khi sửa code để build và khởi động lại. Dừng server này bằng:
+Chạy lại lệnh sau khi sửa code để build sạch và khởi động lại. Dừng server này bằng:
 
 ```powershell
 .\scripts\run-local.ps1 -Stop

@@ -48,6 +48,21 @@ foreach ($requiredPath in @($javaPath, $antLauncher, (Join-Path $TomcatPath 'bin
 
 $buildPath = Join-Path $localPath 'build'
 $distPath = Join-Path $localPath 'dist'
+# Build sạch để file nguồn đã xóa không còn trong ứng dụng hoặc WAR.
+$localRoot = [System.IO.Path]::GetFullPath($localPath).TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
+foreach ($generatedPath in @($buildPath, $distPath)) {
+    $absolutePath = [System.IO.Path]::GetFullPath($generatedPath)
+    if (!$absolutePath.StartsWith($localRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw 'Generated output must stay inside this project .local directory.'
+    }
+    if (Test-Path -LiteralPath $absolutePath) {
+        $resolvedPath = (Resolve-Path -LiteralPath $absolutePath).Path
+        if (!$resolvedPath.StartsWith($localRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+            throw 'Refusing to clean generated output outside this project .local directory.'
+        }
+        Remove-Item -LiteralPath $resolvedPath -Recurse -Force
+    }
+}
 Push-Location $projectPath
 try {
     & $javaPath -cp $antLauncher org.apache.tools.ant.launch.Launcher `
@@ -103,7 +118,7 @@ $deadline = (Get-Date).AddSeconds(40)
 while ((Get-Date) -lt $deadline) {
     if ($serverProcess.HasExited) { break }
     try {
-        $response = Invoke-WebRequest "$baseUrl/layout-demo" -UseBasicParsing -TimeoutSec 2
+        $response = Invoke-WebRequest "$baseUrl/css/app.css" -UseBasicParsing -TimeoutSec 2
         if ($response.StatusCode -eq 200) { $ready = $true; break }
     } catch {
         Start-Sleep -Milliseconds 250
@@ -114,6 +129,5 @@ if (!$ready) {
     Remove-Item -LiteralPath $pidPath -ErrorAction SilentlyContinue
     throw "Tomcat did not become ready. Check $serverPath/logs/startup.err.log"
 }
-Write-Output "Web ready: $baseUrl/layout-demo"
-Write-Output "Room detail: $baseUrl/rooms/detail?roomId=1"
+Write-Output "Web ready: $baseUrl/rooms/detail?roomId=1"
 Write-Output 'Run this script again to rebuild and restart; use -Stop to stop this project server.'

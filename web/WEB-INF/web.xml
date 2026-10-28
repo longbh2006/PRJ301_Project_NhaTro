@@ -6,10 +6,6 @@
     <display-name>RoomRent</display-name>
 
     <servlet>
-        <servlet-name>LayoutDemoServlet</servlet-name>
-        <servlet-class>controller.LayoutDemoServlet</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>RoomDetailController</servlet-name>
         <servlet-class>controller.RoomDetailController</servlet-class>
     </servlet>
@@ -18,10 +14,6 @@
         <servlet-class>controller.TenantRequestController</servlet-class>
     </servlet>
 
-    <servlet-mapping>
-        <servlet-name>LayoutDemoServlet</servlet-name>
-        <url-pattern>/layout-demo</url-pattern>
-    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>RoomDetailController</servlet-name>
         <url-pattern>/rooms/detail</url-pattern>
