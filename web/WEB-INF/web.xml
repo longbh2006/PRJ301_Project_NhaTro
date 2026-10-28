@@ -7,5 +7,6 @@
     <servlet-mapping>
         <servlet-name>RoomController</servlet-name>
         <url-pattern>/rooms</url-pattern>
+        <url-pattern>/rooms/detail</url-pattern>
     </servlet-mapping>
 </web-app>
