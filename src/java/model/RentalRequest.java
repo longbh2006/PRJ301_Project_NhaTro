@@ -1,5 +1,6 @@
 package model;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -16,6 +17,9 @@ public class RentalRequest {
     private LocalDateTime createdAt;
     private LocalDateTime decidedAt;
     private Integer decidedBy;
+    private String roomCode;
+    private String tenantName;
+    private BigDecimal monthlyPrice;
 
     public RentalRequest() {
     }
@@ -122,5 +126,29 @@ public class RentalRequest {
 
     public void setDecidedBy(Integer decidedBy) {
         this.decidedBy = decidedBy;
+    }
+
+    public String getRoomCode() {
+        return roomCode;
+    }
+
+    public void setRoomCode(String roomCode) {
+        this.roomCode = roomCode;
+    }
+
+    public String getTenantName() {
+        return tenantName;
+    }
+
+    public void setTenantName(String tenantName) {
+        this.tenantName = tenantName;
+    }
+
+    public BigDecimal getMonthlyPrice() {
+        return monthlyPrice;
+    }
+
+    public void setMonthlyPrice(BigDecimal monthlyPrice) {
+        this.monthlyPrice = monthlyPrice;
     }
 }

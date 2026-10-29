@@ -29,6 +29,12 @@
 - Filter UTF-8 phải đứng đầu chuỗi filter để dữ liệu tiếng Việt được giải mã đúng.
 - Chỉ tạo hoặc sửa `EncodingFilter` và mapping của nó khi người dùng yêu cầu rõ ràng. Quy tắc thứ tự filter không cho phép tự thêm filter vào công việc khác.
 
+## Kiểm tra trực tiếp, không tạo file demo hoặc test
+
+- Kiểm tra trực tiếp chức năng thật trên ứng dụng của dự án qua giao diện hoặc HTTP, dùng luồng xử lý và cấu hình thực tế.
+- Không tạo file demo, file test, harness, servlet/endpoint thử hoặc ứng dụng riêng để kiểm thử, kể cả file tạm trong `.local/`, trừ khi người dùng yêu cầu rõ ràng.
+- Báo rõ thao tác đã kiểm tra, kết quả thực tế và phần chưa kiểm tra được; không khẳng định đã đạt nếu chưa chạy kiểm tra.
+
 ## Giữ nguyên quy tắc khi làm việc với Git
 
 - Giữ nguyên các quy tắc trong file này và thứ tự Filter UTF-8 khi pull, push, merge hoặc rebase.
