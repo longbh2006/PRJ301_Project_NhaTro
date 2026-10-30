@@ -22,31 +22,39 @@
     <div class="card-body p-4">
         <h2 id="filter-title" class="h6 fw-bold mb-3">Bộ lọc</h2>
         <form method="get" action="<c:url value='/rooms' />" class="row g-3 align-items-end">
-
             <div class="col-md-3 col-sm-6">
                 <label class="form-label" for="filterRoomTypeId">Loại phòng</label>
-                <select class="form-select" id="filterRoomTypeId" name="roomTypeId">
+                <select class="form-select" id="filterRoomTypeId" name="type">
                     <option value="">Tất cả</option>
-                    <option value="1" ${filterRoomTypeId eq 1 ? 'selected' : ''}>Phòng đơn</option>
-                    <option value="2" ${filterRoomTypeId eq 2 ? 'selected' : ''}>Phòng đôi</option>
-                    <option value="3" ${filterRoomTypeId eq 3 ? 'selected' : ''}>Phòng 4 người</option>
+                    <c:choose>
+                        <c:when test="${not empty roomTypes}">
+                            <c:forEach var="rt" items="${roomTypes}">
+                                <option value="${rt.roomTypeId}" ${filterType eq rt.roomTypeId ? 'selected' : ''}>
+                                    <c:out value="${rt.name}"/>
+                                </option>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <option value="1" ${filterType eq 1 ? 'selected' : ''}>Phòng đơn</option>
+                            <option value="2" ${filterType eq 2 ? 'selected' : ''}>Phòng đôi</option>
+                            <option value="3" ${filterType eq 3 ? 'selected' : ''}>Phòng 4 người</option>
+                            <option value="4" ${filterType eq 4 ? 'selected' : ''}>Phòng gác lửng</option>
+                        </c:otherwise>
+                    </c:choose>
                 </select>
             </div>
-
             <div class="col-md-2 col-sm-6">
                 <label class="form-label" for="filterMinPrice">Giá tối thiểu (₫)</label>
                 <input type="number" class="form-control" id="filterMinPrice" name="minPrice"
                        min="0" step="100000" placeholder="0"
                        value="<c:out value='${filterMinPrice}' />" />
             </div>
-
             <div class="col-md-2 col-sm-6">
                 <label class="form-label" for="filterMaxPrice">Giá tối đa (₫)</label>
                 <input type="number" class="form-control" id="filterMaxPrice" name="maxPrice"
                        min="0" step="100000" placeholder="Không giới hạn"
                        value="<c:out value='${filterMaxPrice}' />" />
             </div>
-
             <div class="col-md-2 col-sm-6">
                 <label class="form-label" for="filterFloor">Tầng</label>
                 <select class="form-select" id="filterFloor" name="floor">
@@ -56,7 +64,6 @@
                     <option value="3" ${filterFloor eq 3 ? 'selected' : ''}>Tầng 3</option>
                 </select>
             </div>
-
             <div class="col-md-3 col-sm-12 d-flex gap-2">
                 <button type="submit" class="btn btn-primary">Lọc</button>
                 <a href="<c:url value='/rooms' />" class="btn btn-outline-secondary">Xóa lọc</a>
@@ -99,7 +106,7 @@
                                 <td class="text-center">
                                     <a class="btn btn-sm roomrent-btn-soft"
                                        href="<c:url value='/rooms/detail'>
-                                                 <c:param name='code' value='${r.roomCode}' />
+                                                 <c:param name='id' value='${r.roomCode}' />
                                              </c:url>">
                                         Xem
                                     </a>
@@ -114,20 +121,21 @@
 </c:choose>
 
 <%-- ===== Phân trang (giữ bộ lọc qua URL) ===== --%>
-<c:set var="pagerUrl" value="/rooms" />
-<c:if test="${not empty filterRoomTypeId}">
-    <c:set var="pagerUrl" value="${pagerUrl}?roomTypeId=${filterRoomTypeId}" />
-</c:if>
-<c:if test="${not empty filterMinPrice}">
-    <c:set var="pagerUrl" value="${pagerUrl}${fn:contains(pagerUrl, '?') ? '&' : '?'}minPrice=${filterMinPrice}" />
-</c:if>
-<c:if test="${not empty filterMaxPrice}">
-    <c:set var="pagerUrl" value="${pagerUrl}${fn:contains(pagerUrl, '?') ? '&' : '?'}maxPrice=${filterMaxPrice}" />
-</c:if>
-<c:if test="${not empty filterFloor}">
-    <c:set var="pagerUrl" value="${pagerUrl}${fn:contains(pagerUrl, '?') ? '&' : '?'}floor=${filterFloor}" />
-</c:if>
+<c:url var="basePagerUrl" value="/rooms">
+    <c:if test="${not empty filterType}">
+        <c:param name="type" value="${filterType}" />
+    </c:if>
+    <c:if test="${not empty filterMinPrice}">
+        <c:param name="minPrice" value="${filterMinPrice}" />
+    </c:if>
+    <c:if test="${not empty filterMaxPrice}">
+        <c:param name="maxPrice" value="${filterMaxPrice}" />
+    </c:if>
+    <c:if test="${not empty filterFloor}">
+        <c:param name="floor" value="${filterFloor}" />
+    </c:if>
+</c:url>
 
-<nt:pager page="${currentPage}" totalPages="${totalPages}" url="${pagerUrl}"/>
+<nt:pager page="${currentPage}" totalPages="${totalPages}" url="${basePagerUrl}" />
 
 <%@ include file="/WEB-INF/views/common/_bottom.jspf" %>
