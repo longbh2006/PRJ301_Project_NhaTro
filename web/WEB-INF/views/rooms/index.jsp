@@ -24,12 +24,27 @@
         <form method="get" action="<c:url value='/rooms' />" class="row g-3 align-items-end">
 
             <div class="col-md-3 col-sm-6">
+                <!-- SỬA: Đã đổi name thành "type" để khớp NT-32 -->
                 <label class="form-label" for="filterRoomTypeId">Loại phòng</label>
-                <select class="form-select" id="filterRoomTypeId" name="roomTypeId">
+                <select class="form-select" id="filterRoomTypeId" name="type">
                     <option value="">Tất cả</option>
-                    <option value="1" ${filterRoomTypeId eq 1 ? 'selected' : ''}>Phòng đơn</option>
-                    <option value="2" ${filterRoomTypeId eq 2 ? 'selected' : ''}>Phòng đôi</option>
-                    <option value="3" ${filterRoomTypeId eq 3 ? 'selected' : ''}>Phòng 4 người</option>
+                    <%-- SỬA: Hủy gõ cứng. Cần truyền mảng roomTypes từ RoomController sang --%>
+                    <c:choose>
+                        <c:when test="${not empty roomTypes}">
+                            <c:forEach var="rt" items="${roomTypes}">
+                                <option value="${rt.roomTypeId}" ${filterType eq rt.roomTypeId ? 'selected' : ''}>
+                                    <c:out value="${rt.name}"/>
+                                </option>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <%-- Fallback tạm thời nếu Controller chưa truyền mảng roomTypes --%>
+                            <option value="1" ${filterType eq 1 ? 'selected' : ''}>Phòng đơn</option>
+                            <option value="2" ${filterType eq 2 ? 'selected' : ''}>Phòng đôi</option>
+                            <option value="3" ${filterType eq 3 ? 'selected' : ''}>Phòng 4 người</option>
+                            <option value="4" ${filterType eq 4 ? 'selected' : ''}>Phòng gác lửng</option>
+                        </c:otherwise>
+                    </c:choose>
                 </select>
             </div>
 
@@ -48,12 +63,15 @@
             </div>
 
             <div class="col-md-2 col-sm-6">
+                <!-- Mở rộng cứng các tầng để hỗ trợ P401 -->
                 <label class="form-label" for="filterFloor">Tầng</label>
                 <select class="form-select" id="filterFloor" name="floor">
                     <option value="">Tất cả</option>
                     <option value="1" ${filterFloor eq 1 ? 'selected' : ''}>Tầng 1</option>
                     <option value="2" ${filterFloor eq 2 ? 'selected' : ''}>Tầng 2</option>
                     <option value="3" ${filterFloor eq 3 ? 'selected' : ''}>Tầng 3</option>
+                    <option value="4" ${filterFloor eq 4 ? 'selected' : ''}>Tầng 4</option>
+                    <option value="5" ${filterFloor eq 5 ? 'selected' : ''}>Tầng 5</option>
                 </select>
             </div>
 
@@ -97,6 +115,7 @@
                                     <fmt:formatNumber value="${r.monthlyPrice}" type="number" groupingUsed="true" />
                                 </td>
                                 <td class="text-center">
+                                    <%-- SỬA: Đổi tên param thành code để đồng bộ Controller --%>
                                     <a class="btn btn-sm roomrent-btn-soft"
                                        href="<c:url value='/rooms/detail'>
                                                  <c:param name='code' value='${r.roomCode}' />
@@ -114,20 +133,26 @@
 </c:choose>
 
 <%-- ===== Phân trang (giữ bộ lọc qua URL) ===== --%>
-<c:set var="pagerUrl" value="/rooms" />
-<c:if test="${not empty filterRoomTypeId}">
-    <c:set var="pagerUrl" value="${pagerUrl}?roomTypeId=${filterRoomTypeId}" />
+<%-- SỬA: Cấu trúc lại cách ghép nối URL, dùng c:url để bọc chuỗi param cuối cùng --%>
+<c:set var="queryParams" value="" />
+<c:if test="${not empty filterType}">
+    <c:set var="queryParams" value="${queryParams}&type=${filterType}" />
 </c:if>
 <c:if test="${not empty filterMinPrice}">
-    <c:set var="pagerUrl" value="${pagerUrl}${fn:contains(pagerUrl, '?') ? '&' : '?'}minPrice=${filterMinPrice}" />
+    <c:set var="queryParams" value="${queryParams}&minPrice=${filterMinPrice}" />
 </c:if>
 <c:if test="${not empty filterMaxPrice}">
-    <c:set var="pagerUrl" value="${pagerUrl}${fn:contains(pagerUrl, '?') ? '&' : '?'}maxPrice=${filterMaxPrice}" />
+    <c:set var="queryParams" value="${queryParams}&maxPrice=${filterMaxPrice}" />
 </c:if>
 <c:if test="${not empty filterFloor}">
-    <c:set var="pagerUrl" value="${pagerUrl}${fn:contains(pagerUrl, '?') ? '&' : '?'}floor=${filterFloor}" />
+    <c:set var="queryParams" value="${queryParams}&floor=${filterFloor}" />
 </c:if>
 
-<nt:pager page="${currentPage}" totalPages="${totalPages}" url="${pagerUrl}"/>
+<%-- Nếu queryParams không rỗng, đổi ký tự & đầu tiên thành ? --%>
+<c:if test="${fn:length(queryParams) > 0}">
+    <c:set var="queryParams" value="?${fn:substring(queryParams, 1, -1)}" />
+</c:if>
+
+<nt:pager page="${currentPage}" totalPages="${totalPages}" url="<c:url value='/rooms${queryParams}' />" />
 
 <%@ include file="/WEB-INF/views/common/_bottom.jspf" %>
