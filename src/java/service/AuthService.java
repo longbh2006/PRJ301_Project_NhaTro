@@ -8,6 +8,7 @@ import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import model.Account;
 import model.RegistrationForm;
 import util.PasswordHasher;
 
@@ -117,4 +118,39 @@ public class AuthService {
         }
         return errors;
     }
+
+    public Account login(String username, String password) {
+        // 1. Mở DAO trong try‑with‑resources
+    try (AccountDAO dao = createAccountDAO()) {
+        // 1. Lấy tài khoản
+        Account account = dao.findByUsername(username);
+     
+        // 2. Không có tài khoản thì return null
+        if (account == null) {
+            return null;
+        }
+ 
+        // 3. Sai mật khẩu thì return null
+        if (!PasswordHasher.verify(password, account.getPasswordHash())) {
+            return null;
+        }
+
+        // 4. Bị khoá thì return null
+        if (!account.isActive()) {
+            return null;
+        }
+
+        // 5. Xóa hash
+        account.setPasswordHash(null);
+
+        // 6. Trả về account đã được “sạch” hash
+        return account;
+    } catch (SQLException e) {
+        // Xử lý lỗi cơ sở dữ liệu: trả về null hoặc ghi log
+        
+        return null;
+    }
+}
+  
+
 }
