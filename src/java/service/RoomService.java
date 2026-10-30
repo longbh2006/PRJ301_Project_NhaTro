@@ -8,8 +8,8 @@ import java.util.List;
 public class RoomService {
 
     // Kích thước trang cố định (theo đặc tả UC-01)
-    public static final int PAGE_SIZE = 6; 
-    
+    public static final int PAGE_SIZE = 6;
+
     private RoomDAO roomDAO;
 
     public RoomService() {
@@ -58,9 +58,9 @@ public class RoomService {
         }
 
         if (page < 1) {
-            page = 1; 
+            page = 1;
         } else if (page > totalPages) {
-            page = totalPages; 
+            page = totalPages;
         }
 
         return page;
@@ -80,5 +80,11 @@ public class RoomService {
             return null;
         }
         return roomDAO.findByRoomCode(roomCode.trim());
+    }
+
+    // 7. Lấy danh sách phòng trống hiển thị cho trang chủ
+    public List<Room> getAvailableRoomsForHome() {
+        // Chỉ cần gọi thẳng xuống DAO do hàm này không yêu cầu tham số lọc hay phân trang
+        return roomDAO.getAvailableRoomsForHome();
     }
 }

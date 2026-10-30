@@ -135,4 +135,41 @@ public class RoomDAO extends DBContext {
         }
         return null;
     }
+
+
+    // Bước 6 (bổ sung): Lấy danh sách phòng trống hiển thị cho trang chủ
+    public List<Room> getAvailableRoomsForHome() {
+        List<Room> list = new ArrayList<>();
+
+        // 1. Câu SQL có JOIN RoomType và lấy đúng điều kiện "phòng trống" (không có tham số ? nào)
+        String sql = "SELECT r.roomId, r.roomCode, rt.name AS roomTypeName, r.monthlyPrice, r.floor, r.imageUrl "
+                + "FROM Room r "
+                + "JOIN RoomType rt ON r.roomTypeId = rt.roomTypeId "
+                + "WHERE r.status = 'ACTIVE' "
+                + "AND NOT EXISTS (SELECT 1 FROM Contract c WHERE c.roomId = r.roomId AND c.status = 'ACTIVE') "
+                + "ORDER BY r.floor ASC, r.roomCode ASC"; // Sắp xếp cho gọn gàng trên trang chủ
+
+        // 2. Mở kết nối, PreparedStatement và ResultSet bằng try-with-resources
+        // Vì truy vấn không có tham số (?), ta có thể gộp luôn lệnh executeQuery() vào cụm try này
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            // 3. Đọc ResultSet vào đối tượng Room (giống hệt dòng 97-107)
+            while (rs.next()) {
+                Room room = new Room();
+                room.setRoomId(rs.getInt("roomId"));
+                room.setRoomCode(rs.getString("roomCode"));
+                room.setRoomTypeName(rs.getString("roomTypeName"));
+                room.setMonthlyPrice(rs.getInt("monthlyPrice"));
+                room.setFloor(rs.getInt("floor"));
+                room.setImageUrl(rs.getString("imageUrl"));
+
+                list.add(room);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi khi lấy danh sách phòng trống cho trang chủ.", e);
+        }
+
+        return list;
+    }
 }
+
