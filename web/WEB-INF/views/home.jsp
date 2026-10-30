@@ -48,7 +48,7 @@
                                 
                                 <%-- Nút Xem chi tiết tạo bằng c:url và c:param --%>
                                 <c:url var="detailUrl" value="/rooms/detail">
-                                    <c:param name="code" value="${room.roomCode}" />
+                                    <c:param name="id" value="${room.roomCode}" />
                                 </c:url>
                                 <a href="${detailUrl}" class="btn btn-outline-primary w-100">Xem chi tiết</a>
                             </div>

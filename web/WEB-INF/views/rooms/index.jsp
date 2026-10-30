@@ -22,13 +22,10 @@
     <div class="card-body p-4">
         <h2 id="filter-title" class="h6 fw-bold mb-3">Bộ lọc</h2>
         <form method="get" action="<c:url value='/rooms' />" class="row g-3 align-items-end">
-
             <div class="col-md-3 col-sm-6">
-                <!-- SỬA: Đã đổi name thành "type" để khớp NT-32 -->
                 <label class="form-label" for="filterRoomTypeId">Loại phòng</label>
                 <select class="form-select" id="filterRoomTypeId" name="type">
                     <option value="">Tất cả</option>
-                    <%-- SỬA: Hủy gõ cứng. Cần truyền mảng roomTypes từ RoomController sang --%>
                     <c:choose>
                         <c:when test="${not empty roomTypes}">
                             <c:forEach var="rt" items="${roomTypes}">
@@ -38,7 +35,6 @@
                             </c:forEach>
                         </c:when>
                         <c:otherwise>
-                            <%-- Fallback tạm thời nếu Controller chưa truyền mảng roomTypes --%>
                             <option value="1" ${filterType eq 1 ? 'selected' : ''}>Phòng đơn</option>
                             <option value="2" ${filterType eq 2 ? 'selected' : ''}>Phòng đôi</option>
                             <option value="3" ${filterType eq 3 ? 'selected' : ''}>Phòng 4 người</option>
@@ -47,34 +43,27 @@
                     </c:choose>
                 </select>
             </div>
-
             <div class="col-md-2 col-sm-6">
                 <label class="form-label" for="filterMinPrice">Giá tối thiểu (₫)</label>
                 <input type="number" class="form-control" id="filterMinPrice" name="minPrice"
                        min="0" step="100000" placeholder="0"
                        value="<c:out value='${filterMinPrice}' />" />
             </div>
-
             <div class="col-md-2 col-sm-6">
                 <label class="form-label" for="filterMaxPrice">Giá tối đa (₫)</label>
                 <input type="number" class="form-control" id="filterMaxPrice" name="maxPrice"
                        min="0" step="100000" placeholder="Không giới hạn"
                        value="<c:out value='${filterMaxPrice}' />" />
             </div>
-
             <div class="col-md-2 col-sm-6">
-                <!-- Mở rộng cứng các tầng để hỗ trợ P401 -->
                 <label class="form-label" for="filterFloor">Tầng</label>
                 <select class="form-select" id="filterFloor" name="floor">
                     <option value="">Tất cả</option>
                     <option value="1" ${filterFloor eq 1 ? 'selected' : ''}>Tầng 1</option>
                     <option value="2" ${filterFloor eq 2 ? 'selected' : ''}>Tầng 2</option>
                     <option value="3" ${filterFloor eq 3 ? 'selected' : ''}>Tầng 3</option>
-                    <option value="4" ${filterFloor eq 4 ? 'selected' : ''}>Tầng 4</option>
-                    <option value="5" ${filterFloor eq 5 ? 'selected' : ''}>Tầng 5</option>
                 </select>
             </div>
-
             <div class="col-md-3 col-sm-12 d-flex gap-2">
                 <button type="submit" class="btn btn-primary">Lọc</button>
                 <a href="<c:url value='/rooms' />" class="btn btn-outline-secondary">Xóa lọc</a>
@@ -115,10 +104,9 @@
                                     <fmt:formatNumber value="${r.monthlyPrice}" type="number" groupingUsed="true" />
                                 </td>
                                 <td class="text-center">
-                                    <%-- SỬA: Đổi tên param thành code để đồng bộ Controller --%>
                                     <a class="btn btn-sm roomrent-btn-soft"
                                        href="<c:url value='/rooms/detail'>
-                                                 <c:param name='code' value='${r.roomCode}' />
+                                                 <c:param name='id' value='${r.roomCode}' />
                                              </c:url>">
                                         Xem
                                     </a>
@@ -133,26 +121,21 @@
 </c:choose>
 
 <%-- ===== Phân trang (giữ bộ lọc qua URL) ===== --%>
-<%-- SỬA: Cấu trúc lại cách ghép nối URL, dùng c:url để bọc chuỗi param cuối cùng --%>
-<c:set var="queryParams" value="" />
-<c:if test="${not empty filterType}">
-    <c:set var="queryParams" value="${queryParams}&type=${filterType}" />
-</c:if>
-<c:if test="${not empty filterMinPrice}">
-    <c:set var="queryParams" value="${queryParams}&minPrice=${filterMinPrice}" />
-</c:if>
-<c:if test="${not empty filterMaxPrice}">
-    <c:set var="queryParams" value="${queryParams}&maxPrice=${filterMaxPrice}" />
-</c:if>
-<c:if test="${not empty filterFloor}">
-    <c:set var="queryParams" value="${queryParams}&floor=${filterFloor}" />
-</c:if>
+<c:url var="basePagerUrl" value="/rooms">
+    <c:if test="${not empty filterType}">
+        <c:param name="type" value="${filterType}" />
+    </c:if>
+    <c:if test="${not empty filterMinPrice}">
+        <c:param name="minPrice" value="${filterMinPrice}" />
+    </c:if>
+    <c:if test="${not empty filterMaxPrice}">
+        <c:param name="maxPrice" value="${filterMaxPrice}" />
+    </c:if>
+    <c:if test="${not empty filterFloor}">
+        <c:param name="floor" value="${filterFloor}" />
+    </c:if>
+</c:url>
 
-<%-- Nếu queryParams không rỗng, đổi ký tự & đầu tiên thành ? --%>
-<c:if test="${fn:length(queryParams) > 0}">
-    <c:set var="queryParams" value="?${fn:substring(queryParams, 1, -1)}" />
-</c:if>
-
-<nt:pager page="${currentPage}" totalPages="${totalPages}" url="<c:url value='/rooms${queryParams}' />" />
+<nt:pager page="${currentPage}" totalPages="${totalPages}" url="${basePagerUrl}" />
 
 <%@ include file="/WEB-INF/views/common/_bottom.jspf" %>
