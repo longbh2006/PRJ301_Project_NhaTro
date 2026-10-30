@@ -6,8 +6,12 @@
     <display-name>RoomRent</display-name>
 
     <servlet>
-        <servlet-name>RoomDetailController</servlet-name>
-        <servlet-class>controller.RoomDetailController</servlet-class>
+        <servlet-name>RoomController</servlet-name>
+        <servlet-class>controller.RoomController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>HomeController</servlet-name>
+        <servlet-class>controller.HomeController</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>TenantRequestController</servlet-name>
@@ -15,8 +19,17 @@
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>RoomDetailController</servlet-name>
+        <servlet-name>RoomController</servlet-name>
+        <url-pattern>/rooms</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RoomController</servlet-name>
         <url-pattern>/rooms/detail</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>HomeController</servlet-name>
+        <url-pattern>/home</url-pattern>
+        <url-pattern></url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>TenantRequestController</servlet-name>

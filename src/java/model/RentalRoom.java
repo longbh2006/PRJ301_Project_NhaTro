@@ -12,12 +12,13 @@ public class RentalRoom {
     private final String status;
     private final String description;
     private final boolean occupied;
+    private final int floor;
     private final BigDecimal area;
     private final String imageUrl;
 
     public RentalRoom(int roomId, String roomCode, String roomTypeName, int capacity,
             BigDecimal monthlyPrice, String status, String description, boolean occupied,
-            BigDecimal area, String imageUrl) {
+            int floor, BigDecimal area, String imageUrl) {
         this.roomId = roomId;
         this.roomCode = roomCode;
         this.roomTypeName = roomTypeName;
@@ -26,6 +27,7 @@ public class RentalRoom {
         this.status = status;
         this.description = description;
         this.occupied = occupied;
+        this.floor = floor;
         this.area = area;
         this.imageUrl = imageUrl;
     }
@@ -38,6 +40,7 @@ public class RentalRoom {
     public String getStatus() { return status; }
     public String getDescription() { return description; }
     public boolean isOccupied() { return occupied; }
+    public int getFloor() { return floor; }
     public BigDecimal getArea() { return area; }
     public String getImageUrl() { return imageUrl; }
 }

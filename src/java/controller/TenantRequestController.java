@@ -42,10 +42,6 @@ public class TenantRequestController extends HttpServlet {
             return;
         }
         try {
-            if (request.getParameter("roomId") != null) {
-                showForm(request, response);
-                return;
-            }
             String status = request.getParameter("status") == null ? "" : request.getParameter("status").trim();
             String query = request.getParameter("q") == null ? "" : request.getParameter("q").trim();
             List<RentalRequest> rentalRequests = rentalService.findRequestsByTenant(tenantId, status, query);
@@ -108,15 +104,15 @@ public class TenantRequestController extends HttpServlet {
             throw new ServletException("Không thể lưu yêu cầu thuê. Vui lòng thử lại sau.", ex);
         }
         try {
-            showForm(request, response);
+            showRoomDetail(request, response);
         } catch (NumberFormatException ex) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Mã phòng không hợp lệ.");
         } catch (SQLException ex) {
-            throw new ServletException("Không thể tải thông tin phòng.", ex);
+            throw new ServletException("Không thể tải lại thông tin phòng.", ex);
         }
     }
 
-    private void showForm(HttpServletRequest request, HttpServletResponse response)
+    private void showRoomDetail(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, SQLException {
         int roomId = Integer.parseInt(request.getParameter("roomId"));
         if (roomId <= 0) {
@@ -128,7 +124,6 @@ public class TenantRequestController extends HttpServlet {
             return;
         }
         request.setAttribute("room", room);
-        request.setAttribute("today", LocalDate.now());
-        request.getRequestDispatcher("/WEB-INF/views/tenant/request-form.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/rooms/detail.jsp").forward(request, response);
     }
 }

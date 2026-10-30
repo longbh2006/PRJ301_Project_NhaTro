@@ -37,7 +37,7 @@ public class RentalDAO extends DBContext implements AutoCloseable {
     public RentalRoom findRentalRoom(int roomId) throws SQLException {
         String sql = """
                 SELECT r.roomId, r.roomCode, rt.name AS roomTypeName, rt.capacity,
-                       r.monthlyPrice, r.status, r.description, r.area, r.imageUrl,
+                       r.monthlyPrice, r.status, r.description, r.floor, r.area, r.imageUrl,
                        CASE WHEN EXISTS (SELECT 1 FROM Contract c
                                          WHERE c.roomId = r.roomId AND c.status = ?)
                             THEN 1 ELSE 0 END AS occupied
@@ -52,7 +52,7 @@ public class RentalDAO extends DBContext implements AutoCloseable {
                         rs.getNString("roomTypeName"), rs.getInt("capacity"),
                         rs.getBigDecimal("monthlyPrice"), rs.getString("status"),
                         rs.getNString("description"), rs.getBoolean("occupied"),
-                        rs.getBigDecimal("area"), rs.getString("imageUrl")) : null;
+                        rs.getInt("floor"), rs.getBigDecimal("area"), rs.getString("imageUrl")) : null;
             }
         }
     }
