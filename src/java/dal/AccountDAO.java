@@ -8,7 +8,7 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.time.LocalDate;
 import model.RegistrationForm;
-
+import model.Account;
 public class AccountDAO extends DBContext implements AutoCloseable {
 
     public AccountDAO() throws SQLException {
@@ -85,6 +85,37 @@ public class AccountDAO extends DBContext implements AutoCloseable {
     private static String nullable(String value) {
         return value.isEmpty() ? null : value;
     }
+
+    public Account findByUsername(String username) throws SQLException {
+    // 1. Khai báo câu SQL
+    String sql = "SELECT accountId, username, passwordHash, fullName, role, active "
+               + "FROM Account WHERE username = ?";
+
+    // 2. try‑with‑resources cho PreparedStatement
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setString(1, username);          // set tham số
+
+        // 3. try‑with‑resources cho ResultSet
+        try (ResultSet rs = ps.executeQuery()) {
+            // Nếu không có dòng nào
+            if (!rs.next()) {
+                return null;
+            }
+
+            // 4. Tạo đối tượng Account và gán từng cột
+            Account account = new Account();
+            account.setAccountId(rs.getInt("accountId"));
+            account.setUsername(rs.getString("username"));
+            account.setPasswordHash(rs.getString("passwordHash"));
+            account.setFullName(rs.getString("fullName"));
+            account.setRole(rs.getString("role"));
+            account.setActive(rs.getBoolean("active"));
+
+            // 5. Trả về Account
+            return account;
+        }
+    }
+}
 
     @Override
     public void close() throws SQLException {
