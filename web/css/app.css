@@ -1,0 +1,280 @@
+:root {
+    --rr-ink: #0f172a;
+    --rr-muted: #64748b;
+    --rr-line: #e2e8f0;
+    --rr-blue: #2563eb;
+    --bs-primary: #2563eb;
+    --bs-primary-rgb: 37, 99, 235;
+    --bs-link-color: #2563eb;
+}
+
+body {
+    background: #f8fafc;
+    color: var(--rr-ink);
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+.roomrent-shell {
+    display: flex;
+    flex-direction: column;
+    max-width: 1360px;
+    min-height: calc(100vh - 64px);
+    margin: 32px auto;
+    background: #fff;
+    border: 1px solid var(--rr-line);
+    border-radius: 12px;
+}
+
+.roomrent-header {
+    min-height: 68px;
+    padding: 16px 28px;
+    border-bottom: 1px solid var(--rr-line);
+}
+
+.roomrent-brand {
+    color: var(--rr-blue);
+    font-size: 23px;
+    font-weight: 750;
+    letter-spacing: .025em;
+}
+
+.roomrent-layout {
+    display: grid;
+    flex: 1;
+    grid-template-columns: 237px minmax(0, 1fr);
+    gap: 36px;
+    padding: 20px 16px 28px;
+}
+
+.roomrent-sidebar {
+    padding: 20px 12px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    min-height: 640px;
+}
+
+.roomrent-nav-label {
+    margin: 0 12px 28px;
+    color: var(--rr-muted);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.roomrent-sidebar .nav-link {
+    padding: 13px 12px;
+    color: var(--rr-ink);
+    font-size: 14px;
+    border-radius: 8px;
+}
+
+.roomrent-sidebar .nav-link:hover {
+    background: #e2e8f0;
+}
+
+.roomrent-sidebar .nav-link.active {
+    color: var(--rr-blue);
+    background: #dbeafe;
+    font-weight: 600;
+}
+
+.roomrent-content {
+    min-width: 0;
+    padding: 20px 14px 0 0;
+}
+
+.roomrent-footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px 20px;
+    padding: 20px 28px;
+    border-top: 1px solid var(--rr-line);
+    color: var(--rr-muted);
+    font-size: 13px;
+}
+
+.roomrent-error {
+    max-width: 720px;
+    margin: 24px auto;
+}
+
+.roomrent-error-code {
+    margin-bottom: 16px;
+    font-size: clamp(4rem, 12vw, 7rem);
+    font-weight: 750;
+    line-height: 1;
+}
+
+.roomrent-card {
+    border-color: var(--rr-line);
+    border-radius: 10px;
+    box-shadow: none;
+}
+
+.roomrent-card .form-label {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.roomrent-card .form-select {
+    border-color: #cbd5e1;
+    min-height: 40px;
+    font-size: 14px;
+}
+
+.btn-primary {
+    --bs-btn-bg: #2563eb;
+    --bs-btn-border-color: #2563eb;
+    --bs-btn-hover-bg: #1d4ed8;
+    --bs-btn-hover-border-color: #1d4ed8;
+    --bs-btn-active-bg: #1e40af;
+    --bs-btn-active-border-color: #1e40af;
+}
+
+.roomrent-table {
+    font-size: 12px;
+}
+
+.roomrent-table > thead > tr > th {
+    --bs-table-bg: #f1f5f9;
+    padding: 15px 14px;
+    white-space: nowrap;
+    color: var(--rr-ink);
+}
+
+.roomrent-table > tbody > tr > * {
+    padding: 20px 14px;
+    border-color: var(--rr-line);
+}
+
+.roomrent-table > tbody > tr:last-child > * {
+    border-bottom: 0;
+}
+
+.roomrent-table .btn-link {
+    font-size: inherit;
+}
+
+.badge {
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.roomrent-btn-soft {
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-weight: 600;
+}
+
+.roomrent-btn-soft:hover {
+    background: #bfdbfe;
+    color: #1e40af;
+}
+
+/* Pagination (PagerTag) */
+.pagination {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 0;
+    margin: 0 0 24px;
+    list-style: none;
+}
+
+.pagination a,
+.pagination span {
+    display: inline-block;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid var(--rr-line);
+    border-radius: 6px;
+    color: var(--rr-ink);
+    background: #fff;
+    transition: background .15s, color .15s;
+}
+
+.pagination a:hover {
+    background: #dbeafe;
+    color: var(--rr-blue);
+    border-color: #93c5fd;
+}
+
+.pagination span.active {
+    background: var(--rr-blue);
+    color: #fff;
+    border-color: var(--rr-blue);
+}
+
+.pagination span.disabled {
+    color: #94a3b8;
+    background: #f1f5f9;
+    border-color: var(--rr-line);
+    cursor: default;
+}
+
+/* Filter form inputs */
+.roomrent-card .form-control {
+    border-color: #cbd5e1;
+    min-height: 40px;
+    font-size: 14px;
+}
+
+.roomrent-details {
+    font-size: 13px;
+    row-gap: 12px;
+    overflow-wrap: anywhere;
+}
+
+.roomrent-details dt {
+    color: var(--rr-muted);
+    font-weight: 400;
+}
+
+.roomrent-details dd {
+    margin-bottom: 0;
+    font-weight: 600;
+}
+
+#contract-detail {
+    scroll-margin-top: 24px;
+}
+
+.skip-link:focus {
+    display: block;
+    padding: 12px;
+    background: #fff;
+}
+
+@media (max-width: 991.98px) {
+    .roomrent-shell { margin: 16px; }
+    .roomrent-layout { grid-template-columns: 190px minmax(0, 1fr); gap: 20px; }
+}
+
+@media (max-width: 767.98px) {
+    .roomrent-shell { margin: 0; min-height: 100vh; border: 0; border-radius: 0; }
+    .roomrent-header { padding: 16px 20px; }
+    .roomrent-layout { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .roomrent-sidebar { min-height: auto; padding: 12px; }
+    .roomrent-nav-label { margin: 4px 12px 12px; }
+    .roomrent-sidebar .nav { flex-direction: row !important; flex-wrap: wrap; }
+    .roomrent-sidebar .nav-link { padding: 10px 12px; }
+    .roomrent-content { padding: 0; }
+}
+
+@media print {
+    body { background: #fff; }
+    .roomrent-shell { margin: 0; border: 0; min-height: auto; max-width: none; }
+    .roomrent-header { display: none !important; }
+    .roomrent-layout { display: block; padding: 0; }
+    .roomrent-content { padding: 0; }
+    #contract-detail { display: block !important; break-inside: avoid; }
+}

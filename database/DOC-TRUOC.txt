@@ -1,0 +1,19 @@
+CSDL NhaTroSV — PRJ301 Quản lý nhà trọ sinh viên (SQL Server)
+Đã chạy thử trên SQL Server 2022: chạy 2 lần liên tiếp không lỗi, 14/14 phép thử phá luật đều bị chặn.
+
+THỨ TỰ ĐỌC / CHẠY
+1. tu-dien-du-lieu.md   — 11 bảng, từng cột nghĩa là gì, luật nào thành ràng buộc nào (đọc trước).
+2. erd.mmd              — sơ đồ ERD (dán vào https://mermaid.live để xem hình).
+3. setup.sql            — mở bằng SSMS → Execute (F5). Tạo database NhaTroSV + dữ liệu mẫu.
+                          Chạy lại bao nhiêu lần cũng được (tự xoá rồi tạo lại).
+4. kiem-tra-rang-buoc.sql — chạy sau setup.sql: 14 dòng ĐẠT = database tự chặn dữ liệu sai.
+5. queries-mau.sql      — câu truy vấn mẫu theo người: Long Q01–Q07, Khoa Q08–Q12, Anh Tú Q13–Q17.
+                          Chạy thử trong SSMS trước khi viết DAO. (Các câu ghi dữ liệu sẽ ghi thật:
+                          muốn làm lại từ đầu thì chạy lại setup.sql.)
+6. db.properties.example + java/src/java/dal/DBContext.java — kết nối Java ⇄ SQL Server.
+   Chép db.properties.example thành db.properties, điền mật khẩu sa CỦA MÁY MÌNH.
+   KHÔNG commit db.properties lên GitHub.
+
+TÀI KHOẢN MẪU: admin (ADMIN), quanly (MANAGER), quanly2 (MANAGER, cố ý bị khoá),
+sinh viên an.nguyen, binh.tran, chi.le… — mật khẩu mẫu ghi ở đầu setup.sql.
+Mật khẩu lưu dạng pbkdf2_sha256$600000$salt$hash (giống bài ASM.4 trên Academy).
