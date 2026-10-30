@@ -1,3 +1,2 @@
 web/WEB-INF/ConnectDB.properties
-build/
-dist/
+.local/

@@ -11,21 +11,19 @@ Run from the project directory in PowerShell:
 $classes = Join-Path $env:TEMP 'nhatro-nt26-check/tomcat/webapps/nt26/WEB-INF/classes'
 New-Item -ItemType Directory -Path $classes -Force | Out-Null
 Copy-Item web/WEB-INF/ConnectDB.properties (Join-Path (Split-Path $classes) 'ConnectDB.properties')
-javac --release 17 -encoding UTF-8 -Xlint:all -d $classes src/java/model/RentalRequest.java src/java/model/Contract.java src/java/dal/DBContext.java src/java/dal/RentalDAO.java src/java/dal/RentalDAODemo.java test/dal/RentalTestDAO.java test/dal/RentalDAOIntegrationTest.java
+javac --release 17 -encoding UTF-8 -Xlint:all -d $classes src/java/model/RentalRequest.java src/java/model/RentalRoom.java src/java/model/Contract.java src/java/dal/DBContext.java src/java/dal/RentalDAO.java test/dal/RentalTestDAO.java test/dal/RentalDAOIntegrationTest.java
 if ($LASTEXITCODE -ne 0) { throw 'Compilation failed' }
 Select-String -LiteralPath src/java/dal/RentalDAO.java -SimpleMatch '" +'
 ```
 
-Run `RentalDAODemo.main(new String[0])` and
-`RentalDAOIntegrationTest.main(new String[0])` from a temporary test servlet in
+Run `RentalDAOIntegrationTest.main(new String[0])` from a temporary test servlet in
 that Tomcat web application. Put the JDBC jar in the test application's
 `WEB-INF/lib` and the local configuration in `WEB-INF/ConnectDB.properties`.
 The original DBContext resolves `../ConnectDB.properties` through Tomcat's web
 application class loader; a plain `java -cp` invocation does not resolve that
 legacy resource path. Do not deploy the integration-test endpoint to production.
 
-`RentalDAODemo` is read-only. It prints the pending requests or explicitly reports
-an empty result. The integration check needs a seeded PENDING request and a
+The integration check needs a seeded PENDING request and a
 separate tenant without a PENDING request. It inserts its own request, checks
 Unicode binding, nullable decision fields, filtering and missing IDs, then tests
 contract insertion and atomic rollback, including a UNIQUE violation. Its ENDED
@@ -46,8 +44,7 @@ auto-commit, committing, rolling back or closing it; SQL exceptions propagate to
 the service. Set the contract's status explicitly, for example `ACTIVE` in UC09.
 
 Validation on 2026-10-27 with the original DBContext under Tomcat 10.1:
-compilation succeeded, the demo returned 3 PENDING
-requests, all five integration-check groups passed, and the SQL concatenation
+compilation succeeded, all five integration-check groups passed, and the SQL concatenation
 search returned no matches.
 
 After applying AGENTS.md, the five integration-check groups still pass with

@@ -4,8 +4,7 @@
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
     
     <display-name>RoomRent</display-name>
-    
-    <!-- Servlet Configuration -->
+
     <servlet>
         <servlet-name>LoginController</servlet-name>
         <servlet-class>controller.LoginController</servlet-class>
@@ -21,6 +20,10 @@
     <servlet>
         <servlet-name>HomeController</servlet-name>
         <servlet-class>controller.HomeController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>TenantRequestController</servlet-name>
+        <servlet-class>controller.TenantRequestController</servlet-class>
     </servlet>
     
     <!-- Servlet Mapping -->
@@ -43,11 +46,12 @@
     <servlet-mapping>
         <servlet-name>HomeController</servlet-name>
         <url-pattern>/home</url-pattern>
-        <!-- Mapping vào context root -->
         <url-pattern></url-pattern>
     </servlet-mapping>
-    
-    <!-- Error Pages Configuration -->
+    <servlet-mapping>
+        <servlet-name>TenantRequestController</servlet-name>
+        <url-pattern>/tenant/requests</url-pattern>
+    </servlet-mapping>
     <error-page>
         <error-code>403</error-code>
         <location>/WEB-INF/views/error/403.jsp</location>

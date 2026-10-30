@@ -4,15 +4,15 @@ Web root của dự án NetBeans/Ant này là `web/` (tương đương `webapp/`
 trong cách bố trí khác). CSS công khai nằm tại `web/css/app.css`, được tải
 qua `${contextPath}/css/app.css`; không đặt CSS dưới `WEB-INF`.
 
-## Mở trang thử
+## Mở giao diện ứng dụng
 
 Chạy project trên Tomcat, sau đó mở
-`http://localhost:8080/Project_NhaTro/layout-demo`
+`http://127.0.0.1:8080/Project_NhaTro/rooms/detail?roomId=1`
 (đổi cổng/context path nếu cấu hình triển khai khác).
-`LayoutDemoServlet` nhận GET `/layout-demo`, đặt thông báo vào request rồi
-forward tới `WEB-INF/views/layout-demo.jsp`. Trang này include đủ ba mảnh,
-không cần kết nối CSDL và dùng vai trò đang có trong session; khi chưa đăng
-nhập sẽ hiển thị menu Khách. Không mở trực tiếp URL của file JSP dưới `WEB-INF`.
+Thay `roomId` bằng ID phòng có trong CSDL. `RoomDetailController` nạp thông tin
+phòng và forward tới `WEB-INF/views/rooms/detail.jsp`. Trang này include đủ ba
+mảnh dùng chung và dùng vai trò đang có trong session; khi chưa đăng nhập sẽ
+hiển thị header Khách. Không mở trực tiếp URL của file JSP dưới `WEB-INF`.
 
 ## Quy ước cho mọi trang
 
