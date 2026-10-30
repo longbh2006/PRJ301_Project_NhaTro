@@ -178,6 +178,56 @@ body {
     color: #1e40af;
 }
 
+/* Pagination (PagerTag) */
+.pagination {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 0;
+    margin: 0 0 24px;
+    list-style: none;
+}
+
+.pagination a,
+.pagination span {
+    display: inline-block;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid var(--rr-line);
+    border-radius: 6px;
+    color: var(--rr-ink);
+    background: #fff;
+    transition: background .15s, color .15s;
+}
+
+.pagination a:hover {
+    background: #dbeafe;
+    color: var(--rr-blue);
+    border-color: #93c5fd;
+}
+
+.pagination span.active {
+    background: var(--rr-blue);
+    color: #fff;
+    border-color: var(--rr-blue);
+}
+
+.pagination span.disabled {
+    color: #94a3b8;
+    background: #f1f5f9;
+    border-color: var(--rr-line);
+    cursor: default;
+}
+
+/* Filter form inputs */
+.roomrent-card .form-control {
+    border-color: #cbd5e1;
+    min-height: 40px;
+    font-size: 14px;
+}
+
 .roomrent-details {
     font-size: 13px;
     row-gap: 12px;
