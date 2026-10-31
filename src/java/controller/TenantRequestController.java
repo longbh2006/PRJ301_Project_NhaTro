@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.UUID;
 import model.RentalRequest;
 import model.RentalRoom;
 import service.RentalService;
@@ -41,6 +42,10 @@ public class TenantRequestController extends HttpServlet {
         if (tenantId == null) {
             return;
         }
+        if (!"/tenant/requests".equals(request.getServletPath())) {
+            response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+            return;
+        }
         try {
             String status = request.getParameter("status") == null ? "" : request.getParameter("status").trim();
             String query = request.getParameter("q") == null ? "" : request.getParameter("q").trim();
@@ -59,11 +64,14 @@ public class TenantRequestController extends HttpServlet {
                 request.setAttribute("selectedRequest", selectedRequest);
             }
             HttpSession session = request.getSession(false);
+            if (session.getAttribute("rentalCsrfToken") == null) {
+                session.setAttribute("rentalCsrfToken", UUID.randomUUID().toString());
+            }
             request.setAttribute("successMessage", session.getAttribute("rentalSuccess"));
             session.removeAttribute("rentalSuccess");
             request.getRequestDispatcher("/WEB-INF/views/tenant/requests.jsp").forward(request, response);
         } catch (NumberFormatException ex) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Mã phòng không hợp lệ.");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Mã yêu cầu không hợp lệ.");
         } catch (IllegalArgumentException ex) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
         } catch (SQLException ex) {
@@ -78,6 +86,10 @@ public class TenantRequestController extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         Integer tenantId = requireTenant(request, response);
         if (tenantId == null) {
+            return;
+        }
+        if ("/tenant/requests/cancel".equals(request.getServletPath())) {
+            cancelRequest(request, response, tenantId);
             return;
         }
         try {
@@ -109,6 +121,27 @@ public class TenantRequestController extends HttpServlet {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Mã phòng không hợp lệ.");
         } catch (SQLException ex) {
             throw new ServletException("Không thể tải lại thông tin phòng.", ex);
+        }
+    }
+
+    private void cancelRequest(HttpServletRequest request, HttpServletResponse response, int tenantId)
+            throws ServletException, IOException {
+        Object csrfToken = request.getSession(false).getAttribute("rentalCsrfToken");
+        if (!(csrfToken instanceof String) || !csrfToken.equals(request.getParameter("csrfToken"))) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+        try {
+            int requestId = Integer.parseInt(request.getParameter("requestId"));
+            rentalService.cancelRequest(tenantId, requestId);
+            request.getSession(false).setAttribute("rentalSuccess", "Đã hủy yêu cầu thuê phòng.");
+            response.sendRedirect(request.getContextPath() + "/tenant/requests");
+        } catch (IllegalArgumentException ex) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Mã yêu cầu không hợp lệ.");
+        } catch (IllegalStateException ex) {
+            response.sendError(HttpServletResponse.SC_CONFLICT, ex.getMessage());
+        } catch (SQLException ex) {
+            throw new ServletException("Không thể hủy yêu cầu thuê. Vui lòng thử lại sau.", ex);
         }
     }
 

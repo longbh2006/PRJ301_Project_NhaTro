@@ -8,9 +8,31 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import model.RentalRequest;
+import model.Contract;
 import model.RentalRoom;
 
 public class RentalService {
+    public void cancelRequest(int tenantId, int requestId) throws SQLException {
+        if (tenantId <= 0 || requestId <= 0) {
+            throw new IllegalArgumentException("Mã người thuê hoặc yêu cầu không hợp lệ.");
+        }
+        try (RentalDAO dao = new RentalDAO()) {
+            // Kiểm tra trong cùng UPDATE để không ghi đè quyết định duyệt vừa xảy ra.
+            if (!dao.cancelPendingRequest(requestId, tenantId)) {
+                throw new IllegalStateException("Không thể hủy: yêu cầu không thuộc về bạn hoặc không còn chờ duyệt.");
+            }
+        }
+    }
+
+    public Contract findActiveContractByTenant(int tenantId) throws SQLException {
+        if (tenantId <= 0) {
+            throw new IllegalArgumentException("Tài khoản người thuê không hợp lệ.");
+        }
+        try (RentalDAO dao = new RentalDAO()) {
+            return dao.findActiveContractByTenant(tenantId);
+        }
+    }
+
     public RentalRoom findRoom(int roomId) throws SQLException {
         try (RentalDAO dao = new RentalDAO()) {
             RentalRoom room = dao.findRentalRoom(roomId);

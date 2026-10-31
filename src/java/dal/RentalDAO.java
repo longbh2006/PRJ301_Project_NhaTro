@@ -121,6 +121,47 @@ public class RentalDAO extends DBContext implements AutoCloseable {
         }
     }
 
+    public boolean cancelPendingRequest(int requestId, int tenantId) throws SQLException {
+        String sql = """
+                UPDATE RentalRequest SET status = ?, decidedAt = SYSDATETIME(), decidedBy = NULL
+                WHERE requestId = ? AND tenantId = ? AND status = ?
+                """;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, "CANCELLED");
+            ps.setInt(2, requestId);
+            ps.setInt(3, tenantId);
+            ps.setString(4, "PENDING");
+            return ps.executeUpdate() == 1;
+        }
+    }
+
+    public Contract findActiveContractByTenant(int tenantId) throws SQLException {
+        String sql = """
+                SELECT c.contractId, c.requestId, c.tenantId, c.roomId, c.startDate,
+                       c.endDate, c.monthlyRent, c.deposit, c.numPeople,
+                       c.startElectricIndex, c.startWaterIndex, c.status, c.endedAt, r.roomCode
+                FROM Contract c JOIN Room r ON r.roomId = c.roomId
+                WHERE c.tenantId = ? AND c.status = ?
+                """;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, tenantId);
+            ps.setString(2, "ACTIVE");
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                Contract contract = new Contract(rs.getInt("contractId"), rs.getInt("requestId"),
+                        rs.getInt("tenantId"), rs.getInt("roomId"),
+                        rs.getObject("startDate", LocalDate.class), rs.getObject("endDate", LocalDate.class),
+                        rs.getBigDecimal("monthlyRent"), rs.getBigDecimal("deposit"), rs.getInt("numPeople"),
+                        rs.getInt("startElectricIndex"), rs.getInt("startWaterIndex"),
+                        rs.getString("status"), rs.getObject("endedAt", LocalDateTime.class));
+                contract.setRoomCode(rs.getString("roomCode"));
+                return contract;
+            }
+        }
+    }
+
     public List<RentalRequest> findPendingRequests() throws SQLException {
         String sql = """
                 SELECT requestId, tenantId, roomId, moveInDate, months, numPeople,
