@@ -62,6 +62,7 @@
                     </c:when>
                     <c:when test="${layoutRole eq 'MANAGER'}">
                         <rr:navLink path="/manager/requests" label="Duyệt yêu cầu" />
+                        <rr:navLink path="/manager/contracts" label="Quản lý hợp đồng" />
                         <rr:navLink path="/manager/meters" label="Điện nước" />
                         <rr:navLink path="/manager/invoices" label="Hóa đơn" />
                         <rr:navLink path="/manager/revenue" label="Doanh thu" />

@@ -4,15 +4,15 @@ Web root của dự án NetBeans/Ant này là `web/` (tương đương `webapp/`
 trong cách bố trí khác). CSS công khai nằm tại `web/css/app.css`, được tải
 qua `${contextPath}/css/app.css`; không đặt CSS dưới `WEB-INF`.
 
-## Mở giao diện ứng dụng
+## Mở trang chức năng
 
 Chạy project trên Tomcat, sau đó mở
-`http://127.0.0.1:8080/Project_NhaTro/rooms/detail?roomId=1`
+`http://localhost:8080/Project_NhaTro/manager/requests`
 (đổi cổng/context path nếu cấu hình triển khai khác).
-Thay `roomId` bằng ID phòng có trong CSDL. `RoomDetailController` nạp thông tin
-phòng và forward tới `WEB-INF/views/rooms/detail.jsp`. Trang này include đủ ba
-mảnh dùng chung và dùng vai trò đang có trong session; khi chưa đăng nhập sẽ
-hiển thị header Khách. Không mở trực tiếp URL của file JSP dưới `WEB-INF`.
+`ManagerRequestServlet` kiểm tra session quản lý, gọi service nạp danh sách
+rồi forward tới `WEB-INF/views/manager/requests.jsp`. Trang này dùng đủ ba mảnh
+giao diện chung. Khi chưa đăng nhập, AuthFilter chuyển tới trang đăng nhập;
+TENANT truy cập trang quản lý nhận 403. Không mở URL JSP dưới `WEB-INF`.
 
 ## Quy ước cho mọi trang
 
@@ -51,8 +51,8 @@ Hai JAR JSTL đã có trong `web/WEB-INF/lib`; xem README tại đó.
 
 ## Tích hợp với controller đăng nhập
 
-Hiện source chưa có controller đăng nhập hoặc model tài khoản. Layout quy ước
-`sessionScope.role` là chuỗi do controller đặt **sau khi xác thực**:
+Controller đăng nhập đặt `account`, `accountId` và `role` trong session sau khi
+xác thực. Layout dùng `sessionScope.role` để chọn menu:
 
 | Giá trị | Nhãn | Menu |
 | --- | --- | --- |

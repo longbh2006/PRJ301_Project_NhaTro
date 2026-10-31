@@ -1,4 +1,9 @@
 web/WEB-INF/ConnectDB.properties
-.local/
+
+# Generated files and local workspace data
 build/
-/dist/
+dist/
+nbproject/private/
+.local/
+.concord/
+.cuongmini/
