@@ -16,7 +16,7 @@
     </c:when>
     <c:when test="${status eq 'ACTIVE'}">
         <c:set var="badgeColor" value="success" />
-        <c:set var="badgeLabel" value="Đang hoạt động" />
+        <c:set var="badgeLabel" value="Đang hiệu lực" />
     </c:when>
     <c:when test="${status eq 'PAID'}">
         <c:set var="badgeColor" value="success" />

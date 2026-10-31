@@ -15,7 +15,7 @@ Các biến chỉ nằm trong scope của tag, không ghi vào request/session.
 | --- | --- | --- |
 | PENDING | Chờ duyệt | warning (vàng) |
 | APPROVED | Đã duyệt | success (xanh lá) |
-| ACTIVE | Đang hoạt động | success |
+| ACTIVE | Đang hiệu lực | success |
 | PAID | Đã trả | success |
 | REJECTED | Từ chối | danger (đỏ) |
 | CANCELLED | Đã hủy | danger |
