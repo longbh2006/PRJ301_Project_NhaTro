@@ -20,18 +20,26 @@
           rel="stylesheet" crossorigin="anonymous"
           integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB">
     <link href="<c:url value='/css/app.css' />" rel="stylesheet">
+    <c:if test="${requestScope.rentalDesign}">
+        <link href="<c:url value='/css/rental.css' />" rel="stylesheet">
+    </c:if>
 </head>
 <body>
 <a class="visually-hidden-focusable skip-link" href="#main-content">Đến nội dung chính</a>
-<div class="roomrent-shell">
+<div class="roomrent-shell ${requestScope.layoutVariant eq 'public' ? 'roomrent-shell-public' : ''}">
     <header class="roomrent-header d-flex flex-wrap align-items-center justify-content-between gap-3 d-print-none">
         <a class="roomrent-brand text-decoration-none" href="<c:url value='/' />">ROOMRENT</a>
         <div class="d-flex flex-wrap align-items-center gap-3">
-            <span class="small text-secondary"><c:out value="${layoutRoleLabel}" /></span>
+            <c:choose>
+                <c:when test="${requestScope.layoutVariant eq 'public'}">
+                    <a class="btn btn-outline-secondary btn-sm" href="<c:url value='/rooms' />">Phòng trống</a>
+                </c:when>
+                <c:otherwise><span class="small text-secondary"><c:out value="${layoutRoleLabel}" /></span></c:otherwise>
+            </c:choose>
             <c:choose>
                 <c:when test="${layoutRole eq 'GUEST'}">
                     <a class="btn btn-outline-secondary btn-sm" href="<c:url value='/login' />">Đăng nhập</a>
-                    <a class="btn btn-primary btn-sm" href="<c:url value='/register' />">Đăng ký</a>
+                    <a class="btn ${requestScope.layoutVariant eq 'public' ? 'btn-outline-secondary' : 'btn-primary'} btn-sm" href="<c:url value='/register' />">Đăng ký</a>
                 </c:when>
                 <c:otherwise>
                     <form method="post" action="<c:url value='/logout' />" class="m-0">
@@ -42,6 +50,7 @@
         </div>
     </header>
     <div class="roomrent-layout">
+        <c:if test="${requestScope.layoutVariant ne 'public'}">
         <aside class="roomrent-sidebar d-print-none">
             <p class="roomrent-nav-label">Điều hướng</p>
             <nav class="nav nav-pills flex-column gap-2" aria-label="Điều hướng chính">
@@ -70,4 +79,5 @@
                 </c:choose>
             </nav>
         </aside>
+        </c:if>
         <main id="main-content" class="roomrent-content" tabindex="-1">

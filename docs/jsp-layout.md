@@ -11,8 +11,8 @@ Chạy project trên Tomcat, sau đó mở
 (đổi cổng/context path nếu cấu hình triển khai khác).
 `ManagerRequestServlet` kiểm tra session quản lý, gọi service nạp danh sách
 rồi forward tới `WEB-INF/views/manager/requests.jsp`. Trang này dùng đủ ba mảnh
-giao diện chung. Khi chưa đăng nhập, trang trả 403; cần tích hợp controller
-đăng nhập trước khi kiểm tra luồng quản lý. Không mở URL JSP dưới `WEB-INF`.
+giao diện chung. Khi chưa đăng nhập, AuthFilter chuyển tới trang đăng nhập;
+TENANT truy cập trang quản lý nhận 403. Không mở URL JSP dưới `WEB-INF`.
 
 ## Quy ước cho mọi trang
 
@@ -51,8 +51,8 @@ Hai JAR JSTL đã có trong `web/WEB-INF/lib`; xem README tại đó.
 
 ## Tích hợp với controller đăng nhập
 
-Hiện source chưa có controller đăng nhập hoặc model tài khoản. Layout quy ước
-`sessionScope.role` là chuỗi do controller đặt **sau khi xác thực**:
+Controller đăng nhập đặt `account`, `accountId` và `role` trong session sau khi
+xác thực. Layout dùng `sessionScope.role` để chọn menu:
 
 | Giá trị | Nhãn | Menu |
 | --- | --- | --- |

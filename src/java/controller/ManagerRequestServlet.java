@@ -1,7 +1,6 @@
 package controller;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,7 +13,6 @@ import java.util.Base64;
 import service.RentalService;
 import service.RentalService.BusinessException;
 
-@WebServlet(name = "ManagerRequestServlet", urlPatterns = {"/manager/requests"})
 public class ManagerRequestServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private static final String CSRF_KEY = "managerRequestsCsrf";

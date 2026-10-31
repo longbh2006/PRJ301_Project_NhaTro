@@ -5,7 +5,7 @@ schema from `setup.sql`. Keep the original `DBContext` unchanged. Configure its
 existing `web/WEB-INF/ConnectDB.properties` resource locally with the keys `url`,
 `userID`, and `password`. That file is ignored by Git; never commit credentials.
 
-Build and deploy the actual project following [the VS Code guide](vscode-tomcat.md).
+Build and deploy the actual project following [the local run guide](run-local.md).
 Inspect pending requests through `/manager/requests` using an authenticated
 manager session. Check request and contract persistence through the real rental
 workflow described in [NT-36](NT-36-validation.md).

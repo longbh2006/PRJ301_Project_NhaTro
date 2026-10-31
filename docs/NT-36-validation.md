@@ -14,11 +14,14 @@ và bảng URL ở [Docs 4](https://cuongthai.com/work/prj301-nha-tro-sinh-vien/
 - Thành công redirect về GET (PRG), thông báo trong session chỉ hiển thị một lần.
   Dữ liệu không hợp lệ trả 400 và giữ các giá trị đã nhập; yêu cầu đã xử lý trả 409.
 
-Controller đăng nhập cần đặt **Integer `accountId`** và chuỗi **`role=MANAGER`**
-trong session sau khi xác thực. Servlet từ chối cả GET và POST nếu thiếu session,
+Controller đăng nhập đặt đối tượng `account`, **Integer `accountId`** và chuỗi
+**`role=MANAGER`** trong session sau khi xác thực. AuthFilter chuyển khách chưa
+đăng nhập tới `/login?next=/manager/requests`, chặn TENANT bằng 403.
+Servlet kiểm tra lại cả GET và POST nếu thiếu session,
 thiếu ID hoặc sai vai trò. Service kiểm tra lại tài khoản quản lý còn hoạt động
 trong CSDL trước khi ghi. ID quản lý, người thuê và giá phòng không lấy từ form.
-POST cần token CSRF sinh ở server. JSP escape tên người thuê, mã phòng và ghi chú.
+POST cần token CSRF sinh ở server. JSP hiển thị bảng và escape tên người thuê,
+mã phòng, ghi chú. Mapping servlet đặt tại `web/WEB-INF/web.xml`, không dùng annotation.
 
 ## Giao dịch và cạnh tranh
 
@@ -56,7 +59,7 @@ Cần JDK 17, Tomcat 10.1, driver SQL Server và cấu hình
 `web/WEB-INF/ConnectDB.properties` của DBContext cũ. Không commit cấu hình.
 Giữ DBContext và EncodingFilter nguyên trạng.
 
-Build và triển khai chính ứng dụng theo [hướng dẫn VS Code](vscode-tomcat.md).
+Build và triển khai chính ứng dụng theo [hướng dẫn chạy cục bộ](run-local.md).
 Kiểm tra giao diện hoặc HTTP của chức năng thật; không tạo file demo, test,
 servlet thử hoặc ứng dụng kiểm thử riêng theo AGENTS.md.
 
@@ -78,15 +81,35 @@ ba lần duyệt đồng thời, dữ liệu sai, phân quyền, XSS, CSRF và P
 Các file kiểm thử riêng đã được loại bỏ theo quy tắc mới. Không coi các kết quả
 này là bằng chứng đã kiểm tra lại toàn bộ giao diện sau khi tích hợp chức năng khác.
 
-## Điểm tích hợp còn phụ thuộc các chức năng khác
+## Kết quả kiểm tra lại ngày 31/10/2026
 
-Source gốc hiện chưa có controller đăng nhập, AuthFilter hoặc trang danh sách
-phòng UC01. NT-36 không thêm các chức năng này. Khi ghép UC03, dùng đúng hợp đồng
-session ở trên; giữ lớp kiểm tra quyền ở servlet ngay cả khi có AuthFilter.
+Sau khi merge `main`, build Ant thành công với 25 lớp Java, chạy chính ứng dụng
+trên Tomcat 10.1 tại `http://127.0.0.1:8082/Project_NhaTro`. Worktree riêng dùng
+cấu hình CSDL cục bộ và thư viện NetBeans/JSTL cục bộ; không sửa DBContext,
+EncodingFilter, schema hoặc commit cấu hình kết nối.
 
-Danh sách phòng trống UC01 cần chọn phòng ACTIVE **không có Contract ACTIVE**.
-Không đổi Room.status sang giá trị mới như OCCUPIED: schema chỉ cho ACTIVE,
-MAINTENANCE, HIDDEN. Kiểm tra CSDL trước đó đã xác nhận sau khi duyệt, phòng không còn thỏa điều
-kiện trống trong CSDL. Kiểm tra trực quan phòng biến mất trên UC01 cần thực hiện
-sau khi ghép source UC01. Hai chỉ mục UNIQUE thuộc schema NT-22; nhánh này không
-tự thay schema, DBContext hoặc cấu hình filter.
+- Đăng nhập thật bằng tài khoản quản lý, mở bảng: có 3 yêu cầu PENDING.
+  Lọc `roomId=3` còn đúng #8 và #9; giao diện hiển thị tiếng Việt đúng.
+- Mở hai tab trước khi duyệt. Duyệt #8 với cọc 1.230.000, điện 100, nước 20:
+  redirect về danh sách vẫn giữ bộ lọc; tải lại không gửi lại POST và mất thông báo một lần.
+- Gửi Duyệt #9 từ tab cũ: hiện **“Phòng vừa được người khác thuê.”**.
+  CSDL xác nhận #8 APPROVED, #9 REJECTED, `decidedBy=2` và chỉ một hợp đồng ACTIVE
+  của phòng 3: giá thuê 2.500.000, cọc 1.230.000, điện 100, nước 20,
+  thời hạn 01/11/2026–01/11/2027.
+- Bấm Từ chối #10 mà không nhập cọc/chỉ số: redirect thành công; CSDL xác nhận
+  #10 REJECTED, người quyết định 2, không tạo hợp đồng cho #10.
+- HTTP thật: lọc phòng âm và POST cọc âm trả 400; POST token CSRF sai trả 403;
+  khách bị chuyển tới đăng nhập; TENANT đăng nhập thật truy cập trang quản lý trả 403.
+- Đọc metadata CSDL xác nhận đã có `UX_Contract_ActiveRoom` và
+  `UX_Contract_ActiveTenant`, đều UNIQUE có lọc `status='ACTIVE'`; schema NT-22
+  trong `database/setup.sql` cũng đã khai báo. Không thêm chỉ mục trùng.
+
+Kiểm tra này đã thay đổi dữ liệu mẫu #8, #9, #10 qua chức năng thật như trên;
+không đặt lại dữ liệu bằng SQL và không tạo file demo, harness hoặc endpoint thử.
+Hai tab dùng cùng tài khoản quản lý, gửi lần lượt; chưa chạy hai tài khoản quản lý
+gửi đồng thời, chưa ép lỗi SQL tại INSERT để kiểm tra rollback trong lượt này,
+chưa kiểm tra lại XSS hoặc trực quan danh sách phòng trống UC01.
+
+Danh sách phòng trống UC01 đã có trên `main` và lọc phòng ACTIVE không có Contract
+ACTIVE. Không đổi Room.status sang OCCUPIED vì schema chỉ cho ACTIVE,
+MAINTENANCE, HIDDEN. Giữ kiểm tra quyền trong servlet dù đã có AuthFilter.

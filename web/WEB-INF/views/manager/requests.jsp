@@ -29,29 +29,38 @@
         <div class="card roomrent-card"><div class="card-body p-4">Không có yêu cầu chờ duyệt trong danh sách này.</div></div>
     </c:when>
     <c:otherwise>
-        <div class="d-grid gap-3">
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+                <caption class="visually-hidden">Danh sách yêu cầu thuê đang chờ duyệt</caption>
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Yêu cầu</th>
+                        <th scope="col">Người thuê</th>
+                        <th scope="col">Phòng</th>
+                        <th scope="col">Thời gian thuê</th>
+                        <th scope="col">Ghi chú</th>
+                        <th scope="col">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
             <c:forEach var="rental" items="${requestScope.pendingRequests}">
-                <section class="card roomrent-card" aria-labelledby="request-${rental.requestId}-title">
-                    <div class="card-body p-4">
-                        <div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
-                            <h2 class="h5 mb-0" id="request-${rental.requestId}-title">
-                                Yêu cầu #<c:out value="${rental.requestId}" /> · Phòng <c:out value="${rental.roomCode}" />
-                            </h2>
-                            <span class="badge text-bg-warning align-self-start">Chờ duyệt</span>
-                        </div>
-                        <dl class="row small mb-2">
-                            <dt class="col-sm-3">Người thuê</dt>
-                            <dd class="col-sm-9"><c:out value="${rental.tenantName}" /> (ID <c:out value="${rental.tenantId}" />)</dd>
-                            <dt class="col-sm-3">Phòng</dt>
-                            <dd class="col-sm-9"><c:out value="${rental.roomCode}" /> (ID <c:out value="${rental.roomId}" />)</dd>
-                            <dt class="col-sm-3">Ngày nhận phòng</dt><dd class="col-sm-9"><c:out value="${rental.moveInDate}" /></dd>
-                            <dt class="col-sm-3">Thời hạn / Số người</dt>
-                            <dd class="col-sm-9"><c:out value="${rental.months}" /> tháng / <c:out value="${rental.numPeople}" /> người</dd>
-                            <dt class="col-sm-3">Giá thuê hiện tại</dt>
-                            <dd class="col-sm-9"><fmt:formatNumber value="${rental.monthlyPrice}" pattern="#,##0" /> đ/tháng</dd>
-                            <dt class="col-sm-3">Ghi chú</dt><dd class="col-sm-9 text-break"><c:out value="${rental.note}" default="—" /></dd>
-                        </dl>
-                        <form method="post" action="<c:url value='/manager/requests' />" class="border-top pt-3">
+                <tr>
+                    <th scope="row">
+                        <c:out value="${rental.requestCode}" />
+                        <span class="badge text-bg-warning">Chờ duyệt</span>
+                    </th>
+                    <td><c:out value="${rental.tenantName}" /> (ID <c:out value="${rental.tenantId}" />)</td>
+                    <td>
+                        <c:out value="${rental.roomCode}" /> (ID <c:out value="${rental.roomId}" />)
+                        <div class="small text-secondary"><fmt:formatNumber value="${rental.monthlyPrice}" pattern="#,##0" /> đ/tháng</div>
+                    </td>
+                    <td>
+                        <c:out value="${rental.moveInDate}" />
+                        <div class="small"><c:out value="${rental.months}" /> tháng / <c:out value="${rental.numPeople}" /> người</div>
+                    </td>
+                    <td class="text-break"><c:out value="${rental.note}" default="—" /></td>
+                    <td>
+                        <form method="post" action="<c:url value='/manager/requests' />">
                             <input type="hidden" name="csrfToken" value="${fn:escapeXml(requestScope.csrfToken)}">
                             <input type="hidden" name="action" value="approve">
                             <input type="hidden" name="requestId" value="${rental.requestId}">
@@ -86,9 +95,11 @@
                             <input type="hidden" name="roomId" value="${fn:escapeXml(requestScope.roomId)}">
                             <button type="submit" class="btn btn-outline-danger">Từ chối yêu cầu #<c:out value="${rental.requestId}" /></button>
                         </form>
-                    </div>
-                </section>
+                    </td>
+                </tr>
             </c:forEach>
+                </tbody>
+            </table>
         </div>
     </c:otherwise>
 </c:choose>

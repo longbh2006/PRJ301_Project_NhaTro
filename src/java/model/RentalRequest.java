@@ -3,6 +3,8 @@ package model;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public class RentalRequest {
 
@@ -150,5 +152,12 @@ public class RentalRequest {
 
     public void setMonthlyPrice(BigDecimal monthlyPrice) {
         this.monthlyPrice = monthlyPrice;
+    }
+    public String getRequestCode() {
+        return String.format(Locale.ROOT, "YC%03d", requestId);
+    }
+
+    public String getCreatedAtDisplay() {
+        return createdAt == null ? "" : createdAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
 }

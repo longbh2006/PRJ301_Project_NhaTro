@@ -1,0 +1,17 @@
+# =====================================================================
+# db.properties.example — MẪU cấu hình kết nối CSDL (file này ĐƯỢC commit)
+#
+# Cách dùng (mỗi người làm 1 lần trên máy mình):
+#   1. Chép file này thành  src/java/db.properties   (cùng thư mục gốc package với dal/)
+#      NetBeans (Ant) sẽ tự chép nó vào  WEB-INF/classes/db.properties  khi build.
+#   2. Sửa user / password cho đúng SQL Server của máy bạn.
+#   3. KHÔNG commit db.properties (đã thêm vào .gitignore) — trong đó có mật khẩu sa của bạn.
+#
+# Biến môi trường DB_URL / DB_USER / DB_PASS (nếu có) sẽ THẮNG các giá trị trong file.
+# =====================================================================
+
+# encrypt=true;trustServerCertificate=true: driver mssql-jdbc bản 10+ bắt mã hoá,
+# máy cá nhân không có chứng chỉ thật nên phải "tin" chứng chỉ tự ký.
+db.url=jdbc:sqlserver://localhost:1433;databaseName=NhaTroSV;encrypt=true;trustServerCertificate=true
+db.user=sa
+db.password=DOI_THANH_MAT_KHAU_SA_CUA_BAN
