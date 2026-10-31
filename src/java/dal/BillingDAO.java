@@ -47,6 +47,40 @@ public class BillingDAO extends DBContext {
         return null;
     }
 
+    public MeterReading findReadingBefore(int roomId, int year, int month) throws SQLException {
+        // 3. SQL: lấy ghi có kỳ trước (year, month) đang chọn
+        String sql
+                = "SELECT TOP (1) * "
+                + "FROM MeterReading "
+                + "WHERE roomId = ? "
+                + "  AND ( [year] < ? "
+                + "       OR ( [year] = ? AND [month] < ? ) ) "
+                + "ORDER BY [year] DESC, [month] DESC";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            // 4. Đặt tham số đúng thứ tự: roomId, year, year, month
+            ps.setInt(1, roomId);
+            ps.setInt(2, year);
+            ps.setInt(3, year);
+            ps.setInt(4, month);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    MeterReading m = new MeterReading();
+                    m.setReadingId(rs.getInt("readingId"));
+                    m.setRoomId(rs.getInt("roomId"));
+                    m.setYear(rs.getInt("year"));
+                    m.setMonth(rs.getInt("month"));
+                    m.setElectricIndex(rs.getInt("electricIndex"));
+                    m.setWaterIndex(rs.getInt("waterIndex"));
+                    m.setRecordedAt(rs.getObject("recordedAt", LocalDateTime.class));
+                    return m;
+                }
+            }
+        }
+        return null;   // không tìm thấy ghi trước kỳ
+    }
+
     public int insertReading(MeterReading reading) throws SQLException {
         String sql = "INSERT INTO MeterReading (roomId, [year], [month], electricIndex, waterIndex) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -162,7 +196,7 @@ public class BillingDAO extends DBContext {
             throw new RuntimeException("Lỗi truy vấn hoá đơn theo id", e);
         }
 
-        return null;                                                                                                                                                                                           
+        return null;
     }
 
     public UtilityPrice currentPrice() {
@@ -178,7 +212,7 @@ public class BillingDAO extends DBContext {
             throw new RuntimeException("Lỗi truy vấn giá hiện tại", e);
         }
 
-        return null;                                                                                                                                                                                         
+        return null;
     }
 
     private UtilityPrice mapUtilityPrice(ResultSet rs) throws SQLException {
@@ -195,42 +229,33 @@ public class BillingDAO extends DBContext {
 
     public List<Contract> findActiveContracts() {
 
-      
         List<Contract> list = new ArrayList<>();
 
-        
         String sql
                 = "SELECT contractId, roomId, tenantId, numPeople, startElectricIndex, startWaterIndex, status "
                 + "FROM Contract "
                 + "WHERE status = 'ACTIVE'";
 
-        
         try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 Contract c = new Contract();
 
-              
                 c.setContractId(rs.getInt("contractId"));
                 c.setRoomId(rs.getInt("roomId"));
                 c.setTenantId(rs.getInt("tenantId"));
                 c.setNumPeople(rs.getInt("numPeople"));
                 c.setStartElectricIndex(rs.getInt("startElectricIndex"));
                 c.setStartWaterIndex(rs.getInt("startWaterIndex"));
-                c.setStatus(rs.getString("status"));   
+                c.setStatus(rs.getString("status"));
 
-              list.add(c);
+                list.add(c);
             }
-        }
-    
-    catch (SQLException e
+        } catch (SQLException e) {
 
-    
-        ) {
-            
             throw new RuntimeException("Lỗi truy vấn hợp đồng ACTIVE", e);
-    }
+        }
 
-    return list ;
-}
+        return list;
+    }
 }
