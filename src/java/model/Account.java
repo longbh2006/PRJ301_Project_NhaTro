@@ -4,6 +4,8 @@
  */
 package model;
 
+import java.time.LocalDateTime;
+
 /**
  *
  * @author Lenovo
@@ -12,9 +14,13 @@ public class Account { // TẠM — xoá khi NT-30 được merge
     private int accountId;      
     private String username;    
     private String fullName;    
+    private String phone;
+    private String email;
     private String role;        
     private boolean active; 
     private String passwordHash;
+    private LocalDateTime createdAt;
+
     public int getAccountId() {
         return accountId;
     }
@@ -37,6 +43,22 @@ public class Account { // TẠM — xoá khi NT-30 được merge
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getRole() {
@@ -62,6 +84,12 @@ public class Account { // TẠM — xoá khi NT-30 được merge
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
     }
-    
-    
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }
