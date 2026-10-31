@@ -61,6 +61,10 @@
         <servlet-name>AdminAccountController</servlet-name>
         <servlet-class>controller.AdminAccountController</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>TenantIssueController</servlet-name>
+        <servlet-class>controller.TenantIssueController</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ManagerRequestServlet</servlet-name>
         <url-pattern>/manager/requests</url-pattern>
@@ -101,6 +105,10 @@
     <servlet-mapping>
         <servlet-name>AdminAccountController</servlet-name>
         <url-pattern>/admin/accounts</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>TenantIssueController</servlet-name>
+        <url-pattern>/tenant/issues</url-pattern>
     </servlet-mapping>
     <error-page>
         <error-code>403</error-code>
