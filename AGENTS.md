@@ -38,6 +38,7 @@
 
 ## Giữ nguyên quy tắc khi làm việc với Git
 
+- Sau khi hoàn tất sửa đổi và kiểm tra, tự động commit các file thuộc nhiệm vụ và push lên nhánh của nhiệm vụ trên `origin`, không chờ người dùng nhắc. Giữ nguyên các thay đổi có sẵn ngoài phạm vi nhiệm vụ; báo mã commit, nhánh và kết quả push. Nếu kiểm tra hoặc push thất bại, báo rõ nguyên nhân và phần chưa hoàn tất.
 - Giữ nguyên các quy tắc trong file này và thứ tự Filter UTF-8 khi pull, push, merge hoặc rebase.
 - Không tự ý sửa, xoá hoặc ghi đè file này để hoàn tất thao tác Git hay làm code vượt qua kiểm tra.
 - Khi có xung đột, bảo toàn các quy tắc đã chốt và báo rõ khác biệt; chỉ thay đổi quy tắc khi người dùng yêu cầu rõ ràng.

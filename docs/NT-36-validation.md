@@ -113,3 +113,15 @@ chưa kiểm tra lại XSS hoặc trực quan danh sách phòng trống UC01.
 Danh sách phòng trống UC01 đã có trên `main` và lọc phòng ACTIVE không có Contract
 ACTIVE. Không đổi Room.status sang OCCUPIED vì schema chỉ cho ACTIVE,
 MAINTENANCE, HIDDEN. Giữ kiểm tra quyền trong servlet dù đã có AuthFilter.
+
+## Gỡ xung đột PR #15 ngày 31/10/2026
+
+Gộp `main` vào NT-36: giữ `.gitignore` của NT-36 và thuộc tính session
+`fullName` từ `main`. AGENTS.md được Git gộp tự động, giữ cả quy tắc kiểm tra
+trực tiếp và quy tắc commit/push; không sửa DBContext hoặc EncodingFilter.
+
+Build Ant thành công với 35 lớp Java. Chạy ứng dụng thật tại cổng 18015:
+khách mở `/manager/requests` nhận 302 tới đăng nhập; tài khoản quản lý đăng nhập
+nhận 302 về `/home`; danh sách yêu cầu, lọc `roomId=3`, trang chủ và chi tiết
+phòng P202 trả 200. Lọc `roomId=-1` trả 400; POST token CSRF sai trả 403.
+Không duyệt/từ chối yêu cầu hoặc thay đổi dữ liệu nghiệp vụ trong lượt này.

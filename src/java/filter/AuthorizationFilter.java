@@ -32,7 +32,8 @@ public class AuthorizationFilter implements Filter {
         // ① ép kiểu sang HttpServletRequest
         HttpServletRequest httpReq = (HttpServletRequest) request;
 
-        String path = httpReq.getRequestURI().substring(httpReq.getContextPath().length());
+        // Dùng đường dẫn Tomcat đã chuẩn hóa để tham số đường dẫn không bỏ qua kiểm tra quyền.
+        String path = httpReq.getServletPath();
         HttpSession session = httpReq.getSession(false);
 
         Account account = null;
@@ -40,6 +41,15 @@ public class AuthorizationFilter implements Filter {
             account = (Account) session.getAttribute("account");
         }
     HttpServletResponse httpResp = (HttpServletResponse) response;
+
+    if (account != null || path.startsWith("/tenant/")
+            || path.startsWith("/manager/") || path.startsWith("/admin/")
+            || "/login".equals(path) || "/logout".equals(path)) {
+        // Không lưu nội dung riêng của tài khoản vào cache sau khi đăng xuất.
+        httpResp.setHeader("Cache-Control", "no-store");
+        httpResp.setHeader("Pragma", "no-cache");
+        httpResp.setDateHeader("Expires", 0);
+    }
 
     
     if (path.startsWith("/tenant/")) {
