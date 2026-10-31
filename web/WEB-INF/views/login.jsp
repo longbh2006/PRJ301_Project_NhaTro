@@ -2,10 +2,59 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Đăng nhập</title>
+    <title>Login</title>
+ <style>
+        body {
+            font-family: Arial;
+            background-color: #eeeeee;
+        }
+
+        div {
+            width: 350px;
+            margin: 100px auto;
+            padding: 25px;
+            background-color: white;
+            border: 1px solid #cccccc;
+            border-radius: 8px;
+        }
+
+        h2 {
+            text-align: center;
+            color: blue;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        td {
+            padding: 10px 5px;
+        }
+
+        input {
+            padding: 8px;
+            width: 95%;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: blue;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: darkblue;
+        }
+    </style>
 </head>
 <body>
    
@@ -16,7 +65,7 @@
             <input type="hidden" name="next" value="${fn:escapeXml(param.next)}"/>
             <table>
                 <tr>
-                    <td>UserName:</td>
+                    <td>Username:</td>
                     <td><input type="text" name="username" required/></td>
                 </tr>
                 <tr>
@@ -25,16 +74,18 @@
                 </tr>
                 <tr>
                     <td colspan="2">
-                        <button type="submit">login</button>
+                        <button type="submit">Login</button>
                     </td>
                 </tr>
+                
             </table>
+            <c:if test="${not empty error}">
+                <p style="color:red;" lang="vi"><c:out value="${error}" /></p>
+            </c:if>
         </form>
     </div>
-             <!-- 5️⃣ Khối hiển thị lỗi -->
-    <c:if test="${not empty error}">
-        <p style="color:red;"><c:out value="${error}" /></p>
-    </c:if>
+             
+   
             
             
 </body>
