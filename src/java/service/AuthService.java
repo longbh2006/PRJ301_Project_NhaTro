@@ -3,6 +3,8 @@ package service;
 import dal.AccountDAO;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
@@ -13,6 +15,8 @@ import model.RegistrationForm;
 import util.PasswordHasher;
 
 public class AuthService {
+
+    private static final Logger LOGGER = Logger.getLogger(AuthService.class.getName());
 
     public int register(RegistrationForm form, String password)
             throws RegistrationException, SQLException {
@@ -119,38 +123,36 @@ public class AuthService {
         return errors;
     }
 
-    public Account login(String username, String password) {
+    public Account login(String username, String password) throws SQLException {
         // 1. Mở DAO trong try‑with‑resources
-    try (AccountDAO dao = createAccountDAO()) {
-        // 1. Lấy tài khoản
-        Account account = dao.findByUsername(username);
-     
-        // 2. Không có tài khoản thì return null
-        if (account == null) {
-            return null;
-        }
- 
-        // 3. Sai mật khẩu thì return null
-        if (!PasswordHasher.verify(password, account.getPasswordHash())) {
-            return null;
-        }
+        try (AccountDAO dao = createAccountDAO()) {
+            // 1. Lấy tài khoản
+            Account account = dao.findByUsername(username);
 
-        // 4. Bị khoá thì return null
-        if (!account.isActive()) {
-            return null;
+            // 2. Không có tài khoản thì return null
+            if (account == null) {
+                return null;
+            }
+
+            // 3. Sai mật khẩu thì return null
+            if (!PasswordHasher.verify(password, account.getPasswordHash())) {
+                return null;
+            }
+
+            // 4. Bị khoá thì return null
+            if (!account.isActive()) {
+                return null;
+            }
+
+            // 5. Xóa hash
+            account.setPasswordHash(null);
+
+            // 6. Trả về account đã được “sạch” hash
+            return account;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Đăng nhập lỗi do CSDL", e);
+            throw e;
         }
-
-        // 5. Xóa hash
-        account.setPasswordHash(null);
-
-        // 6. Trả về account đã được “sạch” hash
-        return account;
-    } catch (SQLException e) {
-        // Xử lý lỗi cơ sở dữ liệu: trả về null hoặc ghi log
-        
-        return null;
     }
-}
-  
 
 }
