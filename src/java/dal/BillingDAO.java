@@ -7,6 +7,7 @@ package dal;
 import model.MeterReading;
 import model.Invoice;
 import model.UtilityPrice;
+import model.Contract;
 import java.util.List;
 import java.util.ArrayList;
 import java.sql.PreparedStatement;
@@ -161,7 +162,7 @@ public class BillingDAO extends DBContext {
             throw new RuntimeException("Lỗi truy vấn hoá đơn theo id", e);
         }
 
-        return null; // không tìm thấy                                                                                                                                                                                           
+        return null;                                                                                                                                                                                           
     }
 
     public UtilityPrice currentPrice() {
@@ -177,7 +178,7 @@ public class BillingDAO extends DBContext {
             throw new RuntimeException("Lỗi truy vấn giá hiện tại", e);
         }
 
-        return null; // không có bản ghi                                                                                                                                                                                         
+        return null;                                                                                                                                                                                         
     }
 
     private UtilityPrice mapUtilityPrice(ResultSet rs) throws SQLException {
@@ -192,4 +193,44 @@ public class BillingDAO extends DBContext {
         return p;
     }
 
+    public List<Contract> findActiveContracts() {
+
+      
+        List<Contract> list = new ArrayList<>();
+
+        
+        String sql
+                = "SELECT contractId, roomId, tenantId, numPeople, startElectricIndex, startWaterIndex, status "
+                + "FROM Contract "
+                + "WHERE status = 'ACTIVE'";
+
+        
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Contract c = new Contract();
+
+              
+                c.setContractId(rs.getInt("contractId"));
+                c.setRoomId(rs.getInt("roomId"));
+                c.setTenantId(rs.getInt("tenantId"));
+                c.setNumPeople(rs.getInt("numPeople"));
+                c.setStartElectricIndex(rs.getInt("startElectricIndex"));
+                c.setStartWaterIndex(rs.getInt("startWaterIndex"));
+                c.setStatus(rs.getString("status"));   
+
+              list.add(c);
+            }
+        }
+    
+    catch (SQLException e
+
+    
+        ) {
+            
+            throw new RuntimeException("Lỗi truy vấn hợp đồng ACTIVE", e);
+    }
+
+    return list ;
+}
 }
