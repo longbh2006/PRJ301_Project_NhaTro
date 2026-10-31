@@ -186,7 +186,6 @@ public class BillingDAO extends DBContext {
         p.setElectricPrice(rs.getBigDecimal("electricPrice"));
         p.setWaterPrice(rs.getBigDecimal("waterPrice"));
         p.setServiceFeePerPerson(rs.getBigDecimal("serviceFeePerPerson"));
-
         p.setEffectiveFrom(rs.getObject("effectiveFrom", LocalDate.class));
         p.setCreatedAt(rs.getObject("createdAt", LocalDateTime.class));
         return p;
