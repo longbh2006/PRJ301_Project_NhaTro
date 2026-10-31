@@ -13,6 +13,10 @@
     </filter-mapping>
     <!-- Servlet Configuration -->
     <servlet>
+        <servlet-name>ManagerRequestServlet</servlet-name>
+        <servlet-class>controller.ManagerRequestServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>LoginController</servlet-name>
         <servlet-class>controller.LoginController</servlet-class>
     </servlet>
@@ -32,11 +36,35 @@
         <servlet-name>TenantRequestController</servlet-name>
         <servlet-class>controller.TenantRequestController</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>TenantContractController</servlet-name>
+        <servlet-class>controller.TenantContractController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>TenantContractController</servlet-name>
+        <url-pattern>/tenant/contract</url-pattern>
+    </servlet-mapping>
     <!-- Servlet Mapping -->
+    <servlet>
+        <servlet-name>ManagerContractController</servlet-name>
+        <servlet-class>controller.ManagerContractController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ManagerContractController</servlet-name>
+        <url-pattern>/manager/contracts</url-pattern>
+    </servlet-mapping>
     <servlet>
         <servlet-name>AdminRoomController</servlet-name>
         <servlet-class>controller.AdminRoomController</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>AdminAccountController</servlet-name>
+        <servlet-class>controller.AdminAccountController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ManagerRequestServlet</servlet-name>
+        <url-pattern>/manager/requests</url-pattern>
+    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>LoginController</servlet-name>
         <url-pattern>/login</url-pattern>
@@ -61,6 +89,7 @@
     <servlet-mapping>
         <servlet-name>TenantRequestController</servlet-name>
         <url-pattern>/tenant/requests</url-pattern>
+        <url-pattern>/tenant/requests/cancel</url-pattern>
     </servlet-mapping>
     <!-- Error Pages Configuration -->
     <servlet-mapping>
@@ -68,6 +97,10 @@
         <url-pattern>/admin/rooms</url-pattern>
         <url-pattern>/admin/room-types</url-pattern>
         <url-pattern>/admin/prices</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminAccountController</servlet-name>
+        <url-pattern>/admin/accounts</url-pattern>
     </servlet-mapping>
     <error-page>
         <error-code>403</error-code>

@@ -54,11 +54,7 @@
                                     <fmt:formatNumber value="${room.monthlyPrice}" type="currency" currencySymbol="₫" maxFractionDigits="0"/>
                                 </td>
                                 <td>
-                                    <c:choose>
-                                        <c:when test="${room.status == 'ACTIVE'}"><span class="badge bg-success">ACTIVE</span></c:when>
-                                        <c:when test="${room.status == 'MAINTENANCE'}"><span class="badge bg-warning text-dark">MAINT</span></c:when>
-                                        <c:otherwise><span class="badge bg-secondary">HIDDEN</span></c:otherwise>
-                                    </c:choose>
+                                    <ui:statusBadge value="${room.status}" />
                                 </td>
                                 <td class="text-center">
                                     <a href="<c:url value='/admin/rooms?action=edit&id=${room.roomId}'/>" class="btn btn-sm btn-warning">Sửa</a>

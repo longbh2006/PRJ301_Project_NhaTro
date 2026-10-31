@@ -57,16 +57,16 @@
                                 <c:choose>
                                     <%-- Nếu ngày của bảng giá > hôm nay --%>
                                     <c:when test="${up.effectiveFrom > today}">
-                                        <span class="badge bg-info">Sắp áp dụng</span>
+                                        <ui:statusBadge value="SCHEDULED" />
                                     </c:when>
                                     <%-- Nếu <= hôm nay VÀ chưa tìm thấy bảng hiện tại (vì DS đang sort DESC) --%>
                                     <c:when test="${not foundCurrent}">
                                         <c:set var="foundCurrent" value="true" />
-                                        <span class="badge bg-success">Đang áp dụng</span>
+                                        <ui:statusBadge value="CURRENT" />
                                     </c:when>
                                     <%-- Các dòng còn lại --%>
                                     <c:otherwise>
-                                        <span class="badge bg-secondary">Lịch sử</span>
+                                        <ui:statusBadge value="HISTORICAL" />
                                     </c:otherwise>
                                 </c:choose>
                             </td>

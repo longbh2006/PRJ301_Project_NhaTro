@@ -316,6 +316,11 @@ body {
     .roomrent-footer { padding: 20px 16px; }
 }
 
+.text-bg-unpaid {
+    color: #212529 !important;
+    background-color: #fd7e14 !important;
+}
+
 @media print {
     body { background: #fff; }
     .roomrent-shell { margin: 0; border: 0; min-height: auto; max-width: none; }

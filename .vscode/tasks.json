@@ -1,0 +1,35 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "NhaTro: Build WAR",
+            "type": "shell",
+            "command": "C:/Program Files/NetBeans-17/netbeans/extide/ant/bin/ant.bat",
+            "args": [
+                {
+                    "value": "-Dbuild.dir=.local/vscode-build",
+                    "quoting": "strong"
+                },
+                {
+                    "value": "-Ddist.dir=.local/vscode-dist",
+                    "quoting": "strong"
+                },
+                {
+                    "value": "-Dfile.reference.mssql-jdbc-13.2.0.jre11.jar=${workspaceFolder}/build/web/WEB-INF/lib/mssql-jdbc-13.2.0.jre11.jar",
+                    "quoting": "strong"
+                },
+                "clean",
+                "dist"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "JAVA_HOME": "C:/Program Files/Eclipse Adoptium/jdk-17.0.20.101-hotspot"
+                }
+            },
+            "group": { "kind": "build", "isDefault": true },
+            "problemMatcher": [],
+            "presentation": { "reveal": "always", "panel": "dedicated" }
+        }
+    ]
+}

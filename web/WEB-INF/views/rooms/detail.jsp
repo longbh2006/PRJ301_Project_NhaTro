@@ -53,17 +53,7 @@
 
                 <dt class="col-sm-4">Trạng thái</dt>
                 <dd class="col-sm-8">
-                    <c:choose>
-                        <c:when test="${room.status eq 'ACTIVE'}">
-                            <span class="badge text-bg-success">Đang mở</span>
-                        </c:when>
-                        <c:when test="${room.status eq 'MAINTENANCE'}">
-                            <span class="badge text-bg-warning">Đang bảo trì</span>
-                        </c:when>
-                        <c:otherwise>
-                            <span class="badge text-bg-secondary"><c:out value="${room.status}" /></span>
-                        </c:otherwise>
-                    </c:choose>
+                    <ui:statusBadge value="${room.status}" />
                 </dd>
 
                 <c:if test="${not empty room.description}">
