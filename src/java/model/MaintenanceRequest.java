@@ -14,9 +14,10 @@ public class MaintenanceRequest {
     private String managerNote;
     private LocalDateTime createdAt;
     private LocalDateTime resolvedAt;
-    
+
     // Từ JOIN bảng Room
     private String roomCode;
+    private String tenantName;
 
     public MaintenanceRequest() {
     }
@@ -37,13 +38,13 @@ public class MaintenanceRequest {
         return String.format(Locale.ROOT, "SC%03d", ticketId);
     }
 
+    // SỬA LỖI 2: Format ngày tháng an toàn hơn, tránh NullPointerException
     public String getCreatedAtDisplay() {
-        return createdAt == null ? "" : createdAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        return createdAt != null ? createdAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "";
     }
 
-    // SỬA LỖI 2: Thêm getter để hiển thị ngày xử lý xong trên JSP (trả về chuỗi rỗng nếu null)
     public String getResolvedAtDisplay() {
-        return resolvedAt == null ? "" : resolvedAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        return resolvedAt != null ? resolvedAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "";
     }
 
     // Getters và Setters
@@ -117,5 +118,13 @@ public class MaintenanceRequest {
 
     public void setRoomCode(String roomCode) {
         this.roomCode = roomCode;
+    }
+
+    public String getTenantName() {
+        return tenantName;
+    }
+
+    public void setTenantName(String tenantName) {
+        this.tenantName = tenantName;
     }
 }

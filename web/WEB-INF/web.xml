@@ -96,6 +96,10 @@
         <url-pattern>/tenant/requests/cancel</url-pattern>
     </servlet-mapping>
     <!-- Error Pages Configuration -->
+    <servlet>
+        <servlet-name>ManagerIssueController</servlet-name>
+        <servlet-class>controller.ManagerIssueController</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>AdminRoomController</servlet-name>
         <url-pattern>/admin/rooms</url-pattern>
@@ -109,6 +113,10 @@
     <servlet-mapping>
         <servlet-name>TenantIssueController</servlet-name>
         <url-pattern>/tenant/issues</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManagerIssueController</servlet-name>
+        <url-pattern>/manager/issues</url-pattern>
     </servlet-mapping>
     <error-page>
         <error-code>403</error-code>

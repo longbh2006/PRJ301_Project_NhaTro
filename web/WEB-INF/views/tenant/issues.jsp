@@ -4,6 +4,7 @@
 <c:set var="activeNav" value="/tenant/issues" scope="request" />
 <%@ include file="/WEB-INF/views/common/_top.jspf" %>
 
+
 <div class="container mt-4">
     <div class="mb-4">
         <h1 class="h3 fw-bold mb-1">Báo cáo sự cố bảo trì</h1>
@@ -82,12 +83,7 @@
                                         </td>
                                         <td><c:out value="${issue.createdAtDisplay}" /></td>
                                         <td>
-                                            <c:choose>
-                                                <c:when test="${issue.status == 'OPEN'}"><span class="badge bg-warning text-dark">Chờ xử lý</span></c:when>
-                                                <c:when test="${issue.status == 'IN_PROGRESS'}"><span class="badge bg-primary">Đang sửa</span></c:when>
-                                                <c:when test="${issue.status == 'DONE'}"><span class="badge bg-success">Đã khắc phục</span></c:when>
-                                                <c:otherwise><span class="badge bg-secondary"><c:out value="${issue.status}"/></span></c:otherwise>
-                                            </c:choose>
+                                            <ui:statusBadge value="${issue.status}" />
                                         </td>
                                         <td>
                                             <c:choose>
