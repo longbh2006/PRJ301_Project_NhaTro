@@ -58,7 +58,7 @@
                         <rr:navLink path="/tenant/requests" label="Yêu cầu thuê" />
                         <rr:navLink path="/tenant/contract" label="Hợp đồng" />
                         <rr:navLink path="/tenant/invoices" label="Hóa đơn" />
-                        <rr:navLink path="/tenant/incidents" label="Báo sự cố" />
+                        <rr:navLink path="/tenant/issues" label="Báo sự cố" />
                     </c:when>
                     <c:when test="${layoutRole eq 'MANAGER'}">
                         <rr:navLink path="/manager/requests" label="Duyệt yêu cầu" />
