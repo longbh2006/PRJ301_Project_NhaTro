@@ -42,6 +42,14 @@
     </servlet-mapping>
     <!-- Servlet Mapping -->
     <servlet>
+        <servlet-name>ManagerContractController</servlet-name>
+        <servlet-class>controller.ManagerContractController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ManagerContractController</servlet-name>
+        <url-pattern>/manager/contracts</url-pattern>
+    </servlet-mapping>
+    <servlet>
         <servlet-name>AdminRoomController</servlet-name>
         <servlet-class>controller.AdminRoomController</servlet-class>
     </servlet>

@@ -56,5 +56,16 @@
     <c:when test="${status eq 'HIDDEN'}">
         <c:set var="badgeLabel" value="Đã ẩn" />
     </c:when>
+    <c:when test="${status eq 'SCHEDULED'}">
+        <c:set var="badgeColor" value="info" />
+        <c:set var="badgeLabel" value="Sắp áp dụng" />
+    </c:when>
+    <c:when test="${status eq 'CURRENT'}">
+        <c:set var="badgeColor" value="success" />
+        <c:set var="badgeLabel" value="Đang áp dụng" />
+    </c:when>
+    <c:when test="${status eq 'HISTORICAL'}">
+        <c:set var="badgeLabel" value="Lịch sử" />
+    </c:when>
 </c:choose>
 <span class="badge text-bg-${badgeColor}"><c:out value="${badgeLabel}" /></span>
