@@ -14,6 +14,47 @@ body {
     font-family: "Segoe UI", Arial, sans-serif;
 }
 
+.roomrent-content {
+    overflow-wrap: anywhere;
+}
+
+.roomrent-content img {
+    max-width: 100%;
+    height: auto;
+}
+
+.roomrent-content .row > *,
+.roomrent-content .form-control,
+.roomrent-content .form-select,
+.roomrent-header > * {
+    min-width: 0;
+}
+
+.table-responsive {
+    max-width: 100%;
+    min-width: 0;
+    overflow-wrap: normal;
+}
+
+.table-responsive:focus-visible {
+    outline: 3px solid var(--rr-blue);
+    outline-offset: 3px;
+}
+
+.roomrent-shell-public .roomrent-layout {
+    display: block;
+}
+
+.roomrent-shell-public .roomrent-content {
+    padding: 0;
+}
+
+.roomrent-login {
+    width: 100%;
+    max-width: 420px;
+    margin: 40px auto;
+}
+
 [hidden] {
     display: none !important;
 }
@@ -256,18 +297,23 @@ body {
 
 @media (max-width: 991.98px) {
     .roomrent-shell { margin: 16px; }
-    .roomrent-layout { grid-template-columns: 190px minmax(0, 1fr); gap: 20px; }
+    .roomrent-header { padding: 16px 20px; }
+    .roomrent-header .navbar-collapse { flex-basis: 100%; }
+    .roomrent-layout { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .roomrent-sidebar { min-height: auto; padding: 12px; }
+    .roomrent-nav-label { margin: 4px 12px 12px; }
+    .roomrent-sidebar .nav-link { padding: 10px 12px; }
+    .roomrent-content { padding: 0; }
 }
 
 @media (max-width: 767.98px) {
     .roomrent-shell { margin: 0; min-height: 100vh; border: 0; border-radius: 0; }
-    .roomrent-header { padding: 16px 20px; }
-    .roomrent-layout { grid-template-columns: minmax(0, 1fr); gap: 24px; }
-    .roomrent-sidebar { min-height: auto; padding: 12px; }
-    .roomrent-nav-label { margin: 4px 12px 12px; }
-    .roomrent-sidebar .nav { flex-direction: row !important; flex-wrap: wrap; }
-    .roomrent-sidebar .nav-link { padding: 10px 12px; }
-    .roomrent-content { padding: 0; }
+    .roomrent-content .card-body.p-4,
+    .roomrent-content .card.p-4 { padding: 16px !important; }
+    .roomrent-content .form-control,
+    .roomrent-content .form-select { font-size: 16px; }
+    .roomrent-login { margin: 16px auto; }
+    .roomrent-footer { padding: 20px 16px; }
 }
 
 @media print {

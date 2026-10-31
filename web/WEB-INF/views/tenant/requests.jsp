@@ -23,7 +23,7 @@
     <button class="btn btn-primary" type="submit">Lọc</button>
 </form>
 
-<div class="rental-table-wrap"><table class="table roomrent-table rental-requests-table mb-0">
+<div class="rental-table-wrap table-responsive" role="region" aria-label="Yêu cầu thuê của tôi" tabindex="0"><table class="table roomrent-table rental-requests-table mb-0">
     <thead><tr><th scope="col">Mã yêu cầu</th><th scope="col">Phòng</th><th scope="col">Ngày gửi</th><th scope="col">Trạng thái</th><th scope="col">Thao tác</th></tr></thead>
     <tbody>
     <c:forEach var="rentalRequest" items="${rentalRequests}"><tr>

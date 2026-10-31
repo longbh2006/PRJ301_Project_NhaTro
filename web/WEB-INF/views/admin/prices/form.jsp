@@ -48,7 +48,7 @@
             </div>
         </div>
 
-        <div class="d-flex gap-2">
+        <div class="d-flex flex-wrap gap-2">
             <button type="submit" class="btn btn-primary">Xác nhận tạo bảng giá</button>
             <a href="<c:url value='/admin/prices' />" class="btn btn-outline-secondary">Hủy</a>
         </div>

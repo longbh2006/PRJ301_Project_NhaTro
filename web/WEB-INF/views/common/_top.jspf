@@ -27,8 +27,15 @@
 <body>
 <a class="visually-hidden-focusable skip-link" href="#main-content">Đến nội dung chính</a>
 <div class="roomrent-shell ${requestScope.layoutVariant eq 'public' ? 'roomrent-shell-public' : ''}">
-    <header class="roomrent-header d-flex flex-wrap align-items-center justify-content-between gap-3 d-print-none">
+    <header class="roomrent-header navbar navbar-expand-lg d-flex flex-wrap align-items-center justify-content-between gap-3 d-print-none">
         <a class="roomrent-brand text-decoration-none" href="<c:url value='/' />">ROOMRENT</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target=".roomrent-mobile-menu"
+                aria-controls="header-actions${requestScope.layoutVariant ne 'public' ? ' main-navigation' : ''}"
+                aria-expanded="false" aria-label="Mở hoặc đóng menu điều hướng">
+            <span class="navbar-toggler-icon" aria-hidden="true"></span>
+        </button>
+        <div id="header-actions" class="collapse navbar-collapse roomrent-mobile-menu flex-grow-0">
         <div class="d-flex flex-wrap align-items-center gap-3">
             <c:if test="${requestScope.layoutVariant eq 'public'}">
                 <a class="btn btn-outline-secondary btn-sm" href="<c:url value='/rooms' />">Phòng trống</a>
@@ -46,10 +53,11 @@
                 </c:otherwise>
             </c:choose>
         </div>
+        </div>
     </header>
     <div class="roomrent-layout">
         <c:if test="${requestScope.layoutVariant ne 'public'}">
-        <aside class="roomrent-sidebar d-print-none">
+        <aside id="main-navigation" class="roomrent-sidebar collapse roomrent-mobile-menu d-lg-block d-print-none">
             <p class="roomrent-nav-label">Điều hướng</p>
             <nav class="nav nav-pills flex-column gap-2" aria-label="Điều hướng chính">
                 <c:choose>

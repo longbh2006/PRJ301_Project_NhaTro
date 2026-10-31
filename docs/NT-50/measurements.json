@@ -1,0 +1,344 @@
+[
+  {
+    "name": "admin-rooms",
+    "path": "/admin/rooms",
+    "file": "admin-rooms-mobile.jpg",
+    "client": 360,
+    "heading": "Danh sách Phòng",
+    "scroll": 360,
+    "viewport": 375
+  },
+  {
+    "name": "admin-room-create",
+    "path": "/admin/rooms?action=create",
+    "file": "admin-room-create-mobile.jpg",
+    "client": 360,
+    "heading": "Thêm Phòng mới",
+    "scroll": 360,
+    "viewport": 375
+  },
+  {
+    "name": "admin-room-edit",
+    "path": "/admin/rooms?action=edit&id=1",
+    "file": "admin-room-edit-mobile.jpg",
+    "client": 360,
+    "heading": "Cập nhật Phòng",
+    "scroll": 360,
+    "viewport": 375
+  },
+  {
+    "name": "admin-room-types",
+    "path": "/admin/room-types",
+    "file": "admin-room-types-mobile.jpg",
+    "client": 360,
+    "heading": "Danh sách Loại phòng",
+    "scroll": 360,
+    "viewport": 375
+  },
+  {
+    "name": "admin-room-type-create",
+    "path": "/admin/room-types?action=create",
+    "file": "admin-room-type-create-mobile.jpg",
+    "client": 375,
+    "heading": "Thêm Loại phòng mới",
+    "scroll": 375,
+    "viewport": 375
+  },
+  {
+    "name": "admin-room-type-edit",
+    "path": "/admin/room-types?action=edit&id=1",
+    "file": "admin-room-type-edit-mobile.jpg",
+    "client": 375,
+    "heading": "Cập nhật Loại phòng",
+    "scroll": 375,
+    "viewport": 375
+  },
+  {
+    "name": "admin-prices",
+    "path": "/admin/prices",
+    "file": "admin-prices-mobile.jpg",
+    "client": 375,
+    "heading": "Lịch sử Bảng giá điện nước",
+    "scroll": 375,
+    "viewport": 375
+  },
+  {
+    "name": "admin-price-create",
+    "path": "/admin/prices?action=create",
+    "file": "admin-price-create-mobile.jpg",
+    "client": 360,
+    "heading": "Tạo Bảng Giá Điện Nước Mới",
+    "scroll": 360,
+    "viewport": 375
+  },
+  {
+    "name": "admin-rooms",
+    "path": "/admin/rooms",
+    "file": "admin-rooms-desktop.jpg",
+    "client": 1351,
+    "heading": "Danh sách Phòng",
+    "scroll": 1351,
+    "viewport": 1366
+  },
+  {
+    "name": "admin-room-create",
+    "path": "/admin/rooms?action=create",
+    "file": "admin-room-create-desktop.jpg",
+    "client": 1351,
+    "heading": "Thêm Phòng mới",
+    "scroll": 1351,
+    "viewport": 1366
+  },
+  {
+    "name": "admin-room-edit",
+    "path": "/admin/rooms?action=edit&id=1",
+    "file": "admin-room-edit-desktop.jpg",
+    "client": 1351,
+    "heading": "Cập nhật Phòng",
+    "scroll": 1351,
+    "viewport": 1366
+  },
+  {
+    "name": "admin-room-types",
+    "path": "/admin/room-types",
+    "file": "admin-room-types-desktop.jpg",
+    "client": 1366,
+    "heading": "Danh sách Loại phòng",
+    "scroll": 1366,
+    "viewport": 1366
+  },
+  {
+    "name": "admin-room-type-create",
+    "path": "/admin/room-types?action=create",
+    "file": "admin-room-type-create-desktop.jpg",
+    "client": 1366,
+    "heading": "Thêm Loại phòng mới",
+    "scroll": 1366,
+    "viewport": 1366
+  },
+  {
+    "name": "admin-room-type-edit",
+    "path": "/admin/room-types?action=edit&id=1",
+    "file": "admin-room-type-edit-desktop.jpg",
+    "client": 1366,
+    "heading": "Cập nhật Loại phòng",
+    "scroll": 1366,
+    "viewport": 1366
+  },
+  {
+    "name": "admin-prices",
+    "path": "/admin/prices",
+    "file": "admin-prices-desktop.jpg",
+    "client": 1366,
+    "heading": "Lịch sử Bảng giá điện nước",
+    "scroll": 1366,
+    "viewport": 1366
+  },
+  {
+    "name": "admin-price-create",
+    "path": "/admin/prices?action=create",
+    "file": "admin-price-create-desktop.jpg",
+    "client": 1366,
+    "heading": "Tạo Bảng Giá Điện Nước Mới",
+    "scroll": 1366,
+    "viewport": 1366
+  },
+  {
+    "name": "home",
+    "path": "/home",
+    "file": "home-mobile.jpg",
+    "client": 360,
+    "heading": "Phòng trống nổi bật",
+    "scroll": 360,
+    "viewport": 375
+  },
+  {
+    "name": "rooms",
+    "path": "/rooms",
+    "file": "rooms-mobile.jpg",
+    "client": 360,
+    "heading": "Phòng trống",
+    "scroll": 360,
+    "viewport": 375
+  },
+  {
+    "name": "room-detail",
+    "path": "/rooms/detail?id=P202",
+    "file": "room-detail-mobile.jpg",
+    "client": 360,
+    "heading": "Phòng P202",
+    "scroll": 360,
+    "viewport": 375
+  },
+  {
+    "name": "login",
+    "path": "/login",
+    "file": "login-mobile.jpg",
+    "client": 375,
+    "heading": "Login",
+    "scroll": 375,
+    "viewport": 375
+  },
+  {
+    "name": "register",
+    "path": "/register",
+    "file": "register-mobile.jpg",
+    "client": 360,
+    "heading": "Tạo tài khoản người thuê",
+    "scroll": 360,
+    "viewport": 375
+  },
+  {
+    "name": "not-found",
+    "path": "/missing-nt50",
+    "file": "not-found-mobile.jpg",
+    "client": 375,
+    "heading": "Không tìm thấy trang",
+    "scroll": 375,
+    "viewport": 375
+  },
+  {
+    "name": "home",
+    "path": "/home",
+    "file": "home-desktop.jpg",
+    "client": 1366,
+    "heading": "Phòng trống nổi bật",
+    "scroll": 1366,
+    "viewport": 1366
+  },
+  {
+    "name": "rooms",
+    "path": "/rooms",
+    "file": "rooms-desktop.jpg",
+    "client": 1351,
+    "heading": "Phòng trống",
+    "scroll": 1351,
+    "viewport": 1366
+  },
+  {
+    "name": "room-detail",
+    "path": "/rooms/detail?id=P202",
+    "file": "room-detail-desktop.jpg",
+    "client": 1366,
+    "heading": "Phòng P202",
+    "scroll": 1366,
+    "viewport": 1366
+  },
+  {
+    "name": "login",
+    "path": "/login",
+    "file": "login-desktop.jpg",
+    "client": 1366,
+    "heading": "Login",
+    "scroll": 1366,
+    "viewport": 1366
+  },
+  {
+    "name": "register",
+    "path": "/register",
+    "file": "register-desktop.jpg",
+    "client": 1351,
+    "heading": "Tạo tài khoản người thuê",
+    "scroll": 1351,
+    "viewport": 1366
+  },
+  {
+    "name": "not-found",
+    "path": "/missing-nt50",
+    "file": "not-found-desktop.jpg",
+    "client": 1366,
+    "heading": "Không tìm thấy trang",
+    "scroll": 1366,
+    "viewport": 1366
+  },
+  {
+    "name": "tenant-requests",
+    "path": "/tenant/requests",
+    "file": "tenant-requests-mobile.jpg",
+    "client": 360,
+    "heading": "Yêu cầu thuê của tôi",
+    "scroll": 360,
+    "viewport": 375
+  },
+  {
+    "name": "tenant-request-detail",
+    "path": "/tenant/requests?requestId=2&status=&q=#request-detail",
+    "file": "tenant-request-detail-mobile.jpg",
+    "client": 360,
+    "heading": "Yêu cầu thuê của tôi",
+    "scroll": 360,
+    "viewport": 375
+  },
+  {
+    "name": "forbidden",
+    "path": "/admin/rooms",
+    "file": "forbidden-mobile.jpg",
+    "client": 375,
+    "heading": "Không có quyền truy cập",
+    "scroll": 375,
+    "viewport": 375
+  },
+  {
+    "name": "tenant-requests",
+    "path": "/tenant/requests",
+    "file": "tenant-requests-desktop.jpg",
+    "client": 1366,
+    "heading": "Yêu cầu thuê của tôi",
+    "scroll": 1366,
+    "viewport": 1366
+  },
+  {
+    "name": "tenant-request-detail",
+    "path": "/tenant/requests?requestId=2&status=&q=#request-detail",
+    "file": "tenant-request-detail-desktop.jpg",
+    "client": 1366,
+    "heading": "Yêu cầu thuê của tôi",
+    "scroll": 1366,
+    "viewport": 1366
+  },
+  {
+    "name": "forbidden",
+    "path": "/admin/rooms",
+    "file": "forbidden-desktop.jpg",
+    "client": 1366,
+    "heading": "Không có quyền truy cập",
+    "scroll": 1366,
+    "viewport": 1366
+  },
+  {
+    "name": "rental-form",
+    "path": "/rooms/detail?id=P202 (expanded)",
+    "file": "rental-form-mobile.jpg",
+    "client": 360,
+    "heading": "Phòng P202",
+    "scroll": 360,
+    "viewport": 375
+  },
+  {
+    "name": "rental-form",
+    "path": "/rooms/detail?id=P202 (expanded)",
+    "file": "rental-form-desktop.jpg",
+    "client": 1351,
+    "heading": "Phòng P202",
+    "scroll": 1351,
+    "viewport": 1366
+  },
+  {
+    "name": "tenant-requests-empty",
+    "path": "/tenant/requests?status=PENDING&q=",
+    "file": "tenant-requests-empty-mobile.jpg",
+    "client": 375,
+    "heading": "Yêu cầu thuê của tôi",
+    "scroll": 375,
+    "viewport": 375
+  },
+  {
+    "name": "tenant-requests-empty",
+    "path": "/tenant/requests?status=PENDING&q=",
+    "file": "tenant-requests-empty-desktop.jpg",
+    "client": 1366,
+    "heading": "Yêu cầu thuê của tôi",
+    "scroll": 1366,
+    "viewport": 1366
+  }
+]

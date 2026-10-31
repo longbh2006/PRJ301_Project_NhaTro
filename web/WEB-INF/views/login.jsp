@@ -1,92 +1,33 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Login</title>
- <style>
-        body {
-            font-family: Arial;
-            background-color: #eeeeee;
-        }
+<%@ page pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/views/common/_taglibs.jspf" %>
+<c:set var="pageTitle" value="Login | RoomRent" scope="request" />
+<c:set var="layoutVariant" value="public" scope="request" />
+<%@ include file="/WEB-INF/views/common/_top.jspf" %>
 
-        div {
-            width: 350px;
-            margin: 100px auto;
-            padding: 25px;
-            background-color: white;
-            border: 1px solid #cccccc;
-            border-radius: 8px;
-        }
-
-        h2 {
-            text-align: center;
-            color: blue;
-        }
-
-        table {
-            width: 100%;
-        }
-
-        td {
-            padding: 10px 5px;
-        }
-
-        input {
-            padding: 8px;
-            width: 95%;
-            border: 1px solid #cccccc;
-            border-radius: 4px;
-        }
-
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: blue;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: darkblue;
-        }
-    </style>
-</head>
-<body>
-   
-
-    <div>
-        <h2>Login</h2>
+<section class="roomrent-login card roomrent-card" aria-labelledby="login-title">
+    <div class="card-body p-4">
+        <h1 id="login-title" class="h3 fw-bold text-center mb-4">Login</h1>
         <form action="<c:url value='/login' />" method="post">
-            <input type="hidden" name="next" value="${fn:escapeXml(param.next)}"/>
-            <table>
-                <tr>
-                    <td>Username:</td>
-                    <td><input type="text" name="username" required/></td>
-                </tr>
-                <tr>
-                    <td>Password:</td>
-                    <td><input type="password" name="password" required/></td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <button type="submit">Login</button>
-                    </td>
-                </tr>
-                
-            </table>
-            <c:if test="${not empty error}">
-                <p style="color:red;" lang="vi"><c:out value="${error}" /></p>
-            </c:if>
+            <input type="hidden" name="next" value="${fn:escapeXml(param.next)}">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="form-label" for="login-username">Username:</label>
+                    <input class="form-control" id="login-username" type="text" name="username"
+                           autocomplete="username" required>
+                </div>
+                <div class="col-12">
+                    <label class="form-label" for="login-password">Password:</label>
+                    <input class="form-control" id="login-password" type="password" name="password"
+                           autocomplete="current-password" required>
+                </div>
+                <c:if test="${not empty error}">
+                    <div class="col-12"><p class="alert alert-danger mb-0" role="alert"><c:out value="${error}" /></p></div>
+                </c:if>
+                <div class="col-12"><button class="btn btn-primary w-100" type="submit">Login</button></div>
+            </div>
         </form>
+        <p class="small text-center mt-3 mb-0">Chưa có tài khoản? <a href="<c:url value='/register' />">Đăng ký</a></p>
     </div>
-             
-   
-            
-            
-</body>
-</html>
+</section>
+
+<%@ include file="/WEB-INF/views/common/_bottom.jspf" %>

@@ -1,8 +1,8 @@
 :root { color-scheme: light; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #172d29; background: #f4f7f5; }
 * { box-sizing: border-box; }
-body { margin: 0; }
+body { margin: 0; overflow-wrap: anywhere; }
 a { color: #146b53; text-underline-offset: 3px; }
-.site-header { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px max(24px, calc((100vw - 1100px) / 2)); background: white; border-bottom: 1px solid #dde7e1; }
+.site-header { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding: 20px max(24px, calc((100vw - 1100px) / 2)); background: white; border-bottom: 1px solid #dde7e1; }
 .brand { text-decoration: none; font-size: 21px; font-weight: 750; color: #172d29; }
 .brand span { color: #28745d; }
 .registration { max-width: 800px; margin: 48px auto; padding: 0 24px; }

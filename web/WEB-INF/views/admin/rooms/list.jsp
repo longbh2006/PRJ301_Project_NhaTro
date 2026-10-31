@@ -5,7 +5,7 @@
 <%@ include file="/WEB-INF/views/common/_top.jspf" %>
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
         <h1 class="h3 fw-bold">Danh sách Phòng</h1>
         <a href="<c:url value='/admin/rooms?action=create'/>" class="btn btn-primary">Thêm phòng mới</a>
     </div>
@@ -20,7 +20,7 @@
         <div class="alert alert-success">Xóa phòng thành công!</div>
     </c:if>
 
-    <div class="table-responsive">
+    <div class="table-responsive" role="region" aria-label="Danh sách phòng" tabindex="0">
         <table class="table table-bordered table-striped align-middle">
             <thead class="table-dark">
                 <tr>

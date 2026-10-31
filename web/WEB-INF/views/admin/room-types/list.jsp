@@ -5,7 +5,7 @@
 <%@ include file="/WEB-INF/views/common/_top.jspf" %>
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
         <h1 class="h3 fw-bold">Danh sách Loại phòng</h1>
         <a href="<c:url value='/admin/room-types?action=create'/>" class="btn btn-primary">Thêm loại phòng</a>
     </div>
@@ -20,6 +20,7 @@
         <div class="alert alert-success">Xóa dữ liệu thành công!</div>
     </c:if>
 
+    <div class="table-responsive" role="region" aria-label="Danh sách loại phòng" tabindex="0">
     <table class="table table-bordered table-striped">
         <thead class="table-dark">
             <tr>
@@ -54,6 +55,7 @@
             </c:choose>
         </tbody>
     </table>
+    </div>
 </div>
 
 <%@ include file="/WEB-INF/views/common/_bottom.jspf" %>

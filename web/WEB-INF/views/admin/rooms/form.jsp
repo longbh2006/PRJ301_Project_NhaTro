@@ -80,7 +80,7 @@
             <textarea class="form-control" id="description" name="description" rows="3"><c:out value='${room.description}' /></textarea>
         </div>
 
-        <div class="d-flex gap-2">
+        <div class="d-flex flex-wrap gap-2">
             <button type="submit" class="btn btn-primary">Lưu lại</button>
             <a href="<c:url value='/admin/rooms' />" class="btn btn-outline-secondary">Hủy</a>
         </div>
