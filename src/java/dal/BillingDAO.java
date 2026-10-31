@@ -11,6 +11,7 @@ import model.Contract;
 import java.util.List;
 import java.util.ArrayList;
 import java.sql.PreparedStatement;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -92,6 +93,20 @@ public class BillingDAO extends DBContext {
             return ps.executeUpdate();
         }
     }
+    
+    public int insertReading(Connection con, MeterReading reading) throws SQLException {
+    String sql = "INSERT INTO MeterReading (roomId, [year], [month], electricIndex, waterIndex) " +
+                 "VALUES (?, ?, ?, ?, ?)";
+    // Sử dụng con được truyền vào, không đóng con ở đây
+    try (PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setInt(1, reading.getRoomId());
+        ps.setInt(2, reading.getYear());
+        ps.setInt(3, reading.getMonth());
+        ps.setInt(4, reading.getElectricIndex());
+        ps.setInt(5, reading.getWaterIndex());
+        return ps.executeUpdate();
+    }
+}
 
     public int insertInvoice(Invoice invoice) throws SQLException {
         String sql = "INSERT INTO Invoice "

@@ -20,14 +20,26 @@
 <body>
 
 <h2>Danh sách hợp đồng ACTIVE</h2>
-
+  <c:if test="${not empty loi}">
+       <ul>
+           <c:forEach items="${loi}" var="e">
+               <li><c:out value="${e}"/></li>
+           </c:forEach>
+       </ul>
+   </c:if>
+<form method="post" action="${pageContext.request.contextPath}/manager/meters">
+        <input type="hidden" name="year" value="${year}">
+     <input type="hidden" name="month" value="${month}">
 <table>
+    
     <thead>
         <tr>
             <th>Mã hợp đồng</th>
             <th>Mã phòng</th>
             <th>Chỉ số điện cũ</th>
+            <th>Chỉ số điện mới</th>
             <th>Chỉ số nước cũ</th>
+            <th>Chỉ số nước mới</th>
         </tr>
     </thead>
     <tbody>
@@ -36,12 +48,21 @@
             <tr>
                 <td>${ct.contractId}</td>
                 <td>${ct.roomId}</td>
-                 <td>${oldElectric[ct.contractId]}</td>
-                 <td>${oldWater[ct.contractId]}</td>
+
+                <td>${oldElectric[ct.contractId]}</td>
+                <td>
+                    <input type="number" name="electric_${ct.contractId}" min="0" required>
+                </td>   
+                <td>${oldWater[ct.contractId]}</td>
+                <td>
+                    <input type="number" name="water_${ct.contractId}" min="0" required>
+                </td>
+
             </tr>
         </c:forEach>
     </tbody>
 </table>
-
+    <button type="submit">Lưu chỉ số</button>
+</form>
 </body>
 </html>

@@ -15,9 +15,11 @@ import java.util.List;
 import model.Contract;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Map;
 import model.MeterReading;
 import java.sql.SQLException;
+import service.MeterService;
 
 /**
  *
@@ -50,17 +52,10 @@ public class MeterController extends HttpServlet {
         List<Contract> contracts = new BillingDAO().findActiveContracts();
         Map<Integer, Integer> oldElectric = new HashMap<>();
         Map<Integer, Integer> oldWater = new HashMap<>();
-        BillingDAO dao = new BillingDAO();   // 1. Khởi tạo một lần duy nhất
+        Map<Integer, MeterReading> prevMap = docChiSoKyTruoc(contracts, year, month);
 
         for (Contract ct : contracts) {
-            // 2. Lấy chỉ số điện kỳ trước
-            MeterReading prev = null;
-
-            try {
-                prev = dao.findReadingBefore(ct.getRoomId(), year, month);
-            } catch (SQLException e) {
-                throw new ServletException("Lỗi đọc chỉ số", e);
-            }
+            MeterReading prev = prevMap.get(ct.getContractId());   // <‑‑ lấy từ map
 
             // 3. Ghi vào map
             if (prev != null) {
@@ -68,8 +63,6 @@ public class MeterController extends HttpServlet {
             } else {
                 oldElectric.put(ct.getContractId(), ct.getStartElectricIndex());
             }
-
-            
 
             // 2. Lưu chỉ số nước (đừng gọi findReadingBefore lại!)
             if (prev != null) {
@@ -86,8 +79,24 @@ public class MeterController extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/manager/meters.jsp")
                 .forward(request, response);
 
+    }
 
+    private Map<Integer, MeterReading> docChiSoKyTruoc(
+            List<Contract> contracts, int year, int month) throws ServletException {
 
+        Map<Integer, MeterReading> map = new HashMap<>();
+        BillingDAO dao = new BillingDAO();          // 1. Khởi tạo DAO duy nhất
+
+        for (Contract ct : contracts) {
+            try {
+                MeterReading prev = dao.findReadingBefore(ct.getRoomId(), year, month);
+                map.put(ct.getContractId(), prev);   // null nếu chưa có
+            } catch (SQLException e) {
+                // 2. Bọc SQLException thành ServletException
+                throw new ServletException("Lỗi đọc chỉ số kỳ trước", e);
+            }
+        }
+        return map;
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -116,7 +125,127 @@ public class MeterController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        int year, month;
+        try {
+            year = Integer.parseInt(request.getParameter("year"));
+            month = Integer.parseInt(request.getParameter("month"));
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
+        if (month < 1 || month > 12) {
+
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+        List<Contract> contracts = new BillingDAO().findActiveContracts();
+        List<String> loi = new ArrayList<>();
+
+        // 1. Lấy giá trị chỉ số cũ (nếu có) – không cần thay đổi chữ ký do hàm đã throws ServletException
+        Map<Integer, MeterReading> prevMap = docChiSoKyTruoc(contracts, year, month);
+
+        for (Contract ct : contracts) {
+
+            // 3. Đọc đọc chỉ số cũ (nếu có)
+            MeterReading prev = prevMap.get(ct.getContractId());
+
+            // 4. Tính giá trị “cũ” – điện
+            int oldE;
+            if (prev != null) {
+                oldE = prev.getElectricIndex();          // giá trị ở kỳ trước
+            } else {
+                oldE = ct.getStartElectricIndex();       // giá trị bắt đầu hợp đồng
+            }
+
+            // 5. Tính giá trị “cũ” – nước
+            int oldW;
+            if (prev != null) {
+                oldW = prev.getWaterIndex();            // giá trị ở kỳ trước
+            } else {
+                oldW = ct.getStartWaterIndex();         // giá trị bắt đầu hợp đồng
+            }
+
+            // ---------- Điện ----------
+            String keyElec = "electric_" + ct.getContractId();
+            String valElec = request.getParameter(keyElec);
+            if (valElec == null || valElec.trim().isEmpty()) {
+                loi.add("Phòng " + ct.getRoomId() + ": thiếu chỉ số điện");
+            } else {
+                try {
+                    int newE = Integer.parseInt(valElec.trim());
+                    if (newE < oldE) {
+                        loi.add("Phòng " + ct.getRoomId() + ": chỉ số điện mới nhỏ hơn cũ");
+                    }
+                } catch (NumberFormatException e) {
+                    loi.add("Phòng " + ct.getRoomId() + ": chỉ số điện không phải số");
+                }
+            }
+
+            // ---------- Nước ----------
+            String keyWater = "water_" + ct.getContractId();
+            String valWater = request.getParameter(keyWater);
+            if (valWater == null || valWater.trim().isEmpty()) {
+                loi.add("Phòng " + ct.getRoomId() + ": thiếu chỉ số nước");
+            } else {
+                try {
+                    int newW = Integer.parseInt(valWater.trim());
+                    if (newW < oldW) {
+                        loi.add("Phòng " + ct.getRoomId() + ": chỉ số nước mới nhỏ hơn cũ");
+                    }
+                } catch (NumberFormatException e) {
+                    loi.add("Phòng " + ct.getRoomId() + ": chỉ số nước không phải số");
+                }
+            }
+
+        }
+
+        if (!loi.isEmpty()) {
+            request.setAttribute("loi", loi);
+            processRequest(request, response);
+            return;
+        }
+        List<MeterReading> ds = new ArrayList<>();
+
+        for (Contract ct : contracts) {
+            // 2. Đọc giá trị nhập từ form
+            String valElec = request.getParameter("electric_" + ct.getContractId());
+            String valWater = request.getParameter("water_" + ct.getContractId());
+
+            // 3. Parse thành số nguyên (đã được kiểm tra lỗi ở vòng lặp trước)
+            int eIndex = Integer.parseInt(valElec.trim());
+            int wIndex = Integer.parseInt(valWater.trim());
+
+            // 4. Tạo MeterReading, điền dữ liệu
+            MeterReading mr = new MeterReading();
+            mr.setRoomId(ct.getRoomId());
+            mr.setYear(year);          // năm đang xử lý
+            mr.setMonth(month);        // tháng đang xử lý
+            mr.setElectricIndex(eIndex);
+            mr.setWaterIndex(wIndex);
+
+            // 5. Thêm vào danh sách
+            ds.add(mr);
+        }
+
+// 6. Gọi service lưu, xử lý lỗi
+        try {
+            new MeterService().luuChiSo(ds);
+        } catch (SQLException e) {
+            
+            if (e.getErrorCode() == 2627) {
+                // 2. Thêm thông báo lỗi, trả về trang nhập lại
+                loi.add("Tháng này đã có chỉ số, không lưu lại");
+                request.setAttribute("loi", loi);
+                processRequest(request, response);   // hiển thị lại form + lỗi
+                return;                              // thoát khỏi doPost/doGet
+            }
+            throw new ServletException("Lỗi lưu chỉ số", e);
+        }
+
+        String redirect = request.getContextPath()
+                + "/manager/meters?year=" + year + "&month=" + month;
+        response.sendRedirect(redirect);
     }
 
     /**
