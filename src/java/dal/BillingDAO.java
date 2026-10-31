@@ -82,6 +82,38 @@ public class BillingDAO extends DBContext {
         return null;   // không tìm thấy ghi trước kỳ
     }
 
+    public MeterReading findReading(int roomId, int year, int month) throws SQLException {
+        // 3. SQL: lấy ghi có kỳ trước (year, month) đang chọn
+        String sql
+                = "SELECT TOP (1) * "
+                + "FROM MeterReading "
+                + "WHERE roomId = ? "
+                + "  AND [year] = ? AND [month] = ? "
+                + "ORDER BY [year] DESC, [month] DESC";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            // 4. Đặt tham số đúng thứ tự: roomId, year, year, month
+            ps.setInt(1, roomId);
+            ps.setInt(2, year);
+            ps.setInt(3, month);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    MeterReading m = new MeterReading();
+                    m.setReadingId(rs.getInt("readingId"));
+                    m.setRoomId(rs.getInt("roomId"));
+                    m.setYear(rs.getInt("year"));
+                    m.setMonth(rs.getInt("month"));
+                    m.setElectricIndex(rs.getInt("electricIndex"));
+                    m.setWaterIndex(rs.getInt("waterIndex"));
+                    m.setRecordedAt(rs.getObject("recordedAt", LocalDateTime.class));
+                    return m;
+                }
+            }
+        }
+        return null;   // không tìm thấy ghi trước kỳ
+    }
+
     public int insertReading(MeterReading reading) throws SQLException {
         String sql = "INSERT INTO MeterReading (roomId, [year], [month], electricIndex, waterIndex) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -93,20 +125,20 @@ public class BillingDAO extends DBContext {
             return ps.executeUpdate();
         }
     }
-    
+
     public int insertReading(Connection con, MeterReading reading) throws SQLException {
-    String sql = "INSERT INTO MeterReading (roomId, [year], [month], electricIndex, waterIndex) " +
-                 "VALUES (?, ?, ?, ?, ?)";
-    // Sử dụng con được truyền vào, không đóng con ở đây
-    try (PreparedStatement ps = con.prepareStatement(sql)) {
-        ps.setInt(1, reading.getRoomId());
-        ps.setInt(2, reading.getYear());
-        ps.setInt(3, reading.getMonth());
-        ps.setInt(4, reading.getElectricIndex());
-        ps.setInt(5, reading.getWaterIndex());
-        return ps.executeUpdate();
+        String sql = "INSERT INTO MeterReading (roomId, [year], [month], electricIndex, waterIndex) "
+                + "VALUES (?, ?, ?, ?, ?)";
+        // Sử dụng con được truyền vào, không đóng con ở đây
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, reading.getRoomId());
+            ps.setInt(2, reading.getYear());
+            ps.setInt(3, reading.getMonth());
+            ps.setInt(4, reading.getElectricIndex());
+            ps.setInt(5, reading.getWaterIndex());
+            return ps.executeUpdate();
+        }
     }
-}
 
     public int insertInvoice(Invoice invoice) throws SQLException {
         String sql = "INSERT INTO Invoice "
@@ -116,6 +148,35 @@ public class BillingDAO extends DBContext {
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, invoice.getContractId());
+            ps.setInt(2, invoice.getPriceId());
+            ps.setInt(3, invoice.getYear());
+            ps.setInt(4, invoice.getMonth());
+
+            ps.setBigDecimal(5, invoice.getRoomFee());
+            ps.setInt(6, invoice.getElectricUsed());
+
+            ps.setBigDecimal(7, invoice.getElectricFee());
+            ps.setInt(8, invoice.getWaterUsed());
+
+            ps.setBigDecimal(9, invoice.getWaterFee());
+            ps.setBigDecimal(10, invoice.getServiceFee());
+
+            ps.setBigDecimal(11, invoice.getTotal());
+
+            ps.setObject(12, invoice.getDueDate());
+            return ps.executeUpdate();
+        }
+    }
+
+    public int insertInvoice(Connection con, Invoice invoice) throws SQLException {
+        String sql = "INSERT INTO Invoice "
+                + "(contractId, priceId, [year], [month], roomFee, "
+                + " electricUsed, electricFee, waterUsed, waterFee, "
+                + " serviceFee, total, dueDate) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, invoice.getContractId());
             ps.setInt(2, invoice.getPriceId());
             ps.setInt(3, invoice.getYear());
@@ -247,7 +308,7 @@ public class BillingDAO extends DBContext {
         List<Contract> list = new ArrayList<>();
 
         String sql
-                = "SELECT contractId, roomId, tenantId, numPeople, startElectricIndex, startWaterIndex, status "
+                = "SELECT contractId, roomId, tenantId, monthlyRent, numPeople, startElectricIndex, startWaterIndex, status "
                 + "FROM Contract "
                 + "WHERE status = 'ACTIVE'";
 
@@ -260,6 +321,7 @@ public class BillingDAO extends DBContext {
                 c.setRoomId(rs.getInt("roomId"));
                 c.setTenantId(rs.getInt("tenantId"));
                 c.setNumPeople(rs.getInt("numPeople"));
+                c.setMonthlyRent(rs.getBigDecimal("monthlyRent"));
                 c.setStartElectricIndex(rs.getInt("startElectricIndex"));
                 c.setStartWaterIndex(rs.getInt("startWaterIndex"));
                 c.setStatus(rs.getString("status"));
