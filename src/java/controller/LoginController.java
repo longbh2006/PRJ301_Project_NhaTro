@@ -76,6 +76,9 @@ String next = request.getParameter("next");
             request.changeSessionId();
 
             session.setAttribute("account", account);
+            session.setAttribute("accountId", account.getAccountId());
+            session.setAttribute("role", account.getRole());
+            session.setAttribute("fullName", account.getFullName());
             String target = "/home";
    if (isSafeNext(next)) {
        target = next;
