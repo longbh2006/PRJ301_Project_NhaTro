@@ -74,7 +74,7 @@
                         <rr:navLink path="/manager/meters" label="Điện nước" />
                         <rr:navLink path="/manager/invoices" label="Hóa đơn" />
                         <rr:navLink path="/manager/revenue" label="Doanh thu" />
-                        <rr:navLink path="/manager/incidents" label="Xử lý sự cố" />
+                        <rr:navLink path="/manager/issues" label="Xử lý sự cố" />
                     </c:when>
                     <c:when test="${layoutRole eq 'ADMIN'}">
                         <rr:navLink path="/admin/rooms" label="Quản lý phòng" />
