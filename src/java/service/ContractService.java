@@ -7,8 +7,10 @@ import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import model.Contract;
+import model.Invoice;
 
 public class ContractService {
     public static final int PAGE_SIZE = 10;
@@ -49,12 +51,19 @@ public class ContractService {
                 if (roomId == null) {
                     throw new IllegalArgumentException("Hợp đồng không tồn tại.");
                 }
-                // Khóa phòng trước hợp đồng, cùng thứ tự với luồng duyệt thuê NT-36.
+                // Chỉ thống nhất bước lấy khóa cập nhật Room trước Contract với NT-36;
+                // không khẳng định toàn bộ chuỗi khóa giống nhau (xem docs/NT-48-validation.md).
                 dao.lockRoom(roomId);
                 if (!"ACTIVE".equals(dao.lockStatus(contractId))) {
                     throw new IllegalStateException("Chỉ có thể kết thúc hợp đồng đang hiệu lực.");
                 }
-                BigDecimal unpaid = dao.sumUnpaid(contractId);
+                Map<String, BigDecimal> invoiceTotals = dao.findInvoiceTotals(contractId);
+                for (String status : invoiceTotals.keySet()) {
+                    if (!Invoice.STATUS_UNPAID.equals(status) && !Invoice.STATUS_PAID.equals(status)) {
+                        throw new IllegalStateException("Không thể kết thúc hợp đồng: trạng thái hóa đơn chưa được hỗ trợ.");
+                    }
+                }
+                BigDecimal unpaid = invoiceTotals.getOrDefault(Invoice.STATUS_UNPAID, BigDecimal.ZERO);
                 if (unpaid.signum() > 0) {
                     throw new IllegalStateException("Không thể kết thúc hợp đồng: còn "
                             + NumberFormat.getIntegerInstance(Locale.forLanguageTag("vi-VN")).format(unpaid)

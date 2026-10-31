@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import model.Contract;
 
 public class ContractDAO extends DBContext implements AutoCloseable {
@@ -111,15 +113,21 @@ public class ContractDAO extends DBContext implements AutoCloseable {
         }
     }
 
-    public BigDecimal sumUnpaid(int contractId) throws SQLException {
+    public Map<String, BigDecimal> findInvoiceTotals(int contractId) throws SQLException {
         String sql = """
-                SELECT COALESCE(SUM(total), 0) FROM Invoice WITH (UPDLOCK, HOLDLOCK)
-                WHERE contractId = ? AND status = ?
+                SELECT status, SUM(total) AS total FROM Invoice WITH (UPDLOCK, HOLDLOCK)
+                WHERE contractId = ?
+                GROUP BY status
                 """;
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, contractId);
-            ps.setString(2, "UNPAID");
-            try (ResultSet rs = ps.executeQuery()) { rs.next(); return rs.getBigDecimal(1); }
+            try (ResultSet rs = ps.executeQuery()) {
+                Map<String, BigDecimal> totals = new LinkedHashMap<>();
+                while (rs.next()) {
+                    totals.put(rs.getString("status"), rs.getBigDecimal("total"));
+                }
+                return totals;
+            }
         }
     }
 

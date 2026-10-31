@@ -21,18 +21,36 @@
 
 ## Hóa đơn và giao dịch
 
-Trên `main` tại commit `8fcd777` đã có model `Invoice`, bảng `Invoice` và
-trạng thái `UNPAID`/`PAID`, nên NT-48 triển khai cả phần kết thúc hợp đồng.
-Không phụ thuộc việc màn hình lập hóa đơn NT-37 đã hoàn thành hay chưa.
+Trên `main` tại commit `8fcd777` đã có model `Invoice` và bảng `Invoice`.
+Nguồn xác nhận trạng thái là schema, không phải một hằng chuỗi sẵn có trong model:
+
+- `database/setup.sql`: `Invoice.status` NOT NULL, DEFAULT `UNPAID`,
+  `CK_Invoice_status` chỉ cho `UNPAID`/`PAID`; `CK_Invoice_paidAt` ràng buộc
+  thời điểm thanh toán tương ứng. Quá hạn được tính từ `dueDate`, không phải
+  một trạng thái khác.
+- `database/queries-mau.sql`, Q12/Q14d: công nợ lọc `UNPAID`; luồng tạo hóa đơn
+  mẫu ghi `UNPAID`. `BillingDAO.insertInvoice` trên nhánh NT-27 không truyền
+  cột status, nên nhận DEFAULT từ CSDL.
+- Đọc trực tiếp CSDL đang dùng ngày 31/10/2026: DEFAULT là `('UNPAID')`,
+  `CK_Invoice_status` và `CK_Invoice_paidAt` đều có `is_disabled=0`,
+  `is_not_trusted=0`. Có 6 hóa đơn PAID (18.116.000 đồng), 2 UNPAID
+  (8.364.000 đồng). Không có trạng thái khác.
+
+NT-48 bổ sung `Invoice.STATUS_UNPAID`/`STATUS_PAID` theo schema này. DAO đọc
+tổng hóa đơn theo **mọi trạng thái** của hợp đồng, thay vì chỉ lọc UNPAID.
+Service từ chối nếu gặp trạng thái chưa hỗ trợ (kể cả null), rồi mới kiểm tra
+tổng UNPAID. Vì vậy nếu quy ước/schema của NT-37 thay đổi, một trạng thái lạ
+không bị bỏ qua rồi hiểu nhầm là hợp đồng hết nợ. Chưa xác nhận implementation
+NT-37 vì nhánh đó không có trong các remote refs hiện tại.
 
 Service giữ một connection kế thừa của `ContractDAO`, tắt auto-commit và:
 
 1. Kiểm tra quản lý còn hoạt động, tìm phòng của hợp đồng.
-2. Khóa Room bằng `UPDLOCK, HOLDLOCK` trước khi khóa Contract, theo thứ tự
-   khóa của NT-36. Đọc lại trạng thái; chỉ chấp nhận `ACTIVE`.
-3. Cộng tất cả `Invoice.total` có trạng thái `UNPAID` bằng `BigDecimal`.
-   `UPDLOCK, HOLDLOCK` bảo vệ tập hóa đơn đến hết transaction, kể cả khi chưa
-   có hóa đơn. Tổng lớn hơn 0 thì từ chối và báo đúng số tiền.
+2. Khóa Room bằng `UPDLOCK, HOLDLOCK` trước khi khóa Contract.
+   Đọc lại trạng thái; chỉ chấp nhận `ACTIVE`.
+3. Đọc tổng `Invoice.total` theo trạng thái bằng `BigDecimal`, với
+   `UPDLOCK, HOLDLOCK` trên tập hóa đơn của hợp đồng. Service từ chối trạng thái
+   chưa hỗ trợ. Tổng UNPAID lớn hơn 0 thì từ chối và báo đúng số tiền.
 4. Cập nhật có điều kiện `ACTIVE` → `ENDED`, ghi `endedAt = SYSDATETIME()`.
 5. Commit; lỗi trước commit thì rollback. DAO chỉ truy vấn và đóng connection
    do chính DAO mở, không tự commit/rollback.
@@ -43,6 +61,25 @@ giải phóng phòng theo phép suy ra này, trong cùng transaction. Giữ nguy
 `Room.status` để không mở lại phòng đang `MAINTENANCE` hoặc `HIDDEN`.
 Luồng lập hóa đơn sau này vẫn cần kiểm tra hợp đồng còn ACTIVE trong giao dịch
 của chính nó trước khi tạo hóa đơn mới.
+
+## Phạm vi đối chiếu khóa NT-36
+
+Đã đọc toàn bộ `RentalService.approve` và các DAO được gọi trên
+`origin/nt-36-manager-request-approval` tại commit `88707ed`:
+
+1. Tắt auto-commit; đọc Account quản lý, đọc RentalRequest.
+2. `lockRoomForApproval` lấy `UPDLOCK, HOLDLOCK` trên Room và JOIN RoomType.
+3. Đọc lại RentalRequest; tìm Contract ACTIVE của phòng.
+4. UPDATE RentalRequest được duyệt, INSERT Contract, UPDATE các yêu cầu PENDING
+   khác cùng phòng; commit hoặc rollback.
+
+NT-48 đọc Account bằng HOLDLOCK và tìm roomId trước, sau đó lấy khóa cập nhật
+Room → Contract → Invoice rồi UPDATE Contract. Hai luồng cùng lấy khóa cập nhật
+Room trước khi thay đổi Contract của phòng đó. Đây là điểm tương thích đã
+đối chiếu; **không khẳng định toàn bộ chuỗi khóa giống nhau hoặc không thể
+deadlock**. NT-36 còn chạm RentalRequest/RoomType và các khóa do FK/chỉ mục.
+Chưa chạy cạnh tranh giữa duyệt thuê và kết thúc vì người dùng chỉ cho phép
+kiểm tra không thay đổi dữ liệu. NT-36 cũng chưa được merge vào main hiện tại.
 
 ## Kết quả kiểm tra trực tiếp ngày 31/10/2026
 
@@ -75,7 +112,29 @@ File `ConnectDB.properties` chỉ sao chép cục bộ, vẫn bị Git bỏ qua.
 
 Chưa kiểm tra: POST kết thúc thành công/PRG/thông báo một lần, phòng xuất hiện
 trở lại sau khi kết thúc, rollback sau lỗi ghi và cạnh tranh đồng thời. Các ca
-này cần thay đổi dữ liệu hợp đồng hiện có; chưa thực hiện khi chưa có xác nhận.
+này cần thay đổi dữ liệu hợp đồng hiện có; không thực hiện theo lựa chọn
+chỉ kiểm tra không đổi dữ liệu của người dùng.
 Chưa kiểm tra chuyển trang có dữ liệu vì chỉ có 6 hợp đồng, nhỏ hơn page size 10.
 Kiểm tra giao diện thực hiện bằng HTML trả qua HTTP, chưa kiểm tra trực quan
 trên trình duyệt.
+
+## Kiểm tra lại sau phản hồi review
+
+Người dùng đã xác nhận chỉ kiểm tra không đổi dữ liệu. Không kết thúc HĐ-2,
+không thêm hóa đơn hoặc sửa schema để dựng trường hợp thử.
+
+- Đã chạy `clean dist` của chính `build.xml`, bằng Ant đi kèm NetBeans 17,
+  JDK 17 và các override thư viện ở trên. Kết quả: `BUILD SUCCESSFUL`,
+  biên dịch 35 file Java, tạo WAR mới. Sau đó chạy ứng dụng bằng script hiện có.
+- Chưa bấm Clean and Build trong cửa sổ NetBeans: kết nối điều khiển Windows
+  trả `Computer Use native pipe is unavailable`. Kết quả Ant CLI không được
+  coi là đã thao tác giao diện NetBeans.
+- HTTP qua đăng nhập quản lý thật: danh sách và bộ lọc kết hợp trả 200;
+  POST HĐ-3 trả 409 với nợ **3.410.000 đồng**, HĐ-4 trả 409 với nợ
+  **4.954.000 đồng**. HĐ-3 có cả hóa đơn PAID và UNPAID nên cũng kiểm tra được
+  việc tiền PAID không cộng vào công nợ.
+- Hợp đồng đã ENDED trả 409; CSRF sai trả 403; trạng thái lọc sai và page=0
+  trả 400. GET kiểm tra lại xác nhận HĐ-2 còn ACTIVE.
+- Chưa chạy nhánh từ chối trạng thái hóa đơn lạ qua HTTP vì CHECK hiện tại
+  không cho lưu dữ liệu đó và không được phép đổi schema/dữ liệu để tạo nó.
+  Chưa chạy thành công/PRG, rollback sau lỗi ghi hoặc cạnh tranh đồng thời.
