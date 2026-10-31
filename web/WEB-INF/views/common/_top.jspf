@@ -1,6 +1,6 @@
 <%@ page pageEncoding="UTF-8" %>
-<%-- The login controller owns sessionScope.role; request parameters never select a role. --%>
-<c:set var="layoutRole" value="${fn:toUpperCase(sessionScope.role)}" />
+<%-- Vai trò hiển thị lấy từ tài khoản đã được xác thực trong session. --%>
+<c:set var="layoutRole" value="${fn:toUpperCase(sessionScope.account.role)}" />
 <c:choose>
     <c:when test="${layoutRole eq 'TENANT'}"><c:set var="layoutRoleLabel" value="Người thuê" /></c:when>
     <c:when test="${layoutRole eq 'MANAGER'}"><c:set var="layoutRoleLabel" value="Quản lý" /></c:when>
@@ -30,14 +30,12 @@
     <header class="roomrent-header d-flex flex-wrap align-items-center justify-content-between gap-3 d-print-none">
         <a class="roomrent-brand text-decoration-none" href="<c:url value='/' />">ROOMRENT</a>
         <div class="d-flex flex-wrap align-items-center gap-3">
+            <c:if test="${requestScope.layoutVariant eq 'public'}">
+                <a class="btn btn-outline-secondary btn-sm" href="<c:url value='/rooms' />">Phòng trống</a>
+            </c:if>
+            <span class="small text-secondary"><c:out value="${layoutRoleLabel}" /></span>
             <c:choose>
-                <c:when test="${requestScope.layoutVariant eq 'public'}">
-                    <a class="btn btn-outline-secondary btn-sm" href="<c:url value='/rooms' />">Phòng trống</a>
-                </c:when>
-                <c:otherwise><span class="small text-secondary"><c:out value="${layoutRoleLabel}" /></span></c:otherwise>
-            </c:choose>
-            <c:choose>
-                <c:when test="${layoutRole eq 'GUEST'}">
+                <c:when test="${empty sessionScope.account}">
                     <a class="btn btn-outline-secondary btn-sm" href="<c:url value='/login' />">Đăng nhập</a>
                     <a class="btn ${requestScope.layoutVariant eq 'public' ? 'btn-outline-secondary' : 'btn-primary'} btn-sm" href="<c:url value='/register' />">Đăng ký</a>
                 </c:when>
