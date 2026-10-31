@@ -30,13 +30,7 @@
         <td><c:out value="${rentalRequest.requestCode}" /></td>
         <td><c:out value="${rentalRequest.roomCode}" /></td>
         <td><c:out value="${rentalRequest.createdAtDisplay}" /></td>
-        <td><c:choose>
-            <c:when test="${rentalRequest.status eq 'PENDING'}"><span class="rental-status rental-status-pending">Chờ duyệt</span></c:when>
-            <c:when test="${rentalRequest.status eq 'APPROVED'}"><span class="rental-status rental-status-approved">Đã duyệt</span></c:when>
-            <c:when test="${rentalRequest.status eq 'REJECTED'}"><span class="rental-status rental-status-rejected">Từ chối</span></c:when>
-            <c:when test="${rentalRequest.status eq 'CANCELLED'}"><span class="rental-status rental-status-muted">Đã hủy</span></c:when>
-            <c:otherwise><c:out value="${rentalRequest.status}" /></c:otherwise>
-        </c:choose></td>
+        <td><ui:statusBadge value="${rentalRequest.status}" /></td>
         <td><c:url var="detailUrl" value="/tenant/requests">
                 <c:param name="requestId" value="${rentalRequest.requestId}" />
                 <c:param name="status" value="${selectedStatus}" /><c:param name="q" value="${searchQuery}" />
