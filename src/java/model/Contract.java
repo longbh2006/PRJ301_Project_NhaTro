@@ -20,6 +20,16 @@ public class Contract {
     private String status;
     private LocalDateTime endedAt;
 
+    private String roomCode;
+
+    public String getRoomCode() {
+        return roomCode;
+    }
+
+    public void setRoomCode(String roomCode) {
+        this.roomCode = roomCode;
+    }
+
     public Contract() {
     }
 

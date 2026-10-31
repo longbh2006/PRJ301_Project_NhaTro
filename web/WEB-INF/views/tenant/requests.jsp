@@ -40,7 +40,15 @@
         <td><c:url var="detailUrl" value="/tenant/requests">
                 <c:param name="requestId" value="${rentalRequest.requestId}" />
                 <c:param name="status" value="${selectedStatus}" /><c:param name="q" value="${searchQuery}" />
-            </c:url><a href="${fn:escapeXml(detailUrl)}#request-detail">Xem</a></td>
+            </c:url><a href="${fn:escapeXml(detailUrl)}#request-detail">Xem</a>
+            <c:if test="${rentalRequest.status eq 'PENDING'}">
+                <form method="post" action="<c:url value='/tenant/requests/cancel' />" class="d-inline ms-2">
+                    <input type="hidden" name="requestId" value="${rentalRequest.requestId}">
+                    <input type="hidden" name="csrfToken" value="${fn:escapeXml(sessionScope.rentalCsrfToken)}">
+                    <button class="btn btn-outline-danger btn-sm" type="submit">Hủy yêu cầu</button>
+                </form>
+            </c:if>
+        </td>
     </tr></c:forEach>
     <c:if test="${empty rentalRequests}"><tr><td colspan="5" class="rental-empty-state">
         <c:choose><c:when test="${empty selectedStatus and empty searchQuery}">Bạn chưa gửi yêu cầu thuê phòng nào.</c:when>
