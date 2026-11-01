@@ -26,9 +26,8 @@ public class BillingService {
             UtilityPrice gia, int year, int month) {
 
         /* 1. Số kWh, số m³ */
-        int dienCu = (prev != null) ? prev.getElectricIndex() : ct.getStartElectricIndex();
-        int nuocCu = (prev != null) ? prev.getWaterIndex() : ct.getStartWaterIndex();
-
+         int dienCu = chiSoCu(prev, ct.getStartElectricIndex(), true);
+        int nuocCu = chiSoCu(prev, ct.getStartWaterIndex(), false);
         int dienMoi = cur.getElectricIndex();
         int nuocMoi = cur.getWaterIndex();
 
@@ -78,35 +77,45 @@ public class BillingService {
     }
 
     public int lapHoaDonThang(int year, int month) throws SQLException {
-        BillingDAO dao = new BillingDAO();
-        UtilityPrice gia = dao.currentPrice();
-        if (gia == null) {
-            throw new SQLException("Chưa có bảng giá");
-        }
-        List<Contract> hopDongs = dao.findActiveContracts();
-        List<Invoice> hoaDons = new ArrayList<>();
-        for (Contract ct : hopDongs) {
-            MeterReading cur = dao.findReading(ct.getRoomId(), year, month);
-            if (cur == null) {
-                throw new SQLException("Phòng " + ct.getRoomId() + " chưa nhập chỉ số tháng " + month);
+        try (BillingDAO dao = new BillingDAO()) {
+            UtilityPrice gia = dao.priceFor(year, month);
+            if (gia == null) {
+                throw new SQLException("Chưa có bảng giá");
             }
-            MeterReading prev = dao.findReadingBefore(ct.getRoomId(), year, month);
-            hoaDons.add(tinhHoaDon(ct, cur, prev, gia, year, month));
+            List<Contract> hopDongs = dao.findActiveContracts();
+            List<Invoice> hoaDons = new ArrayList<>();
+            for (Contract ct : hopDongs) {
+                MeterReading cur = dao.findReading(ct.getRoomId(), year, month);
+                if (cur == null) {
+                    throw new SQLException("Phòng " + ct.getRoomId() + " chưa nhập chỉ số tháng " + month, "THIEU_CHI_SO", 50001);
+                }
+                MeterReading prev = dao.findReadingBefore(ct.getRoomId(), year, month);
+                hoaDons.add(tinhHoaDon(ct, cur, prev, gia, year, month));
+            }
+
+            Connection con = dao.getConnection();
+            try {
+                con.setAutoCommit(false);
+                for (Invoice inv : hoaDons) {
+                    dao.insertInvoice(con, inv);
+                }
+                con.commit();
+            } catch (SQLException e) {
+                con.rollback();
+                throw e;
+            } finally {
+                con.setAutoCommit(true);
+            }
+            return hoaDons.size();
         }
 
-        Connection con = dao.getConnection();
-        try {
-            con.setAutoCommit(false);
-            for (Invoice inv : hoaDons) {
-                dao.insertInvoice(con, inv);
-            }
-            con.commit();
-        } catch (SQLException e) {
-            con.rollback();
-            throw e;
-        } finally {
-            con.setAutoCommit(true);
+    }
+
+    public static int chiSoCu(MeterReading truoc, int chiSoDau, boolean laDien) {
+        if (truoc == null) {
+            return chiSoDau;
         }
-        return hoaDons.size();
+        int kyTruoc = laDien ? truoc.getElectricIndex() : truoc.getWaterIndex();
+        return Math.max(kyTruoc, chiSoDau);
     }
 }

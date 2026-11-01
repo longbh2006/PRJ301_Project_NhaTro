@@ -14,10 +14,25 @@
         <servlet-name>HomeController</servlet-name>
         <servlet-class>controller.HomeController</servlet-class>
     </servlet>
-    
+    <servlet>
+       <servlet-name>MeterController</servlet-name>
+       <servlet-class>controller.MeterController</servlet-class>
+    </servlet>
+    <servlet>
+       <servlet-name>InvoiceController</servlet-name>
+       <servlet-class>controller.InvoiceController</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>RoomController</servlet-name>
         <url-pattern>/rooms</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+    <servlet-name>MeterController</servlet-name>
+        <url-pattern>/manager/meters</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+    <servlet-name>InvoiceController</servlet-name>
+        <url-pattern>/manager/invoices</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>RoomController</servlet-name>

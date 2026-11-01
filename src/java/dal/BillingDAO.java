@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
  *
  * @author Lenovo
  */
-public class BillingDAO extends DBContext {
+public class BillingDAO extends DBContext implements AutoCloseable {
 
     public MeterReading findLastReading(int roomId) throws SQLException {
         String sql = "SELECT TOP (1) *"
@@ -291,6 +291,24 @@ public class BillingDAO extends DBContext {
         return null;
     }
 
+    public UtilityPrice priceFor(int year, int month) {
+        String sql = "SELECT TOP (1) * FROM UtilityPrice "
+                + "WHERE effectiveFrom <= EOMONTH(DATEFROMPARTS(?, ?, 1)) "
+                + "ORDER BY effectiveFrom DESC";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, year);
+            ps.setInt(2, month);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapUtilityPrice(rs);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi truy vấn giá theo tháng", e);
+        }
+        return null;
+    }
+
     private UtilityPrice mapUtilityPrice(ResultSet rs) throws SQLException {
         UtilityPrice p = new UtilityPrice();
         p.setPriceId(rs.getInt("priceId"));
@@ -334,5 +352,12 @@ public class BillingDAO extends DBContext {
         }
 
         return list;
+    }
+
+    @Override
+    public void close() throws SQLException {
+        if (connection != null) {
+            connection.close();
+        }
     }
 }

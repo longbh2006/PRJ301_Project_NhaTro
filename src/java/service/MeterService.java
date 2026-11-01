@@ -7,9 +7,13 @@ package service;
 import dal.BillingDAO;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import model.MeterReading;
+import model.Contract;
 import java.sql.SQLException;
 import java.sql.Connection;
+
 /**
  *
  * @author Lenovo
@@ -17,37 +21,57 @@ import java.sql.Connection;
 public class MeterService {
 
     public void luuChiSo(List<MeterReading> danhSach) throws SQLException {
-        BillingDAO dao = new BillingDAO();
-    Connection con = dao.getConnection();
+        try (BillingDAO dao = new BillingDAO()) {
+            Connection con = dao.getConnection();
 
-    try {
-        // 2. Mở transaction
-        con.setAutoCommit(false);
+            try {
+                // 2. Mở transaction
+                con.setAutoCommit(false);
 
-        // 3. Duyệt danh sách và ghi từng chỉ số
-        for (MeterReading r : danhSach) {
-            dao.insertReading(con, r);
-        }
+                // 3. Duyệt danh sách và ghi từng chỉ số
+                for (MeterReading r : danhSach) {
+                    dao.insertReading(con, r);
+                }
 
-        // 4. Commit toàn bộ
-        con.commit();
-    } catch (SQLException e) {
-        // 5. Rollback khi có lỗi
-        try {
-            con.rollback();
-        } catch (SQLException rbEx) {
-            // ghi log, nhưng không làm ảnh hưởng tới exception gốc
+                // 4. Commit toàn bộ
+                con.commit();
+            } catch (SQLException e) {
+                // 5. Rollback khi có lỗi
+                try {
+                    con.rollback();
+                } catch (SQLException rbEx) {
+                    // ghi log, nhưng không làm ảnh hưởng tới exception gốc
+                }
+                throw e;   // ném lại để xử lý ở tầng gọi
+            } finally {
+                // 6. Trả Connection về trạng thái mặc định
+                try {
+                    con.setAutoCommit(true);
+                } catch (SQLException ex) {
+                    // ghi log nếu cần
+                }
+                // **không đóng con** – sẽ được dọn dẹp ở nơi quản lý connection
+            }
+
         }
-        throw e;   // ném lại để xử lý ở tầng gọi
-    } finally {
-        // 6. Trả Connection về trạng thái mặc định
-        try {
-            con.setAutoCommit(true);
-        } catch (SQLException ex) {
-            // ghi log nếu cần
-        }
-        // **không đóng con** – sẽ được dọn dẹp ở nơi quản lý connection
     }
-        
+
+    public List<Contract> layHopDongActive() throws SQLException {
+        try (BillingDAO dao = new BillingDAO()) {
+            return dao.findActiveContracts();
+        }
+    }
+
+    public Map<Integer, MeterReading> chiSoKyTruoc(List<Contract> contracts, int year, int month) throws SQLException {
+        Map<Integer, MeterReading> map = new HashMap<>();
+        try (BillingDAO dao = new BillingDAO()) {
+            for (Contract ct : contracts) {
+
+                MeterReading reading = dao.findReadingBefore(ct.getRoomId(), year, month);
+
+                map.put(ct.getContractId(), reading);
+            }
+        }
+        return map;
     }
 }

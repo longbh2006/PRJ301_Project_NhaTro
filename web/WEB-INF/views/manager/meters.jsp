@@ -33,6 +33,9 @@
 
             <p style="color: red;">Tháng này đã lập hoá đơn, không lập lại.</p>
         </c:if>
+        <c:if test="${param.thieu == '1'}">
+            <p style="color: red;">Chưa lập được hoá đơn: có phòng chưa nhập chỉ số tháng này. Hãy nhập đủ chỉ số rồi lập lại.</p>
+        </c:if>
         <c:if test="${not empty loi}">
             <ul>
                 <c:forEach items="${loi}" var="e">
