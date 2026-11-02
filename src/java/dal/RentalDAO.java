@@ -1,20 +1,85 @@
 package dal;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import model.Contract;
 import model.RentalRequest;
+import model.RentalRoom;
 
 /** Giữ connection kế thừa đến khi đóng DAO để có thể gọi nhiều truy vấn liên tiếp. */
 public class RentalDAO extends DBContext implements AutoCloseable {
+
+    public boolean lockActiveTenant(int tenantId) throws SQLException {
+        String sql = """
+                SELECT t.tenantId
+                FROM Tenant t WITH (UPDLOCK, HOLDLOCK)
+                JOIN Account a ON a.accountId = t.tenantId
+                WHERE t.tenantId = ? AND a.role = ? AND a.active = ?
+                """;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, tenantId);
+            ps.setString(2, "TENANT");
+            ps.setBoolean(3, true);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    public RentalRoom findRentalRoom(int roomId) throws SQLException {
+        String sql = """
+                SELECT r.roomId, r.roomCode, rt.name AS roomTypeName, rt.capacity,
+                       r.monthlyPrice, r.status, r.description, r.floor, r.area, r.imageUrl,
+                       CASE WHEN EXISTS (SELECT 1 FROM Contract c
+                                         WHERE c.roomId = r.roomId AND c.status = ?)
+                            THEN 1 ELSE 0 END AS occupied
+                FROM Room r JOIN RoomType rt ON rt.roomTypeId = r.roomTypeId
+                WHERE r.roomId = ?
+                """;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, "ACTIVE");
+            ps.setInt(2, roomId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? new RentalRoom(rs.getInt("roomId"), rs.getString("roomCode"),
+                        rs.getNString("roomTypeName"), rs.getInt("capacity"),
+                        rs.getBigDecimal("monthlyPrice"), rs.getString("status"),
+                        rs.getNString("description"), rs.getBoolean("occupied"),
+                        rs.getInt("floor"), rs.getBigDecimal("area"), rs.getString("imageUrl")) : null;
+            }
+        }
+    }
+
+    public boolean hasActiveContract(int tenantId) throws SQLException {
+        String sql = "SELECT 1 FROM Contract WHERE tenantId = ? AND status = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, tenantId);
+            ps.setString(2, "ACTIVE");
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    public boolean hasPendingRequest(int tenantId) throws SQLException {
+        String sql = "SELECT 1 FROM RentalRequest WHERE tenantId = ? AND status = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, tenantId);
+            ps.setString(2, "PENDING");
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
 
     /** Luôn tạo request PENDING và trả ID để caller có thể tra cứu bản ghi vừa tạo. */
     public int insertRequest(RentalRequest request) throws SQLException {
@@ -38,38 +103,94 @@ public class RentalDAO extends DBContext implements AutoCloseable {
 
     public List<RentalRequest> findRequestsByTenant(int tenantId) throws SQLException {
         String sql = """
-                SELECT requestId, tenantId, roomId, moveInDate, months, numPeople,
-                       note, status, createdAt, decidedAt, decidedBy
-                FROM RentalRequest
-                WHERE tenantId = ?
-                ORDER BY createdAt DESC, requestId DESC
+                SELECT rr.requestId, rr.tenantId, rr.roomId, rr.moveInDate, rr.months, rr.numPeople,
+                       rr.note, rr.status, rr.createdAt, rr.decidedAt, rr.decidedBy, r.roomCode
+                FROM RentalRequest rr JOIN Room r ON r.roomId = rr.roomId
+                WHERE rr.tenantId = ?
+                ORDER BY rr.createdAt DESC, rr.requestId DESC
                 """;
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, tenantId);
             try (ResultSet rs = ps.executeQuery()) {
                 List<RentalRequest> requests = new ArrayList<>();
                 while (rs.next()) {
-                    requests.add(mapRequest(rs));
+                    RentalRequest rentalRequest = mapRequest(rs);
+                    rentalRequest.setRoomCode(rs.getString("roomCode"));
+                    requests.add(rentalRequest);
                 }
                 return requests;
             }
         }
     }
 
-    public List<RentalRequest> findPendingRequests() throws SQLException {
+    public boolean cancelPendingRequest(int requestId, int tenantId) throws SQLException {
         String sql = """
-                SELECT requestId, tenantId, roomId, moveInDate, months, numPeople,
-                       note, status, createdAt, decidedAt, decidedBy
-                FROM RentalRequest
-                WHERE status = ?
-                ORDER BY createdAt, requestId
+                UPDATE RentalRequest SET status = ?, decidedAt = SYSDATETIME(), decidedBy = NULL
+                WHERE requestId = ? AND tenantId = ? AND status = ?
+                """;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, "CANCELLED");
+            ps.setInt(2, requestId);
+            ps.setInt(3, tenantId);
+            ps.setString(4, "PENDING");
+            return ps.executeUpdate() == 1;
+        }
+    }
+
+    public Contract findActiveContractByTenant(int tenantId) throws SQLException {
+        String sql = """
+                SELECT c.contractId, c.requestId, c.tenantId, c.roomId, c.startDate,
+                       c.endDate, c.monthlyRent, c.deposit, c.numPeople,
+                       c.startElectricIndex, c.startWaterIndex, c.status, c.endedAt, r.roomCode
+                FROM Contract c JOIN Room r ON r.roomId = c.roomId
+                WHERE c.tenantId = ? AND c.status = ?
+                """;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, tenantId);
+            ps.setString(2, "ACTIVE");
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                Contract contract = new Contract(rs.getInt("contractId"), rs.getInt("requestId"),
+                        rs.getInt("tenantId"), rs.getInt("roomId"),
+                        rs.getObject("startDate", LocalDate.class), rs.getObject("endDate", LocalDate.class),
+                        rs.getBigDecimal("monthlyRent"), rs.getBigDecimal("deposit"), rs.getInt("numPeople"),
+                        rs.getInt("startElectricIndex"), rs.getInt("startWaterIndex"),
+                        rs.getString("status"), rs.getObject("endedAt", LocalDateTime.class));
+                contract.setRoomCode(rs.getString("roomCode"));
+                return contract;
+            }
+        }
+    }
+
+    public List<RentalRequest> findPendingRequests() throws SQLException {
+        return findPendingRequests(null);
+    }
+
+    public List<RentalRequest> findPendingRequests(Integer roomId) throws SQLException {
+        String sql = """
+                SELECT r.requestId, r.tenantId, r.roomId, r.moveInDate, r.months, r.numPeople,
+                       r.note, r.status, r.createdAt, r.decidedAt, r.decidedBy,
+                       room.roomCode, room.monthlyPrice, a.fullName AS tenantName
+                FROM RentalRequest r
+                JOIN Room room ON room.roomId = r.roomId
+                JOIN Account a ON a.accountId = r.tenantId
+                WHERE r.status = ? AND (? IS NULL OR r.roomId = ?)
+                ORDER BY r.createdAt, r.requestId
                 """;
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, "PENDING");
+            ps.setObject(2, roomId, Types.INTEGER);
+            ps.setObject(3, roomId, Types.INTEGER);
             try (ResultSet rs = ps.executeQuery()) {
                 List<RentalRequest> requests = new ArrayList<>();
                 while (rs.next()) {
-                    requests.add(mapRequest(rs));
+                    RentalRequest request = mapRequest(rs);
+                    request.setRoomCode(rs.getString("roomCode"));
+                    request.setTenantName(rs.getNString("tenantName"));
+                    request.setMonthlyPrice(rs.getBigDecimal("monthlyPrice"));
+                    requests.add(request);
                 }
                 return requests;
             }
@@ -89,6 +210,77 @@ public class RentalDAO extends DBContext implements AutoCloseable {
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() ? mapRequest(rs) : null;
             }
+        }
+    }
+
+    public boolean isActiveManager(int accountId) throws SQLException {
+        String sql = "SELECT 1 FROM Account WHERE accountId = ? AND role = ? AND active = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, accountId);
+            ps.setString(2, "MANAGER");
+            ps.setBoolean(3, true);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    public record RoomTerms(String status, BigDecimal monthlyPrice, int capacity) { }
+
+    /** Khóa phòng trước khi cập nhật request để các lần duyệt cùng phòng có cùng thứ tự khóa. */
+    public RoomTerms lockRoomForApproval(int roomId) throws SQLException {
+        String sql = """
+                SELECT r.status, r.monthlyPrice, t.capacity
+                FROM Room r WITH (UPDLOCK, HOLDLOCK)
+                JOIN RoomType t ON t.roomTypeId = r.roomTypeId
+                WHERE r.roomId = ?
+                """;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, roomId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? new RoomTerms(rs.getString("status"),
+                        rs.getBigDecimal("monthlyPrice"), rs.getInt("capacity")) : null;
+            }
+        }
+    }
+
+    public boolean hasActiveContractForRoom(int roomId) throws SQLException {
+        String sql = "SELECT 1 FROM Contract WHERE roomId = ? AND status = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, roomId);
+            ps.setString(2, "ACTIVE");
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    public int decidePendingRequest(int requestId, int managerId, String status) throws SQLException {
+        String sql = """
+                UPDATE RentalRequest SET status = ?, decidedAt = SYSDATETIME(), decidedBy = ?
+                WHERE requestId = ? AND status = ?
+                """;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, managerId);
+            ps.setInt(3, requestId);
+            ps.setString(4, "PENDING");
+            return ps.executeUpdate();
+        }
+    }
+
+    public int rejectOtherPendingRequests(int roomId, int approvedRequestId, int managerId) throws SQLException {
+        String sql = """
+                UPDATE RentalRequest SET status = ?, decidedAt = SYSDATETIME(), decidedBy = ?
+                WHERE roomId = ? AND requestId <> ? AND status = ?
+                """;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, "REJECTED");
+            ps.setInt(2, managerId);
+            ps.setInt(3, roomId);
+            ps.setInt(4, approvedRequestId);
+            ps.setString(5, "PENDING");
+            return ps.executeUpdate();
         }
     }
 

@@ -1,6 +1,6 @@
 <%@ page pageEncoding="UTF-8" %>
-<%-- The login controller owns sessionScope.role; request parameters never select a role. --%>
-<c:set var="layoutRole" value="${fn:toUpperCase(sessionScope.role)}" />
+<%-- Vai trò hiển thị lấy từ tài khoản đã được xác thực trong session. --%>
+<c:set var="layoutRole" value="${fn:toUpperCase(sessionScope.account.role)}" />
 <c:choose>
     <c:when test="${layoutRole eq 'TENANT'}"><c:set var="layoutRoleLabel" value="Người thuê" /></c:when>
     <c:when test="${layoutRole eq 'MANAGER'}"><c:set var="layoutRoleLabel" value="Quản lý" /></c:when>
@@ -20,18 +20,31 @@
           rel="stylesheet" crossorigin="anonymous"
           integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB">
     <link href="<c:url value='/css/app.css' />" rel="stylesheet">
+    <c:if test="${requestScope.rentalDesign}">
+        <link href="<c:url value='/css/rental.css' />" rel="stylesheet">
+    </c:if>
 </head>
 <body>
 <a class="visually-hidden-focusable skip-link" href="#main-content">Đến nội dung chính</a>
-<div class="roomrent-shell">
-    <header class="roomrent-header d-flex flex-wrap align-items-center justify-content-between gap-3 d-print-none">
+<div class="roomrent-shell ${requestScope.layoutVariant eq 'public' ? 'roomrent-shell-public' : ''}">
+    <header class="roomrent-header navbar navbar-expand-lg d-flex flex-wrap align-items-center justify-content-between gap-3 d-print-none">
         <a class="roomrent-brand text-decoration-none" href="<c:url value='/' />">ROOMRENT</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target=".roomrent-mobile-menu"
+                aria-controls="header-actions${requestScope.layoutVariant ne 'public' ? ' main-navigation' : ''}"
+                aria-expanded="false" aria-label="Mở hoặc đóng menu điều hướng">
+            <span class="navbar-toggler-icon" aria-hidden="true"></span>
+        </button>
+        <div id="header-actions" class="collapse navbar-collapse roomrent-mobile-menu flex-grow-0">
         <div class="d-flex flex-wrap align-items-center gap-3">
+            <c:if test="${requestScope.layoutVariant eq 'public'}">
+                <a class="btn btn-outline-secondary btn-sm" href="<c:url value='/rooms' />">Phòng trống</a>
+            </c:if>
             <span class="small text-secondary"><c:out value="${layoutRoleLabel}" /></span>
             <c:choose>
-                <c:when test="${layoutRole eq 'GUEST'}">
+                <c:when test="${empty sessionScope.account}">
                     <a class="btn btn-outline-secondary btn-sm" href="<c:url value='/login' />">Đăng nhập</a>
-                    <a class="btn btn-primary btn-sm" href="<c:url value='/register' />">Đăng ký</a>
+                    <a class="btn ${requestScope.layoutVariant eq 'public' ? 'btn-outline-secondary' : 'btn-primary'} btn-sm" href="<c:url value='/register' />">Đăng ký</a>
                 </c:when>
                 <c:otherwise>
                     <form method="post" action="<c:url value='/logout' />" class="m-0">
@@ -40,9 +53,11 @@
                 </c:otherwise>
             </c:choose>
         </div>
+        </div>
     </header>
     <div class="roomrent-layout">
-        <aside class="roomrent-sidebar d-print-none">
+        <c:if test="${requestScope.layoutVariant ne 'public'}">
+        <aside id="main-navigation" class="roomrent-sidebar collapse roomrent-mobile-menu d-lg-block d-print-none">
             <p class="roomrent-nav-label">Điều hướng</p>
             <nav class="nav nav-pills flex-column gap-2" aria-label="Điều hướng chính">
                 <c:choose>
@@ -51,14 +66,15 @@
                         <rr:navLink path="/tenant/requests" label="Yêu cầu thuê" />
                         <rr:navLink path="/tenant/contract" label="Hợp đồng" />
                         <rr:navLink path="/tenant/invoices" label="Hóa đơn" />
-                        <rr:navLink path="/tenant/incidents" label="Báo sự cố" />
+                        <rr:navLink path="/tenant/issues" label="Báo sự cố" />
                     </c:when>
                     <c:when test="${layoutRole eq 'MANAGER'}">
                         <rr:navLink path="/manager/requests" label="Duyệt yêu cầu" />
+                        <rr:navLink path="/manager/contracts" label="Quản lý hợp đồng" />
                         <rr:navLink path="/manager/meters" label="Điện nước" />
                         <rr:navLink path="/manager/invoices" label="Hóa đơn" />
                         <rr:navLink path="/manager/revenue" label="Doanh thu" />
-                        <rr:navLink path="/manager/incidents" label="Xử lý sự cố" />
+                        <rr:navLink path="/manager/issues" label="Xử lý sự cố" />
                     </c:when>
                     <c:when test="${layoutRole eq 'ADMIN'}">
                         <rr:navLink path="/admin/rooms" label="Quản lý phòng" />
@@ -70,4 +86,5 @@
                 </c:choose>
             </nav>
         </aside>
+        </c:if>
         <main id="main-content" class="roomrent-content" tabindex="-1">

@@ -13,14 +13,14 @@ import java.time.LocalDateTime;
  * @author Lenovo
  */
 public class UtilityPrice {
-        private int priceId;
-        private BigDecimal electricPrice;
-        private BigDecimal waterPrice;
-        private BigDecimal serviceFeePerPerson;
-        private  LocalDate effectiveFrom;
-        private LocalDateTime createdAt;
-        
-        
+
+    private int priceId;
+    private BigDecimal electricPrice;
+    private BigDecimal waterPrice;
+    private BigDecimal serviceFeePerPerson;
+    private LocalDate effectiveFrom;
+    private LocalDateTime createdAt;
+
     public int getPriceId() {
         return priceId;
     }
@@ -68,6 +68,5 @@ public class UtilityPrice {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
-        
-        
+
 }

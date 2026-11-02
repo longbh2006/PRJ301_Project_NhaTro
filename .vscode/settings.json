@@ -1,0 +1,17 @@
+{
+    "rsp-ui.rsp.java.home": "C:/Program Files/Eclipse Adoptium/jdk-17.0.20.101-hotspot",
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-17",
+            "path": "C:/Program Files/Eclipse Adoptium/jdk-17.0.20.101-hotspot",
+            "default": true
+        }
+    ],
+    "java.project.sourcePaths": ["src/java"],
+    "java.project.outputPath": ".local/vscode-java/classes",
+    "java.project.referencedLibraries": [
+        "web/WEB-INF/lib/*.jar",
+        "build/web/WEB-INF/lib/mssql-jdbc-13.2.0.jre11.jar",
+        "C:/Program Files/Apache Software Foundation/Tomcat 10.1/lib/servlet-api.jar"
+    ]
+}

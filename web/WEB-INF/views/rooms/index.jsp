@@ -83,7 +83,7 @@
     </c:when>
     <c:otherwise>
         <section class="card roomrent-card mb-4">
-            <div class="table-responsive">
+            <div class="table-responsive" role="region" aria-label="Danh sách phòng trống" tabindex="0">
                 <table class="table roomrent-table align-middle mb-0">
                     <thead>
                         <tr>

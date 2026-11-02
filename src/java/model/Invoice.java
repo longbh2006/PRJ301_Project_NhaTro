@@ -13,6 +13,10 @@ import java.time.LocalDateTime;
  * @author Lenovo
  */
 public class Invoice {
+    // Theo DEFAULT/CHECK của Invoice trong database/setup.sql.
+    public static final String STATUS_UNPAID = "UNPAID";
+    public static final String STATUS_PAID = "PAID";
+
     private int invoiceId;
     private int contractId;
     private int year;

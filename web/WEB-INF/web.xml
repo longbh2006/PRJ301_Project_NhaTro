@@ -1,11 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
-    
+<web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
     <display-name>RoomRent</display-name>
-    
+    <!-- Filter Configuration -->
+    <filter>
+        <filter-name>AuthFilter</filter-name>
+        <filter-class>filter.AuthorizationFilter</filter-class>
+    </filter>
+    <!-- Filter Mapping -->
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
     <!-- Servlet Configuration -->
+    <servlet>
+        <servlet-name>ManagerRequestServlet</servlet-name>
+        <servlet-class>controller.ManagerRequestServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>LoginController</servlet-name>
+        <servlet-class>controller.LoginController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>LogoutController</servlet-name>
+        <servlet-class>controller.LogoutController</servlet-class>
+    </servlet>
     <servlet>
         <servlet-name>RoomController</servlet-name>
         <servlet-class>controller.RoomController</servlet-class>
@@ -15,38 +33,107 @@
         <servlet-class>controller.HomeController</servlet-class>
     </servlet>
     <servlet>
-       <servlet-name>MeterController</servlet-name>
-       <servlet-class>controller.MeterController</servlet-class>
+        <servlet-name>MeterController</servlet-name>
+        <servlet-class>controller.MeterController</servlet-class>
     </servlet>
     <servlet>
-       <servlet-name>InvoiceController</servlet-name>
-       <servlet-class>controller.InvoiceController</servlet-class>
+        <servlet-name>InvoiceController</servlet-name>
+        <servlet-class>controller.InvoiceController</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>TenantRequestController</servlet-name>
+        <servlet-class>controller.TenantRequestController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>TenantContractController</servlet-name>
+        <servlet-class>controller.TenantContractController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>TenantContractController</servlet-name>
+        <url-pattern>/tenant/contract</url-pattern>
+    </servlet-mapping>
+    <!-- Servlet Mapping -->
+    <servlet>
+        <servlet-name>ManagerContractController</servlet-name>
+        <servlet-class>controller.ManagerContractController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ManagerContractController</servlet-name>
+        <url-pattern>/manager/contracts</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>AdminRoomController</servlet-name>
+        <servlet-class>controller.AdminRoomController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AdminAccountController</servlet-name>
+        <servlet-class>controller.AdminAccountController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>TenantIssueController</servlet-name>
+        <servlet-class>controller.TenantIssueController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ManagerRequestServlet</servlet-name>
+        <url-pattern>/manager/requests</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>LoginController</servlet-name>
+        <url-pattern>/login</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>LogoutController</servlet-name>
+        <url-pattern>/logout</url-pattern>
+    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>RoomController</servlet-name>
         <url-pattern>/rooms</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-    <servlet-name>MeterController</servlet-name>
+        <servlet-name>MeterController</servlet-name>
         <url-pattern>/manager/meters</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-    <servlet-name>InvoiceController</servlet-name>
+        <servlet-name>InvoiceController</servlet-name>
         <url-pattern>/manager/invoices</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>RoomController</servlet-name>
         <url-pattern>/rooms/detail</url-pattern>
     </servlet-mapping>
-    
     <servlet-mapping>
         <servlet-name>HomeController</servlet-name>
         <url-pattern>/home</url-pattern>
-        <!-- Mapping vào context root -->
-        <url-pattern></url-pattern>
+        <url-pattern/>
     </servlet-mapping>
-    
+    <servlet-mapping>
+        <servlet-name>TenantRequestController</servlet-name>
+        <url-pattern>/tenant/requests</url-pattern>
+        <url-pattern>/tenant/requests/cancel</url-pattern>
+    </servlet-mapping>
     <!-- Error Pages Configuration -->
+    <servlet>
+        <servlet-name>ManagerIssueController</servlet-name>
+        <servlet-class>controller.ManagerIssueController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminRoomController</servlet-name>
+        <url-pattern>/admin/rooms</url-pattern>
+        <url-pattern>/admin/room-types</url-pattern>
+        <url-pattern>/admin/prices</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminAccountController</servlet-name>
+        <url-pattern>/admin/accounts</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>TenantIssueController</servlet-name>
+        <url-pattern>/tenant/issues</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManagerIssueController</servlet-name>
+        <url-pattern>/manager/issues</url-pattern>
+    </servlet-mapping>
     <error-page>
         <error-code>403</error-code>
         <location>/WEB-INF/views/error/403.jsp</location>

@@ -19,6 +19,13 @@ public class Contract {
     private int startWaterIndex;
     private String status;
     private LocalDateTime endedAt;
+    private String roomCode;
+    private String tenantName;
+
+    public String getRoomCode() { return roomCode; }
+    public void setRoomCode(String roomCode) { this.roomCode = roomCode; }
+    public String getTenantName() { return tenantName; }
+    public void setTenantName(String tenantName) { this.tenantName = tenantName; }
 
     public Contract() {
     }
