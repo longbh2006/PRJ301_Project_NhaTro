@@ -6,10 +6,21 @@
         <filter-name>AuthFilter</filter-name>
         <filter-class>filter.AuthorizationFilter</filter-class>
     </filter>
+    <filter>
+        <filter-name>OwnershipFilter</filter-name>
+        <filter-class>filter.OwnershipFilter</filter-class>
+    </filter>
     <!-- Filter Mapping -->
     <filter-mapping>
         <filter-name>AuthFilter</filter-name>
         <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <!-- OwnershipFilter đứng sau AuthFilter: chỉ kiểm quyền sở hữu khi đã chắc là TENANT -->
+    <filter-mapping>
+        <filter-name>OwnershipFilter</filter-name>
+        <url-pattern>/tenant/invoices/detail</url-pattern>
+        <url-pattern>/tenant/pay</url-pattern>
+        <url-pattern>/tenant/issues/detail</url-pattern>
     </filter-mapping>
     <!-- Servlet Configuration -->
     <servlet>
@@ -113,6 +124,16 @@
     <servlet-mapping>
         <servlet-name>TenantIssueController</servlet-name>
         <url-pattern>/tenant/issues</url-pattern>
+        <url-pattern>/tenant/issues/detail</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>TenantInvoiceController</servlet-name>
+        <servlet-class>controller.TenantInvoiceController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>TenantInvoiceController</servlet-name>
+        <url-pattern>/tenant/invoices/detail</url-pattern>
+        <url-pattern>/tenant/pay</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ManagerIssueController</servlet-name>

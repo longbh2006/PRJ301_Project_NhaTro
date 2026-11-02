@@ -89,6 +89,40 @@ public class MaintenanceDAO extends DBContext implements AutoCloseable {
         return list;
     }
 
+    /**
+     * OwnershipFilter: sự cố có thuộc hợp đồng của tenant này không.
+     */
+    public boolean isRequestOwnedByTenant(int ticketId, int tenantId) throws SQLException {
+        String sql = "SELECT 1 FROM MaintenanceRequest m JOIN Contract c ON m.contractId = c.contractId WHERE m.ticketId = ? AND c.tenantId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, ticketId);
+            ps.setInt(2, tenantId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    /**
+     * Lớp chặn IDOR thứ 3: câu SELECT luôn kèm c.tenantId = ? (id từ session).
+     */
+    public MaintenanceRequest findRequestByIdForTenant(int ticketId, int tenantId) throws SQLException {
+        String sql = "SELECT m.ticketId, m.contractId, m.title, m.description, m.status, m.managerNote, m.createdAt, m.resolvedAt, r.roomCode FROM MaintenanceRequest m JOIN Contract c ON m.contractId = c.contractId JOIN Room r ON c.roomId = r.roomId WHERE m.ticketId = ? AND c.tenantId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, ticketId);
+            ps.setInt(2, tenantId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new MaintenanceRequest(rs.getInt("ticketId"), rs.getInt("contractId"),
+                            rs.getString("title"), rs.getString("description"), rs.getString("status"),
+                            rs.getString("managerNote"), rs.getObject("createdAt", LocalDateTime.class),
+                            rs.getObject("resolvedAt", LocalDateTime.class), rs.getString("roomCode"));
+                }
+            }
+        }
+        return null;
+    }
+
     public List<MaintenanceRequest> findRequestsByManager(String status, Integer roomId) throws SQLException {
         List<MaintenanceRequest> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder(

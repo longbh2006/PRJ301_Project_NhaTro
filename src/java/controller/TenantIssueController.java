@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Account;
+import model.MaintenanceRequest;
 import service.MaintenanceService;
 
 public class TenantIssueController extends HttpServlet {
@@ -34,6 +35,10 @@ public class TenantIssueController extends HttpServlet {
         }
 
         MaintenanceService service = new MaintenanceService();
+        if ("/tenant/issues/detail".equals(request.getServletPath())) {
+            showDetail(request, response, service, account);
+            return;
+        }
         try {
             request.setAttribute("hasActiveContract", service.hasActiveContract(account.getAccountId()));
             request.setAttribute("issues", service.getIssuesByTenant(account.getAccountId()));
@@ -45,9 +50,41 @@ public class TenantIssueController extends HttpServlet {
         }
     }
 
+    private void showDetail(HttpServletRequest request, HttpServletResponse response,
+            MaintenanceService service, Account account) throws ServletException, IOException {
+        int ticketId;
+        try {
+            ticketId = Integer.parseInt(request.getParameter("id"));
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        MaintenanceRequest issue;
+        try {
+            // SELECT có c.tenantId = ? nên dù OwnershipFilter bị gỡ vẫn không đọc được sự cố người khác.
+            issue = service.getIssueForTenant(ticketId, account.getAccountId());
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Lỗi CSDL khi tải chi tiết sự cố cho tenant", e);
+            throw new ServletException("Sự cố hệ thống khi tải dữ liệu.", e);
+        }
+        if (issue == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        request.setAttribute("issue", issue);
+        request.getRequestDispatcher("/WEB-INF/views/tenant/issue-detail.jsp").forward(request, response);
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // Trang chi tiết chỉ để xem; form tạo sự cố chỉ gửi tới /tenant/issues.
+        if (!"/tenant/issues".equals(request.getServletPath())) {
+            response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+            return;
+        }
+
         // SỬA LỖI 1: Báo cho server đọc dữ liệu Form theo UTF-8 TRƯỚC KHI lấy tham số
         request.setCharacterEncoding("UTF-8");
 

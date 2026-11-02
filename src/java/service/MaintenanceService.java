@@ -60,6 +60,34 @@ public class MaintenanceService {
         }
     }
 
+    public boolean isIssueOwnedByTenant(int ticketId, int tenantId) throws SQLException {
+        if (ticketId <= 0 || tenantId <= 0) {
+            return false;
+        }
+        try (MaintenanceDAO dao = new MaintenanceDAO()) {
+            if (dao.getConnection() == null) {
+                throw new SQLException("Không thể kết nối đến cơ sở dữ liệu.");
+            }
+            return dao.isRequestOwnedByTenant(ticketId, tenantId);
+        }
+    }
+
+    /**
+     * Trả null khi sự cố không tồn tại hoặc không thuộc tenant: controller trả
+     * 404 cho cả hai trường hợp để không lộ id nào có thật.
+     */
+    public MaintenanceRequest getIssueForTenant(int ticketId, int tenantId) throws SQLException {
+        if (ticketId <= 0 || tenantId <= 0) {
+            return null;
+        }
+        try (MaintenanceDAO dao = new MaintenanceDAO()) {
+            if (dao.getConnection() == null) {
+                throw new SQLException("Không thể kết nối đến cơ sở dữ liệu.");
+            }
+            return dao.findRequestByIdForTenant(ticketId, tenantId);
+        }
+    }
+
     // ================= UC12: QUẢN LÝ XỬ LÝ SỰ CỐ =================
     private boolean isValidStatus(String status) {
         return "OPEN".equals(status) || "IN_PROGRESS".equals(status) || "DONE".equals(status);

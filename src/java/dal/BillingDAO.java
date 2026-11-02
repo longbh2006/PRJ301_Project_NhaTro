@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
  *
  * @author Lenovo
  */
-public class BillingDAO extends DBContext {
+public class BillingDAO extends DBContext implements AutoCloseable {
 
     public MeterReading findLastReading(int roomId) throws SQLException {
         String sql = "SELECT TOP (1) *"
@@ -161,7 +161,41 @@ public class BillingDAO extends DBContext {
             throw new RuntimeException("Lỗi truy vấn hoá đơn theo id", e);
         }
 
-        return null; // không tìm thấy                                                                                                                                                                                           
+        return null; // không tìm thấy
+    }
+
+    /**
+     * OwnershipFilter: hoá đơn có thuộc hợp đồng của tenant này không.
+     */
+    public boolean isInvoiceOwnedByTenant(int invoiceId, int tenantId) throws SQLException {
+        String sql = "SELECT 1 FROM Invoice i JOIN Contract c ON i.contractId = c.contractId WHERE i.invoiceId = ? AND c.tenantId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, invoiceId);
+            ps.setInt(2, tenantId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    /**
+     * Lớp chặn IDOR thứ 3: dù filter bị gỡ, câu SELECT vẫn chỉ trả hoá đơn của
+     * chính tenant (id lấy từ session).
+     */
+    public Invoice findInvoiceByIdForTenant(int invoiceId, int tenantId) throws SQLException {
+        String sql = "SELECT i.*, r.roomCode FROM Invoice i JOIN Contract c ON i.contractId = c.contractId JOIN Room r ON c.roomId = r.roomId WHERE i.invoiceId = ? AND c.tenantId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, invoiceId);
+            ps.setInt(2, tenantId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Invoice inv = mapInvoice(rs);
+                    inv.setRoomCode(rs.getString("roomCode"));
+                    return inv;
+                }
+            }
+        }
+        return null;
     }
 
     public UtilityPrice currentPrice() {
@@ -189,6 +223,13 @@ public class BillingDAO extends DBContext {
         p.setEffectiveFrom(rs.getObject("effectiveFrom", LocalDate.class));
         p.setCreatedAt(rs.getObject("createdAt", LocalDateTime.class));
         return p;
+    }
+
+    @Override
+    public void close() throws SQLException {
+        if (connection != null) {
+            connection.close();
+        }
     }
 
 }

@@ -73,7 +73,10 @@
                             <c:otherwise>
                                 <c:forEach var="issue" items="${issues}">
                                     <tr>
-                                        <td><strong><c:out value="${issue.ticketCode}" /></strong></td>
+                                        <td>
+                                            <c:url var="issueUrl" value="/tenant/issues/detail"><c:param name="id" value="${issue.ticketId}" /></c:url>
+                                            <a href="<c:out value='${issueUrl}' />"><strong><c:out value="${issue.ticketCode}" /></strong></a>
+                                        </td>
                                         <td><strong><c:out value="${issue.roomCode}" /></strong></td>
                                         <td>
                                             <strong><c:out value="${issue.title}" /></strong>

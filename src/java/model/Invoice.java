@@ -7,6 +7,8 @@ package model;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 /**
  *
@@ -33,8 +35,10 @@ public class Invoice {
     private LocalDateTime paidAt;
     private int priceId;
     private LocalDateTime createdAt;
-    
-    
+    // Lấy kèm từ Room khi người thuê xem chi tiết hoá đơn.
+    private String roomCode;
+
+
     public int getInvoiceId() {
         return invoiceId;
     }
@@ -163,7 +167,27 @@ public class Invoice {
         this.createdAt = createdAt;
     }
 
-   
+    public String getRoomCode() {
+        return roomCode;
+    }
+
+    public void setRoomCode(String roomCode) {
+        this.roomCode = roomCode;
+    }
+
+    public String getInvoiceCode() {
+        return String.format(Locale.ROOT, "HD%03d", invoiceId);
+    }
+
+    public String getDueDateDisplay() {
+        return dueDate != null ? dueDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "";
+    }
+
+    public String getPaidAtDisplay() {
+        return paidAt != null ? paidAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "";
+    }
+
+
     
     
 }
