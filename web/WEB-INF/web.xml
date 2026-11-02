@@ -65,6 +65,15 @@
         <servlet-name>TenantIssueController</servlet-name>
         <servlet-class>controller.TenantIssueController</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>TenantInvoiceController</servlet-name>
+        <servlet-class>controller.TenantInvoiceController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>TenantInvoiceController</servlet-name>
+        <url-pattern>/tenant/invoices</url-pattern>
+        <url-pattern>/tenant/invoices/detail</url-pattern>
+    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ManagerRequestServlet</servlet-name>
         <url-pattern>/manager/requests</url-pattern>

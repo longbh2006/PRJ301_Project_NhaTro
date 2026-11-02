@@ -7,6 +7,7 @@ package model;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  *
@@ -33,8 +34,83 @@ public class Invoice {
     private LocalDateTime paidAt;
     private int priceId;
     private LocalDateTime createdAt;
-    
-    
+
+    // Trường hiển thị cho trang hoá đơn của người thuê (NT-38), lấy qua JOIN.
+    private String roomCode;
+    private boolean overdue;
+    private int numPeople;
+    private Integer electricIndex;
+    private Integer waterIndex;
+    private UtilityPrice utilityPrice;
+
+    public String getCode() {
+        return String.format("INV%03d", invoiceId);
+    }
+
+    public String getPeriodDisplay() {
+        return String.format("%02d/%d", month, year);
+    }
+
+    public String getDueDateDisplay() {
+        return dueDate != null ? dueDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "";
+    }
+
+    public String getPaidAtDisplay() {
+        return paidAt != null ? paidAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "";
+    }
+
+    public boolean isUnpaid() {
+        return STATUS_UNPAID.equals(status);
+    }
+
+    public String getRoomCode() {
+        return roomCode;
+    }
+
+    public void setRoomCode(String roomCode) {
+        this.roomCode = roomCode;
+    }
+
+    public boolean isOverdue() {
+        return overdue;
+    }
+
+    public void setOverdue(boolean overdue) {
+        this.overdue = overdue;
+    }
+
+    public int getNumPeople() {
+        return numPeople;
+    }
+
+    public void setNumPeople(int numPeople) {
+        this.numPeople = numPeople;
+    }
+
+    public Integer getElectricIndex() {
+        return electricIndex;
+    }
+
+    public void setElectricIndex(Integer electricIndex) {
+        this.electricIndex = electricIndex;
+    }
+
+    public Integer getWaterIndex() {
+        return waterIndex;
+    }
+
+    public void setWaterIndex(Integer waterIndex) {
+        this.waterIndex = waterIndex;
+    }
+
+    public UtilityPrice getUtilityPrice() {
+        return utilityPrice;
+    }
+
+    public void setUtilityPrice(UtilityPrice utilityPrice) {
+        this.utilityPrice = utilityPrice;
+    }
+
     public int getInvoiceId() {
         return invoiceId;
     }
