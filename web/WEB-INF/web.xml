@@ -37,10 +37,6 @@
         <servlet-class>controller.MeterController</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>InvoiceController</servlet-name>
-        <servlet-class>controller.InvoiceController</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>TenantRequestController</servlet-name>
         <servlet-class>controller.TenantRequestController</servlet-class>
     </servlet>
@@ -92,10 +88,6 @@
     <servlet-mapping>
         <servlet-name>MeterController</servlet-name>
         <url-pattern>/manager/meters</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>InvoiceController</servlet-name>
-        <url-pattern>/manager/invoices</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>RoomController</servlet-name>
