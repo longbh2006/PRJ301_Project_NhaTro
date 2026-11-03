@@ -73,7 +73,7 @@
                         <rr:navLink path="/manager/contracts" label="Quản lý hợp đồng" />
                         <rr:navLink path="/manager/meters" label="Điện nước" />
                         <rr:navLink path="/manager/invoices" label="Hóa đơn" />
-                        <rr:navLink path="/manager/revenue" label="Doanh thu" />
+                        <rr:navLink path="/manager/report" label="Doanh thu" />
                         <rr:navLink path="/manager/issues" label="Xử lý sự cố" />
                     </c:when>
                     <c:when test="${layoutRole eq 'ADMIN'}">
