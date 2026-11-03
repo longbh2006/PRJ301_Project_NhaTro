@@ -58,6 +58,18 @@ Cổng giả làm phần việc của VNPay bằng cùng HashSecret:
 Dữ liệu CSDL local đã đổi sau khi kiểm tra (hoá đơn 6, 9 PAID; Payment 10–12);
 chạy lại `database/setup.sql` để về dữ liệu mẫu.
 
+## Sửa sau khi merge vào main (03/11/2026)
+
+Lỗi: sau khi merge NT-38 + NT-44, nút "Thanh toán VNPay" trên `/tenant/invoices/detail`
+vẫn mang thuộc tính `disabled` từ NT-38 nên bấm không được. Lần kiểm tra trước chỉ đi
+qua trang `/tenant/pay` của NT-44 trên nhánh riêng, chưa đi qua trang chi tiết hoá đơn.
+
+Đã bỏ `disabled` và đổi dòng ghi chú. Kiểm tra lại trên `main` đã merge (có cả
+OwnershipFilter của NT-42): `chi.le` → `/tenant/invoices` → chi tiết hoá đơn 7 → nút gửi
+`POST /tenant/pay` → 302 sang cổng → "Thanh toán thành công" → IPN `00` → trang return
+"Đã ghi nhận thanh toán" → trang chi tiết đổi badge "Đã trả", nút thanh toán biến mất.
+Thiếu `VNPay.properties` thì bấm nút sẽ quay về `/tenant/pay` kèm thông báo "Thiếu cấu hình VNPay".
+
 ## Chưa kiểm tra
 
 - **Sandbox VNPay thật với thẻ test NCB**: chưa có TmnCode/HashSecret sandbox trên máy này.
