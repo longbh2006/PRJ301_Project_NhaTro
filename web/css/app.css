@@ -55,6 +55,12 @@ body {
     margin: 40px auto;
 }
 
+.roomrent-register {
+    width: 100%;
+    max-width: 800px;
+    margin: 40px auto;
+}
+
 [hidden] {
     display: none !important;
 }
@@ -312,7 +318,8 @@ body {
     .roomrent-content .card.p-4 { padding: 16px !important; }
     .roomrent-content .form-control,
     .roomrent-content .form-select { font-size: 16px; }
-    .roomrent-login { margin: 16px auto; }
+    .roomrent-login,
+    .roomrent-register { margin: 16px auto; }
     .roomrent-footer { padding: 20px 16px; }
 }
 
