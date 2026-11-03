@@ -32,11 +32,13 @@ public class OwnershipFilter implements Filter {
         // Id người thuê chỉ lấy từ session, không bao giờ lấy từ URL hoặc form.
         HttpSession session = httpReq.getSession(false);
         Account account = session == null ? null : (Account) session.getAttribute("account");
-        int resourceId = parseId(httpReq.getParameter("id"));
+        String path = httpReq.getServletPath();
+        // /tenant/pay (NT-44) nhận invoiceId ở cả GET lẫn form POST; các trang chi tiết nhận id.
+        int resourceId = parseId(httpReq.getParameter("/tenant/pay".equals(path) ? "invoiceId" : "id"));
 
         boolean owned;
         try {
-            owned = account != null && resourceId > 0 && isOwned(httpReq.getServletPath(), resourceId, account.getAccountId());
+            owned = account != null && resourceId > 0 && isOwned(path, resourceId, account.getAccountId());
         } catch (SQLException e) {
             throw new ServletException("Không thể kiểm tra quyền sở hữu dữ liệu.", e);
         }
@@ -53,7 +55,7 @@ public class OwnershipFilter implements Filter {
         switch (path) {
             case "/tenant/invoices/detail":
             case "/tenant/pay":
-                return invoiceService.isInvoiceOwnedByTenant(resourceId, tenantId);
+                return invoiceService.isOwnedByTenant(tenantId, resourceId);
             case "/tenant/issues/detail":
                 return maintenanceService.isIssueOwnedByTenant(resourceId, tenantId);
             default:

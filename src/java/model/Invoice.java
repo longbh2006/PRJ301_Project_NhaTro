@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 
 /**
  *
@@ -35,9 +34,92 @@ public class Invoice {
     private LocalDateTime paidAt;
     private int priceId;
     private LocalDateTime createdAt;
-    // Lấy kèm từ Room khi người thuê xem chi tiết hoá đơn.
-    private String roomCode;
 
+    // Các trường hiển thị lấy qua JOIN (dùng cho cả quản lý và người thuê)
+    private String roomCode;
+    private String tenantName;
+    private boolean overdue;
+    private int numPeople;
+    private Integer electricIndex;
+    private Integer waterIndex;
+    private UtilityPrice utilityPrice;
+
+    // Helper methods hiển thị UI
+    public String getCode() {
+        return String.format("INV%03d", invoiceId);
+    }
+
+    public String getPeriodDisplay() {
+        return String.format("%02d/%d", month, year);
+    }
+
+    public String getDueDateDisplay() {
+        return dueDate != null ? dueDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "";
+    }
+
+    public String getPaidAtDisplay() {
+        return paidAt != null ? paidAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "";
+    }
+
+    public boolean isUnpaid() {
+        return STATUS_UNPAID.equals(status);
+    }
+
+    public String getRoomCode() {
+        return roomCode;
+    }
+
+    public void setRoomCode(String roomCode) {
+        this.roomCode = roomCode;
+    }
+
+    public String getTenantName() {
+        return tenantName;
+    }
+
+    public void setTenantName(String tenantName) {
+        this.tenantName = tenantName;
+    }
+
+    public boolean isOverdue() {
+        return overdue;
+    }
+
+    public void setOverdue(boolean overdue) {
+        this.overdue = overdue;
+    }
+
+    public int getNumPeople() {
+        return numPeople;
+    }
+
+    public void setNumPeople(int numPeople) {
+        this.numPeople = numPeople;
+    }
+
+    public Integer getElectricIndex() {
+        return electricIndex;
+    }
+
+    public void setElectricIndex(Integer electricIndex) {
+        this.electricIndex = electricIndex;
+    }
+
+    public Integer getWaterIndex() {
+        return waterIndex;
+    }
+
+    public void setWaterIndex(Integer waterIndex) {
+        this.waterIndex = waterIndex;
+    }
+
+    public UtilityPrice getUtilityPrice() {
+        return utilityPrice;
+    }
+
+    public void setUtilityPrice(UtilityPrice utilityPrice) {
+        this.utilityPrice = utilityPrice;
+    }
 
     public int getInvoiceId() {
         return invoiceId;
@@ -166,28 +248,4 @@ public class Invoice {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
-
-    public String getRoomCode() {
-        return roomCode;
-    }
-
-    public void setRoomCode(String roomCode) {
-        this.roomCode = roomCode;
-    }
-
-    public String getInvoiceCode() {
-        return String.format(Locale.ROOT, "HD%03d", invoiceId);
-    }
-
-    public String getDueDateDisplay() {
-        return dueDate != null ? dueDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "";
-    }
-
-    public String getPaidAtDisplay() {
-        return paidAt != null ? paidAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "";
-    }
-
-
-    
-    
 }
