@@ -69,6 +69,14 @@
         <url-pattern>/manager/contracts</url-pattern>
     </servlet-mapping>
     <servlet>
+        <servlet-name>ManagerReportController</servlet-name>
+        <servlet-class>controller.ManagerReportController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ManagerReportController</servlet-name>
+        <url-pattern>/manager/report</url-pattern>
+    </servlet-mapping>
+    <servlet>
         <servlet-name>AdminRoomController</servlet-name>
         <servlet-class>controller.AdminRoomController</servlet-class>
     </servlet>
