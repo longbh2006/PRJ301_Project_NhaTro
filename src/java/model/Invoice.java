@@ -33,8 +33,15 @@ public class Invoice {
     private LocalDateTime paidAt;
     private int priceId;
     private LocalDateTime createdAt;
-    
-    
+    // Chỉ dùng để hiển thị danh sách hoá đơn, lấy từ Room và Account khi JOIN.
+    private String roomCode;
+    private String tenantName;
+
+    public String getRoomCode() { return roomCode; }
+    public void setRoomCode(String roomCode) { this.roomCode = roomCode; }
+    public String getTenantName() { return tenantName; }
+    public void setTenantName(String tenantName) { this.tenantName = tenantName; }
+
     public int getInvoiceId() {
         return invoiceId;
     }
