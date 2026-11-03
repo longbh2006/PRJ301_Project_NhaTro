@@ -38,9 +38,18 @@ if (!$JdkPath) {
 }
 $javaPath = Join-Path $JdkPath 'bin/java.exe'
 $antLauncher = Join-Path $AntPath 'lib/ant-launcher.jar'
+# nbproject/project.properties trỏ JSTL tới thư mục ngoài project (..\..\Codes\allowedlib)
+# chỉ có trên máy tạo project; build bằng bản JSTL đã nằm sẵn trong web/WEB-INF/lib.
+$jstlJar = Join-Path $projectPath 'web/WEB-INF/lib/jakarta.servlet.jsp.jstl-3.0.1.jar'
+$jstlApiJar = Join-Path $projectPath 'web/WEB-INF/lib/jakarta.servlet.jsp.jstl-api-3.0.0.jar'
+# nbproject/private/private.properties (đang được Git theo dõi) trỏ tới build.properties của máy khác,
+# nên lấy CopyLibs trực tiếp từ bản cài NetBeans chứa Ant.
+$copyLibsJar = Join-Path (Split-Path -Parent (Split-Path -Parent $AntPath)) `
+    'java/ant/extra/org-netbeans-modules-java-j2seproject-copylibstask.jar'
 foreach ($requiredPath in @($javaPath, $antLauncher, (Join-Path $TomcatPath 'bin/bootstrap.jar'),
         (Join-Path $projectPath 'web/WEB-INF/ConnectDB.properties'),
-        (Join-Path $projectPath 'web/WEB-INF/lib/mssql-jdbc-13.2.0.jre11.jar'))) {
+        (Join-Path $projectPath 'web/WEB-INF/lib/mssql-jdbc-13.2.0.jre11.jar'),
+        $jstlJar, $jstlApiJar, $copyLibsJar)) {
     if (!(Test-Path -LiteralPath $requiredPath)) {
         throw "Required file is missing: $requiredPath"
     }
@@ -66,7 +75,10 @@ foreach ($generatedPath in @($buildPath, $distPath)) {
 Push-Location $projectPath
 try {
     & $javaPath -cp $antLauncher org.apache.tools.ant.launch.Launcher `
-        "-Dbuild.dir=$buildPath" "-Ddist.dir=$distPath" "-Dj2ee.server.home=$TomcatPath" dist
+        "-Dbuild.dir=$buildPath" "-Ddist.dir=$distPath" "-Dj2ee.server.home=$TomcatPath" `
+        "-Dfile.reference.jakarta.servlet.jsp.jstl-2.0.0.jar=$jstlJar" `
+        "-Dfile.reference.jakarta.servlet.jsp.jstl-api-2.0.0.jar=$jstlApiJar" `
+        "-Dlibs.CopyLibs.classpath=$copyLibsJar" dist
     if ($LASTEXITCODE -ne 0) {
         throw 'Project build failed.'
     }
