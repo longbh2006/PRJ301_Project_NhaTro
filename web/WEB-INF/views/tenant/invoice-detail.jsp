@@ -93,11 +93,11 @@
 </div>
 
 <c:if test="${invoice.unpaid}">
-    <%-- UC07 (tuần 4) sẽ cài POST /tenant/pay; tới lúc đó nút chỉ hiển thị, chưa gửi được. --%>
+    <%-- UC07 (NT-44): POST /tenant/pay tạo lần thử PENDING rồi chuyển sang cổng VNPay. --%>
     <form method="post" action="<c:url value='/tenant/pay' />" class="d-flex flex-wrap align-items-center gap-3">
         <input type="hidden" name="invoiceId" value="${invoice.invoiceId}" />
-        <button type="submit" class="btn btn-primary px-4" disabled aria-describedby="pay-note">Thanh toán VNPay</button>
-        <span id="pay-note" class="small text-secondary">Chức năng thanh toán trực tuyến sẽ mở trong bản cập nhật tới.</span>
+        <button type="submit" class="btn btn-primary px-4" aria-describedby="pay-note">Thanh toán VNPay</button>
+        <span id="pay-note" class="small text-secondary">Bạn sẽ được chuyển sang cổng VNPay để thanh toán.</span>
     </form>
 </c:if>
 
