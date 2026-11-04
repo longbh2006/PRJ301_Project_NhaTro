@@ -62,6 +62,9 @@
                 <div><dt>Số người</dt><dd><c:out value="${selectedRequest.numPeople}" /> người</dd></div>
             </dl>
             <p class="rental-detail-note">Ghi chú: <c:out value="${selectedRequest.note}" default="Không có ghi chú." /></p>
+            <c:if test="${selectedRequest.status eq 'REJECTED'}">
+                <p class="rental-detail-note">Lý do từ chối: <c:out value="${selectedRequest.decisionNote}" default="Quản lý không ghi lý do." /></p>
+            </c:if>
         </c:when>
         <c:otherwise><p class="rental-help mb-0">Chọn “Xem” ở yêu cầu để kiểm tra ngày dọn vào, thời hạn thuê, số người và ghi chú.</p></c:otherwise>
     </c:choose>

@@ -28,7 +28,7 @@ public class TenantContractController extends HttpServlet {
             return;
         }
         try {
-            request.setAttribute("contract", rentalService.findActiveContractByTenant((Integer) accountId));
+            request.setAttribute("contracts", rentalService.findContractsByTenant((Integer) accountId));
             request.getRequestDispatcher("/WEB-INF/views/tenant/contract.jsp").forward(request, response);
         } catch (SQLException ex) {
             throw new ServletException("Không thể tải hợp đồng thuê. Vui lòng thử lại sau.", ex);
