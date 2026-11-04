@@ -93,6 +93,9 @@
                             <input type="hidden" name="action" value="reject">
                             <input type="hidden" name="requestId" value="${rental.requestId}">
                             <input type="hidden" name="roomId" value="${fn:escapeXml(requestScope.roomId)}">
+                            <label class="form-label" for="note-${rental.requestId}">Lý do từ chối (không bắt buộc)</label>
+                            <textarea class="form-control mb-2" id="note-${rental.requestId}" name="decisionNote"
+                                      rows="2" maxlength="255"><c:if test="${requestScope.formRequestId eq rental.requestId}"><c:out value="${param.decisionNote}" /></c:if></textarea>
                             <button type="submit" class="btn btn-outline-danger">Từ chối yêu cầu #<c:out value="${rental.requestId}" /></button>
                         </form>
                     </td>

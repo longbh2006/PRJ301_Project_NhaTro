@@ -104,7 +104,7 @@ public class RentalDAO extends DBContext implements AutoCloseable {
     public List<RentalRequest> findRequestsByTenant(int tenantId) throws SQLException {
         String sql = """
                 SELECT rr.requestId, rr.tenantId, rr.roomId, rr.moveInDate, rr.months, rr.numPeople,
-                       rr.note, rr.status, rr.createdAt, rr.decidedAt, rr.decidedBy, r.roomCode
+                       rr.note, rr.status, rr.createdAt, rr.decidedAt, rr.decidedBy, rr.decisionNote, r.roomCode
                 FROM RentalRequest rr JOIN Room r ON r.roomId = rr.roomId
                 WHERE rr.tenantId = ?
                 ORDER BY rr.createdAt DESC, rr.requestId DESC
@@ -137,29 +137,32 @@ public class RentalDAO extends DBContext implements AutoCloseable {
         }
     }
 
-    public Contract findActiveContractByTenant(int tenantId) throws SQLException {
+    /** Hợp đồng ACTIVE (tối đa 1) đứng đầu, sau đó là lịch sử ENDED mới nhất trước. */
+    public List<Contract> findContractsByTenant(int tenantId) throws SQLException {
         String sql = """
                 SELECT c.contractId, c.requestId, c.tenantId, c.roomId, c.startDate,
                        c.endDate, c.monthlyRent, c.deposit, c.numPeople,
                        c.startElectricIndex, c.startWaterIndex, c.status, c.endedAt, r.roomCode
                 FROM Contract c JOIN Room r ON r.roomId = c.roomId
-                WHERE c.tenantId = ? AND c.status = ?
+                WHERE c.tenantId = ?
+                ORDER BY CASE WHEN c.status = ? THEN 0 ELSE 1 END, c.startDate DESC, c.contractId DESC
                 """;
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, tenantId);
             ps.setString(2, "ACTIVE");
             try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) {
-                    return null;
+                List<Contract> contracts = new ArrayList<>();
+                while (rs.next()) {
+                    Contract contract = new Contract(rs.getInt("contractId"), rs.getInt("requestId"),
+                            rs.getInt("tenantId"), rs.getInt("roomId"),
+                            rs.getObject("startDate", LocalDate.class), rs.getObject("endDate", LocalDate.class),
+                            rs.getBigDecimal("monthlyRent"), rs.getBigDecimal("deposit"), rs.getInt("numPeople"),
+                            rs.getInt("startElectricIndex"), rs.getInt("startWaterIndex"),
+                            rs.getString("status"), rs.getObject("endedAt", LocalDateTime.class));
+                    contract.setRoomCode(rs.getString("roomCode"));
+                    contracts.add(contract);
                 }
-                Contract contract = new Contract(rs.getInt("contractId"), rs.getInt("requestId"),
-                        rs.getInt("tenantId"), rs.getInt("roomId"),
-                        rs.getObject("startDate", LocalDate.class), rs.getObject("endDate", LocalDate.class),
-                        rs.getBigDecimal("monthlyRent"), rs.getBigDecimal("deposit"), rs.getInt("numPeople"),
-                        rs.getInt("startElectricIndex"), rs.getInt("startWaterIndex"),
-                        rs.getString("status"), rs.getObject("endedAt", LocalDateTime.class));
-                contract.setRoomCode(rs.getString("roomCode"));
-                return contract;
+                return contracts;
             }
         }
     }
@@ -171,7 +174,7 @@ public class RentalDAO extends DBContext implements AutoCloseable {
     public List<RentalRequest> findPendingRequests(Integer roomId) throws SQLException {
         String sql = """
                 SELECT r.requestId, r.tenantId, r.roomId, r.moveInDate, r.months, r.numPeople,
-                       r.note, r.status, r.createdAt, r.decidedAt, r.decidedBy,
+                       r.note, r.status, r.createdAt, r.decidedAt, r.decidedBy, r.decisionNote,
                        room.roomCode, room.monthlyPrice, a.fullName AS tenantName
                 FROM RentalRequest r
                 JOIN Room room ON room.roomId = r.roomId
@@ -201,7 +204,7 @@ public class RentalDAO extends DBContext implements AutoCloseable {
     public RentalRequest findById(int id) throws SQLException {
         String sql = """
                 SELECT requestId, tenantId, roomId, moveInDate, months, numPeople,
-                       note, status, createdAt, decidedAt, decidedBy
+                       note, status, createdAt, decidedAt, decidedBy, decisionNote
                 FROM RentalRequest
                 WHERE requestId = ?
                 """;
@@ -255,31 +258,38 @@ public class RentalDAO extends DBContext implements AutoCloseable {
         }
     }
 
-    public int decidePendingRequest(int requestId, int managerId, String status) throws SQLException {
+    /** decisionNote có thể null: duyệt không cần lý do, còn lý do từ chối là tùy chọn. */
+    public int decidePendingRequest(int requestId, int managerId, String status,
+            String decisionNote) throws SQLException {
         String sql = """
-                UPDATE RentalRequest SET status = ?, decidedAt = SYSDATETIME(), decidedBy = ?
+                UPDATE RentalRequest SET status = ?, decidedAt = SYSDATETIME(), decidedBy = ?,
+                       decisionNote = ?
                 WHERE requestId = ? AND status = ?
                 """;
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, status);
             ps.setInt(2, managerId);
-            ps.setInt(3, requestId);
-            ps.setString(4, "PENDING");
+            ps.setNString(3, decisionNote);
+            ps.setInt(4, requestId);
+            ps.setString(5, "PENDING");
             return ps.executeUpdate();
         }
     }
 
-    public int rejectOtherPendingRequests(int roomId, int approvedRequestId, int managerId) throws SQLException {
+    public int rejectOtherPendingRequests(int roomId, int approvedRequestId, int managerId,
+            String decisionNote) throws SQLException {
         String sql = """
-                UPDATE RentalRequest SET status = ?, decidedAt = SYSDATETIME(), decidedBy = ?
+                UPDATE RentalRequest SET status = ?, decidedAt = SYSDATETIME(), decidedBy = ?,
+                       decisionNote = ?
                 WHERE roomId = ? AND requestId <> ? AND status = ?
                 """;
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, "REJECTED");
             ps.setInt(2, managerId);
-            ps.setInt(3, roomId);
-            ps.setInt(4, approvedRequestId);
-            ps.setString(5, "PENDING");
+            ps.setNString(3, decisionNote);
+            ps.setInt(4, roomId);
+            ps.setInt(5, approvedRequestId);
+            ps.setString(6, "PENDING");
             return ps.executeUpdate();
         }
     }
@@ -314,7 +324,7 @@ public class RentalDAO extends DBContext implements AutoCloseable {
     }
 
     private RentalRequest mapRequest(ResultSet rs) throws SQLException {
-        return new RentalRequest(
+        RentalRequest request = new RentalRequest(
                 rs.getInt("requestId"),
                 rs.getInt("tenantId"),
                 rs.getInt("roomId"),
@@ -326,6 +336,8 @@ public class RentalDAO extends DBContext implements AutoCloseable {
                 rs.getObject("createdAt", LocalDateTime.class),
                 rs.getObject("decidedAt", LocalDateTime.class),
                 rs.getObject("decidedBy", Integer.class));
+        request.setDecisionNote(rs.getNString("decisionNote"));
+        return request;
     }
 
     private int generatedId(PreparedStatement ps) throws SQLException {

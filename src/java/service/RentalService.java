@@ -68,7 +68,7 @@ public class RentalService {
                 if (request.getMoveInDate() == null || request.getMonths() < 1 || request.getMonths() > 24) {
                     throw new BusinessException("Ngày nhận phòng hoặc thời hạn thuê không hợp lệ.");
                 }
-                if (dao.decidePendingRequest(requestId, managerId, "APPROVED") != 1) {
+                if (dao.decidePendingRequest(requestId, managerId, "APPROVED", null) != 1) {
                     throw new BusinessException("Yêu cầu đã được xử lý. Vui lòng tải lại danh sách.");
                 }
                 Contract contract = new Contract(0, requestId, request.getTenantId(), request.getRoomId(),
@@ -76,7 +76,9 @@ public class RentalService {
                         room.monthlyPrice(), deposit, request.getNumPeople(),
                         electricIndex, waterIndex, "ACTIVE", null);
                 int contractId = dao.insertContract(con, contract);
-                dao.rejectOtherPendingRequests(request.getRoomId(), requestId, managerId);
+                // Ghi lý do để người thuê bị từ chối tự động biết vì sao (UC09 bước 8).
+                dao.rejectOtherPendingRequests(request.getRoomId(), requestId, managerId,
+                        "Phòng đã được duyệt cho yêu cầu " + request.getRequestCode() + ".");
                 con.commit();
                 return contractId;
             } catch (SQLException ex) {
@@ -91,15 +93,21 @@ public class RentalService {
         }
     }
 
-    public void reject(int requestId, int managerId) throws SQLException, BusinessException {
+    public void reject(int requestId, int managerId, String decisionNote)
+            throws SQLException, BusinessException {
         validateIds(requestId, managerId);
+        String note = decisionNote == null ? "" : decisionNote.trim();
+        if (note.length() > 255) {
+            throw new IllegalArgumentException("Lý do từ chối không được vượt quá 255 ký tự.");
+        }
         try (RentalDAO dao = openDAO()) {
             Connection con = dao.getConnection();
             con.setAutoCommit(false);
             try {
                 requireManager(dao, managerId);
                 requirePending(requireRequest(dao, requestId));
-                if (dao.decidePendingRequest(requestId, managerId, "REJECTED") != 1) {
+                if (dao.decidePendingRequest(requestId, managerId, "REJECTED",
+                        note.isEmpty() ? null : note) != 1) {
                     throw new BusinessException("Yêu cầu đã được xử lý. Vui lòng tải lại danh sách.");
                 }
                 con.commit();
@@ -180,12 +188,13 @@ public class RentalService {
         }
     }
 
-    public Contract findActiveContractByTenant(int tenantId) throws SQLException {
+    /** Gồm hợp đồng ACTIVE và các hợp đồng ENDED để người thuê xem lại lịch sử (UC05 bước 9). */
+    public List<Contract> findContractsByTenant(int tenantId) throws SQLException {
         if (tenantId <= 0) {
             throw new IllegalArgumentException("Tài khoản người thuê không hợp lệ.");
         }
         try (RentalDAO dao = new RentalDAO()) {
-            return dao.findActiveContractByTenant(tenantId);
+            return dao.findContractsByTenant(tenantId);
         }
     }
 
