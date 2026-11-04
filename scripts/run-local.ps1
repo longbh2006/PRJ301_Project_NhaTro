@@ -1,5 +1,7 @@
 param(
     [ValidateRange(1024, 65535)][int]$Port = 8080,
+    # 0.0.0.0 cho điện thoại cùng Wi-Fi mở được trang quét QR của cổng VNPay giả; mặc định chỉ máy này.
+    [ValidateSet('127.0.0.1', '0.0.0.0')][string]$ListenAddress = '127.0.0.1',
     [string]$TomcatPath = 'C:/Program Files/Apache Software Foundation/Tomcat 10.1',
     [string]$AntPath = 'C:/Program Files/NetBeans-17/netbeans/extide/ant',
     [string]$JdkPath,
@@ -98,7 +100,7 @@ $serverConfig = @"
 <?xml version="1.0" encoding="UTF-8"?>
 <Server port="-1">
   <Service name="Catalina">
-    <Connector address="127.0.0.1" port="$Port" protocol="HTTP/1.1" connectionTimeout="20000" />
+    <Connector address="$ListenAddress" port="$Port" protocol="HTTP/1.1" connectionTimeout="20000" />
     <Engine name="Catalina" defaultHost="localhost">
       <Host name="localhost" appBase="webapps" autoDeploy="false" deployOnStartup="true">
         <Context path="/Project_NhaTro" docBase="$webPath" reloadable="false" />

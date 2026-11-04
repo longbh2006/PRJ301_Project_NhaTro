@@ -1,19 +1,32 @@
 # Chép file này thành web/WEB-INF/VNPay.properties (đã nằm trong .gitignore, KHÔNG commit).
 # Biến môi trường cùng nghĩa được ưu tiên hơn file:
-#   VNPAY_TMN_CODE, VNPAY_HASH_SECRET, VNPAY_PAY_URL, VNPAY_RETURN_URL, VNPAY_IPN_URL, VNPAY_FAKE_GATEWAY
+#   VNPAY_TMN_CODE, VNPAY_HASH_SECRET, VNPAY_PAY_URL, VNPAY_API_URL, VNPAY_RETURN_URL, VNPAY_IPN_URL, VNPAY_FAKE_GATEWAY
 
-# --- VNPay sandbox thật: lấy TmnCode/HashSecret trong email đăng ký sandbox ---
-vnp_TmnCode=YOUR_TMN_CODE
-vnp_HashSecret=YOUR_HASH_SECRET
-vnp_PayUrl=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+# --- Chạy local bằng cổng giả (không cần tài khoản VNPay), có QR giả khi chọn VNPAY-QR ---
+vnp_TmnCode=LOCALTEST
+vnp_HashSecret=chuoi-bi-mat-bat-ky-chi-dung-o-may-minh
+vnp_PayUrl=http://127.0.0.1:8080/Project_NhaTro/payment/fake-vnpay
 vnp_ReturnUrl=http://127.0.0.1:8080/Project_NhaTro/payment/return
-# IPN URL của sandbox khai trong trang quản trị merchant VNPay (phải là địa chỉ công khai).
-vnp_FakeGateway=false
+vnp_IpnUrl=http://127.0.0.1:8080/Project_NhaTro/payment/ipn
+vnp_FakeGateway=true
+# Địa chỉ gốc đưa vào mã QR cho điện thoại; bỏ trống thì tự đổi 127.0.0.1 sang IP LAN.
+# Cần chạy .\scripts\run-local.ps1 -ListenAddress 0.0.0.0 để điện thoại cùng Wi-Fi mở được.
+# vnp_FakeQrBaseUrl=http://192.168.1.10:8080/Project_NhaTro
 
-# --- Chạy local bằng cổng giả (VNPay không gọi được IPN về máy dev) ---
-# vnp_TmnCode=LOCALTEST
-# vnp_HashSecret=chuoi-bi-mat-bat-ky-chi-dung-o-may-minh
-# vnp_PayUrl=http://127.0.0.1:8080/Project_NhaTro/payment/fake-vnpay
+# --- VNPay sandbox thật: đăng ký tại https://sandbox.vnpayment.vn/devreg/ ---
+# TmnCode (8 ký tự) và HashSecret nằm trong email VNPay gửi sau khi đăng ký.
+# IPN chỉ tới được khi có địa chỉ công khai (khai IPN URL trong merchant admin).
+# vnp_TmnCode=YOUR_TMN_CODE
+# vnp_HashSecret=YOUR_HASH_SECRET
+# vnp_PayUrl=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+# Trang return tự gọi querydr khi lần thử còn PENDING (sandbox đang trả 99, xem NT-44-validation.md).
+# vnp_ApiUrl=https://sandbox.vnpayment.vn/merchant_webapi/api/transaction
 # vnp_ReturnUrl=http://127.0.0.1:8080/Project_NhaTro/payment/return
-# vnp_IpnUrl=http://127.0.0.1:8080/Project_NhaTro/payment/ipn
-# vnp_FakeGateway=true
+# vnp_FakeGateway=false
+# Chỉ dùng khi chạy local không có IPN: ghi kết quả từ tham số return đã kiểm chữ ký. Server thật để false.
+# vnp_TrustReturnUrl=true
+# Thẻ test sandbox: NCB 9704198526191432198, NGUYEN VAN A, ngày phát hành 07/15, OTP 123456.
+# Phương thức hiện trên trang thanh toán (VNPAYQR, VNBANK, INTCARD, ANY = chọn trên VNPay).
+# Bỏ trống = chỉ VNBANK, vì sandbox chưa bật VNPAY-QR (mã 76) và thẻ quốc tế báo lỗi (mã 01).
+# Cổng giả luôn hiện đủ bốn phương thức.
+# vnp_BankCodes=VNBANK

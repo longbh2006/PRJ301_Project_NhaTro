@@ -197,6 +197,15 @@
         <servlet-name>FakeVnPayController</servlet-name>
         <url-pattern>/payment/fake-vnpay</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>FakeVnPayQrController</servlet-name>
+        <servlet-class>controller.FakeVnPayQrController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>FakeVnPayQrController</servlet-name>
+        <url-pattern>/payment/fake-vnpay/qr</url-pattern>
+        <url-pattern>/payment/fake-vnpay/qr-status</url-pattern>
+    </servlet-mapping>
     <error-page>
         <error-code>403</error-code>
         <location>/WEB-INF/views/error/403.jsp</location>

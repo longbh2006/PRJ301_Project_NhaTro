@@ -93,12 +93,12 @@
 </div>
 
 <c:if test="${invoice.unpaid}">
-    <%-- UC07 (NT-44): POST /tenant/pay tạo lần thử PENDING rồi chuyển sang cổng VNPay. --%>
-    <form method="post" action="<c:url value='/tenant/pay' />" class="d-flex flex-wrap align-items-center gap-3">
-        <input type="hidden" name="invoiceId" value="${invoice.invoiceId}" />
-        <button type="submit" class="btn btn-primary px-4" aria-describedby="pay-note">Thanh toán VNPay</button>
-        <span id="pay-note" class="small text-secondary">Bạn sẽ được chuyển sang cổng VNPay để thanh toán.</span>
-    </form>
+    <%-- UC07 (NT-44): trang /tenant/pay cho chọn phương thức (VNPAY-QR, ATM, thẻ quốc tế) rồi mới tạo lần thử. --%>
+    <c:url var="payUrl" value="/tenant/pay"><c:param name="invoiceId" value="${invoice.invoiceId}" /></c:url>
+    <div class="d-flex flex-wrap align-items-center gap-3">
+        <a class="btn btn-primary px-4" href="<c:out value='${payUrl}' />" aria-describedby="pay-note">Thanh toán VNPay</a>
+        <span id="pay-note" class="small text-secondary">Chọn quét mã VNPAY-QR hoặc thẻ ngân hàng ở bước tiếp theo.</span>
+    </div>
 </c:if>
 
 <%@ include file="/WEB-INF/views/common/_bottom.jspf" %>

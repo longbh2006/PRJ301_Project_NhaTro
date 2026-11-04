@@ -42,6 +42,8 @@ public class TenantPaymentController extends HttpServlet {
             request.setAttribute("errorMessage", session.getAttribute(FLASH_ERROR));
             session.removeAttribute(FLASH_ERROR);
             request.setAttribute("invoice", invoice);
+            // Chỉ hiện phương thức cổng thanh toán đang cấu hình chạy được.
+            request.setAttribute("bankCodes", paymentService.availableBankCodes());
             request.getRequestDispatcher("/WEB-INF/views/tenant/pay.jsp").forward(request, response);
         } catch (SQLException ex) {
             throw new ServletException("Không thể tải hoá đơn. Vui lòng thử lại sau.", ex);
@@ -60,13 +62,19 @@ public class TenantPaymentController extends HttpServlet {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
+        // Thiếu tham số = "" (để VNPay cho chọn); service từ chối giá trị lạ hoặc phương thức đang ẩn.
+        String bankCode = request.getParameter("bankCode");
+        bankCode = bankCode == null ? "" : bankCode.trim();
         try {
-            String paymentUrl = paymentService.createPaymentUrl(tenantId, invoiceId, request.getRemoteAddr());
+            String paymentUrl = paymentService.createPaymentUrl(tenantId, invoiceId, request.getRemoteAddr(),
+                    bankCode);
             if (paymentUrl == null) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
             response.sendRedirect(paymentUrl);
+        } catch (IllegalArgumentException ex) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
         } catch (IllegalStateException ex) {
             request.getSession(false).setAttribute(FLASH_ERROR, ex.getMessage());
             response.sendRedirect(request.getContextPath() + "/tenant/pay?invoiceId=" + invoiceId);

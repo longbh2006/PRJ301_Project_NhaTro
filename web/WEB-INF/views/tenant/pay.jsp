@@ -33,10 +33,35 @@
 
 <c:choose>
     <c:when test="${invoice.status eq 'UNPAID'}">
-        <form method="post" action="<c:url value='/tenant/pay' />" class="d-flex flex-wrap align-items-center gap-3">
+        <form method="post" action="<c:url value='/tenant/pay' />">
             <input type="hidden" name="invoiceId" value="${invoice.invoiceId}" />
-            <button type="submit" class="btn btn-primary px-4">Thanh toán qua VNPay</button>
-            <span class="small text-secondary">Bạn sẽ được chuyển sang cổng VNPay để thanh toán.</span>
+            <fieldset class="card shadow-sm border-0 mb-3">
+                <div class="card-body p-4">
+                    <legend class="h6 fw-bold mb-3">Phương thức thanh toán</legend>
+                    <%-- Danh sách do máy chủ quyết định theo cấu hình cổng; phương thức chưa chạy được thì không hiện. --%>
+                    <c:forEach var="code" items="${bankCodes}" varStatus="loop">
+                        <div class="form-check${loop.last ? '' : ' mb-2'}">
+                            <input class="form-check-input" type="radio" name="bankCode" id="bank-${loop.index}"
+                                   value="${code}"${loop.first ? ' checked' : ''}>
+                            <label class="form-check-label" for="bank-${loop.index}">
+                                <c:choose>
+                                    <c:when test="${code eq 'VNPAYQR'}">
+                                        Quét mã VNPAY-QR
+                                        <span class="d-block small text-secondary">Mở ứng dụng ngân hàng hoặc ví VNPAY để quét mã QR trên trang VNPay.</span>
+                                    </c:when>
+                                    <c:when test="${code eq 'VNBANK'}">Thẻ ATM / tài khoản ngân hàng nội địa</c:when>
+                                    <c:when test="${code eq 'INTCARD'}">Thẻ quốc tế (Visa, MasterCard, JCB)</c:when>
+                                    <c:otherwise>Chọn trên trang VNPay</c:otherwise>
+                                </c:choose>
+                            </label>
+                        </div>
+                    </c:forEach>
+                </div>
+            </fieldset>
+            <div class="d-flex flex-wrap align-items-center gap-3">
+                <button type="submit" class="btn btn-primary px-4">Thanh toán qua VNPay</button>
+                <span class="small text-secondary">Bạn sẽ được chuyển sang cổng VNPay để thanh toán.</span>
+            </div>
         </form>
     </c:when>
     <c:otherwise>

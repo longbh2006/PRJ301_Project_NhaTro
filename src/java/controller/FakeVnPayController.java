@@ -49,6 +49,13 @@ public class FakeVnPayController extends HttpServlet {
         } else {
             request.setAttribute("paymentParams", vnpParams(params));
             request.setAttribute("amount", fakeService.displayAmount(params));
+            if (fakeService.wantsQr(params)) {
+                String token = fakeService.createQrTicket(params);
+                String base = fakeService.qrBaseUrl(request.getScheme(), request.getServerName(),
+                        request.getServerPort(), request.getContextPath());
+                request.setAttribute("qrToken", token);
+                request.setAttribute("qrUrl", base + "/payment/fake-vnpay/qr?token=" + token);
+            }
         }
         request.getRequestDispatcher("/WEB-INF/views/payment/fake-vnpay.jsp").forward(request, response);
     }
