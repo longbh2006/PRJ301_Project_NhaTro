@@ -66,7 +66,7 @@ public class ManagerRequestServlet extends HttpServlet {
                 service.approve(requestId, managerId, deposit, electric, water);
                 successMessage = "Đã duyệt yêu cầu, tạo hợp đồng và từ chối các yêu cầu khác cùng phòng.";
             } else if ("reject".equals(action)) {
-                service.reject(requestId, managerId);
+                service.reject(requestId, managerId, request.getParameter("decisionNote"));
                 successMessage = "Đã từ chối yêu cầu thuê.";
             } else {
                 throw new IllegalArgumentException("Thao tác không hợp lệ.");

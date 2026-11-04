@@ -19,6 +19,7 @@ public class RentalRequest {
     private LocalDateTime createdAt;
     private LocalDateTime decidedAt;
     private Integer decidedBy;
+    private String decisionNote;
     private String roomCode;
     private String tenantName;
     private BigDecimal monthlyPrice;
@@ -128,6 +129,14 @@ public class RentalRequest {
 
     public void setDecidedBy(Integer decidedBy) {
         this.decidedBy = decidedBy;
+    }
+
+    public String getDecisionNote() {
+        return decisionNote;
+    }
+
+    public void setDecisionNote(String decisionNote) {
+        this.decisionNote = decisionNote;
     }
 
     public String getRoomCode() {
