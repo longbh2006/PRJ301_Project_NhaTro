@@ -77,6 +77,15 @@
         <url-pattern>/manager/report</url-pattern>
     </servlet-mapping>
     <servlet>
+        <servlet-name>ManagerInvoiceController</servlet-name>
+        <servlet-class>controller.ManagerInvoiceController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ManagerInvoiceController</servlet-name>
+        <url-pattern>/manager/invoices</url-pattern>
+        <url-pattern>/manager/invoices/detail</url-pattern>
+    </servlet-mapping>
+    <servlet>
         <servlet-name>AdminRoomController</servlet-name>
         <servlet-class>controller.AdminRoomController</servlet-class>
     </servlet>
