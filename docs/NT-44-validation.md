@@ -80,33 +80,49 @@ Thiếu `VNPay.properties` thì bấm nút sẽ quay về `/tenant/pay` kèm th�
 - `POST /tenant/pay` chưa có CSRF token: form NT-38 chưa gửi token. POST giả mạo chỉ tạo
   một lần thử PENDING và mở trang VNPay, người dùng vẫn phải tự nhập thẻ/OTP.
 
-## VNPAY-QR và sandbox thật chạy ở local (04/11/2026)
+## VNPAY-QR (04/11/2026)
 
-- `/tenant/pay` cho chọn phương thức, gửi trong `vnp_BankCode`: **VNPAY-QR** (`VNPAYQR`,
-  mặc định), thẻ ATM nội địa (`VNBANK`), thẻ quốc tế (`INTCARD`), hoặc để trống cho VNPay
-  tự hiện danh sách. Giá trị khác trả 400. Nút trên trang chi tiết hoá đơn mở trang chọn này.
-- **querydr khi quay về**: sandbox không gọi được IPN về `127.0.0.1`. Khi `/payment/return`
-  có chữ ký đúng mà Payment còn PENDING (và không dùng cổng giả), máy chủ gọi
-  `POST vnp_ApiUrl` (`vnp_Command=querydr`, checksum `RequestId|Version|Command|TmnCode|TxnRef|
-  TransactionDate|CreateDate|IpAddr|OrderInfo`, HMAC-SHA512). Chỉ ghi kết quả khi phản hồi có
-  checksum đúng (thứ tự trường theo tài liệu "Truy vấn và hoàn tiền" của VNPay),
-  `vnp_ResponseCode=00`, đúng TmnCode/TxnRef; số tiền vẫn so với Payment trong CSDL và ghi
-  trong cùng transaction với IPN. `vnp_TransactionStatus=00` ⇒ SUCCESS + Invoice PAID;
-  `02` ⇒ FAILED; trạng thái khác hoặc lỗi mạng ⇒ giữ PENDING. Tham số trên URL return vẫn
-  không bao giờ đủ để ghi PAID.
-- Cách chạy: đăng ký sandbox, điền TmnCode/HashSecret vào `VNPay.properties` theo mẫu
-  [`VNPay.properties.example`](VNPay.properties.example) (`vnp_FakeGateway=false`). Thẻ test
-  thành công (trang demo VNPay): NCB `9704198526191432198`, `NGUYEN VAN A`, ngày phát hành
-  `07/15`, OTP `123456`.
+### Chọn phương thức
 
-| Thao tác (Tomcat local cổng 8081) | Kết quả thực tế |
+`/tenant/pay` cho chọn phương thức, gửi trong `vnp_BankCode`: **VNPAY-QR** (`VNPAYQR`,
+mặc định), thẻ ATM nội địa (`VNBANK`), thẻ quốc tế (`INTCARD`), hoặc để trống cho cổng
+tự hiện danh sách. Giá trị khác trả 400. Nút trên trang chi tiết hoá đơn mở trang chọn này.
+
+### QR trên cổng giả local
+
+Chọn VNPAY-QR với `vnp_FakeGateway=true` thì `/payment/fake-vnpay` hiện mã QR (qrcodejs 1.0.0,
+file `web/js/qrcode.min.js` khớp SRI cdnjs) trỏ tới `/payment/fake-vnpay/qr?token=…`:
+
+1. Điện thoại quét mã (hoặc bấm link dưới mã) → trang "Xác nhận thanh toán" / "Hủy giao dịch".
+2. Xác nhận → cổng giả ký kết quả (`vnp_BankCode=VNPAYQR`, `vnp_CardType=QRCODE`) và gọi IPN
+   như VNPay; mỗi vé dùng một lần, hết hạn 15 phút, mã vé ngẫu nhiên 128 bit.
+3. Trang máy tính hỏi `/payment/fake-vnpay/qr-status` mỗi 2 giây, xong thì tự về ReturnUrl.
+
+Điện thoại chỉ mở được khi Tomcat nghe trên mạng LAN:
+`.\scripts\run-local.ps1 -ListenAddress 0.0.0.0` (Windows Firewall sẽ hỏi cho phép Java).
+Địa chỉ trong mã QR tự đổi 127.0.0.1 sang IP LAN của máy; đặt `vnp_FakeQrBaseUrl` nếu dò sai.
+
+| Thao tác (Tomcat local cổng 8081, nghe 127.0.0.1) | Kết quả thực tế |
 |---|---|
-| `/tenant/pay?invoiceId=11` (`binh.tran`) | 4 lựa chọn, VNPAY-QR được chọn sẵn |
-| POST `bankCode=XYZ` | 400 |
-| POST `bankCode=VNPAYQR`, cổng giả | URL cổng có `vnp_BankCode=VNPAYQR`, chữ ký đúng; huỷ ⇒ IPN `00`, return "Bạn đã hủy giao dịch", Payment FAILED |
-| POST `bankCode=VNPAYQR`, sandbox thật với TmnCode `LOCALTEST` | 302 sang `sandbox.vnpayment.vn`; VNPay báo "Không tìm thấy website" vì TmnCode chưa đăng ký |
-| Return có chữ ký đúng cho lần thử PENDING, sandbox | Máy chủ gọi được querydr tới sandbox; VNPay trả `03`/`99` cho TmnCode giả, checksum phản hồi không khớp ⇒ giữ PENDING, hoá đơn vẫn UNPAID |
+| `binh.tran` chọn VNPAY-QR, hoá đơn 11 | Cổng giả hiện "Phương thức VNPAY-QR", QR trỏ `http://10.33.99.159:8081/.../qr?token=…`; status `done=false` |
+| Mở link QR (không cookie, như điện thoại) → "Xác nhận thanh toán" | IPN `00`; status `done=true, paid=true` kèm ReturnUrl; return "Đã ghi nhận thanh toán"; Payment 25 SUCCESS `VNPAYQR`, Invoice 11 PAID |
+| POST lại cùng vé (huỷ) | Không gọi IPN lần hai; vẫn 1 dòng SUCCESS |
+| Vé sai / không tồn tại | GET 404, POST 400, status `found=false` |
+| `chi.le` chọn VNPAY-QR rồi "Hủy giao dịch" trên máy tính | Về return "Không thành công"; Payment FAILED `24`, Invoice 10 vẫn UNPAID |
+| Chọn thẻ ATM (`VNBANK`) | Cổng giả không hiện QR, vẫn hai nút như cũ |
 
-Chưa kiểm tra được: trả thành công trên sandbox (QR và thẻ NCB) và querydr trả `00`, vì cần
-TmnCode/HashSecret sandbox thật. Theo hỏi đáp cộng đồng, sandbox công khai hiện mã VNPAY-QR
-nhưng có thể không quét để trả được; khi đó chọn thẻ NCB trên cùng trang VNPay.
+Chưa kiểm tra: quét bằng điện thoại thật qua Wi‑Fi (môi trường kiểm tra không cho mở
+Tomcat ra mạng LAN) và vẽ QR trên trình duyệt thật (mới kiểm tra HTML/JS được trả về).
+Dữ liệu CSDL local đã đổi: hoá đơn 11 PAID; chạy lại `database/setup.sql` để về dữ liệu mẫu.
+
+### VNPay sandbox thật (TmnCode `9K605ALU`)
+
+- `vnp_BankCode=VNPAYQR` ⇒ VNPay báo "Ngân hàng thanh toán không được hỗ trợ": terminal
+  sandbox này chưa bật VNPAY-QR. `VNBANK` hoặc để trống ⇒ trang "Chọn phương thức thanh toán
+  (Test)" chỉ có "Thẻ nội địa và tài khoản ngân hàng". Thẻ test: NCB `9704198526191432198`,
+  `NGUYEN VAN A`, `07/15`, OTP `123456`.
+- IPN không tới được `127.0.0.1`. Code có gọi API querydr khi trang return thấy lần thử còn
+  PENDING (chỉ ghi khi checksum phản hồi đúng), nhưng ngày 04/11/2026 sandbox trả
+  `{"vnp_ResponseCode":"99","vnp_Message":"Unexpected error"}` cho **mọi** yêu cầu querydr,
+  kể cả chữ ký sai hay TmnCode sai, nên chưa xác nhận được đường này. Với sandbox thật,
+  hoá đơn chỉ chuyển PAID khi có tunnel công khai cho IPN (khai trong merchant admin).

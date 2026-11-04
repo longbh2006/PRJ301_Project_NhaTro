@@ -22,8 +22,10 @@ public final class VnPayConfig {
     private final String returnUrl;
     private final String ipnUrl;
     private final boolean fakeGateway;
+    private final String fakeQrBaseUrl;
 
     private VnPayConfig(Properties file) {
+        fakeQrBaseUrl = read(file, "VNPAY_FAKE_QR_BASE_URL", "vnp_FakeQrBaseUrl", null);
         tmnCode = read(file, "VNPAY_TMN_CODE", "vnp_TmnCode", null);
         hashSecret = read(file, "VNPAY_HASH_SECRET", "vnp_HashSecret", null);
         payUrl = read(file, "VNPAY_PAY_URL", "vnp_PayUrl", SANDBOX_PAY_URL);
@@ -90,6 +92,11 @@ public final class VnPayConfig {
 
     public String getIpnUrl() {
         return ipnUrl;
+    }
+
+    /** Địa chỉ gốc (vd. http://192.168.1.5:8080/Project_NhaTro) cho mã QR của cổng giả; null = tự dò. */
+    public String getFakeQrBaseUrl() {
+        return fakeQrBaseUrl;
     }
 
     public boolean isFakeGateway() {

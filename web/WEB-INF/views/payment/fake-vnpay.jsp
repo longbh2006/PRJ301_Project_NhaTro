@@ -50,18 +50,67 @@
                         <dd class="col-sm-8"><c:out value="${paymentParams.vnp_OrderInfo}" /></dd>
                         <dt class="col-sm-4">Số tiền</dt>
                         <dd class="col-sm-8 fw-bold"><fmt:formatNumber value="${amount}" pattern="#,##0" /> VND</dd>
-                        <dt class="col-sm-4">Ngân hàng</dt>
-                        <dd class="col-sm-8">NCB (thẻ test)</dd>
+                        <dt class="col-sm-4">Phương thức</dt>
+                        <dd class="col-sm-8"><c:out value="${empty qrToken ? 'NCB (thẻ test)' : 'VNPAY-QR'}" /></dd>
                     </dl>
                 </div>
             </div>
-            <form method="post" action="<c:url value='/payment/fake-vnpay' />" class="d-flex flex-wrap gap-2">
-                <c:forEach var="field" items="${paymentParams}">
-                    <input type="hidden" name="${fn:escapeXml(field.key)}" value="${fn:escapeXml(field.value)}">
-                </c:forEach>
-                <button type="submit" name="action" value="pay" class="btn btn-primary">Thanh toán thành công</button>
-                <button type="submit" name="action" value="cancel" class="btn btn-outline-danger">Hủy giao dịch</button>
-            </form>
+            <c:choose>
+                <c:when test="${not empty qrToken}">
+                    <c:url var="statusUrl" value="/payment/fake-vnpay/qr-status"><c:param name="token" value="${qrToken}" /></c:url>
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-body text-center">
+                            <p class="fw-semibold mb-3">Quét mã bằng camera điện thoại để thanh toán</p>
+                            <div id="fake-qr" class="d-inline-block p-3 bg-white border rounded" role="img"
+                                 aria-label="Mã QR thanh toán"
+                                 data-qr-url="${fn:escapeXml(qrUrl)}" data-status-url="${fn:escapeXml(statusUrl)}"></div>
+                            <p class="small text-secondary mt-3 mb-1">Điện thoại phải dùng chung Wi‑Fi với máy này. Không quét được thì mở link:</p>
+                            <p class="small text-break mb-2"><a href="<c:out value='${qrUrl}' />" target="_blank" rel="noopener"><c:out value="${qrUrl}" /></a></p>
+                            <p id="qr-status" class="small text-secondary mb-0" role="status" aria-live="polite">Đang chờ quét mã…</p>
+                        </div>
+                    </div>
+                    <form method="post" action="<c:url value='/payment/fake-vnpay/qr' />" class="m-0">
+                        <input type="hidden" name="token" value="${fn:escapeXml(qrToken)}">
+                        <input type="hidden" name="from" value="desktop">
+                        <button type="submit" name="action" value="cancel" class="btn btn-outline-danger">Hủy giao dịch</button>
+                    </form>
+                    <%-- qrcode.min.js: qrcodejs 1.0.0 (MIT, davidshimjs), lấy từ cdnjs, khớp SRI cdnjs công bố. --%>
+                    <script src="<c:url value='/js/qrcode.min.js' />"></script>
+                    <script>
+                        (function () {
+                            var box = document.getElementById('fake-qr');
+                            var statusText = document.getElementById('qr-status');
+                            new QRCode(box, { text: box.dataset.qrUrl, width: 220, height: 220,
+                                correctLevel: QRCode.CorrectLevel.M });
+                            // Điện thoại xác nhận xong thì trang này tự quay về website, giống VNPay thật.
+                            var timer = setInterval(function () {
+                                fetch(box.dataset.statusUrl, { cache: 'no-store' })
+                                    .then(function (r) { return r.json(); })
+                                    .then(function (s) {
+                                        if (s.found !== 'true') {
+                                            clearInterval(timer);
+                                            statusText.textContent = 'Mã QR đã hết hạn. Hãy tạo giao dịch mới.';
+                                        } else if (s.done === 'true') {
+                                            clearInterval(timer);
+                                            statusText.textContent = 'Đã nhận kết quả, đang quay về website…';
+                                            window.location.href = s.returnUrl;
+                                        }
+                                    })
+                                    .catch(function () { /* mạng chập chờn: thử lại ở lượt sau */ });
+                            }, 2000);
+                        })();
+                    </script>
+                </c:when>
+                <c:otherwise>
+                    <form method="post" action="<c:url value='/payment/fake-vnpay' />" class="d-flex flex-wrap gap-2">
+                        <c:forEach var="field" items="${paymentParams}">
+                            <input type="hidden" name="${fn:escapeXml(field.key)}" value="${fn:escapeXml(field.value)}">
+                        </c:forEach>
+                        <button type="submit" name="action" value="pay" class="btn btn-primary">Thanh toán thành công</button>
+                        <button type="submit" name="action" value="cancel" class="btn btn-outline-danger">Hủy giao dịch</button>
+                    </form>
+                </c:otherwise>
+            </c:choose>
         </c:otherwise>
     </c:choose>
 </main>

@@ -9,6 +9,9 @@ Trong terminal PowerShell tại thư mục project:
 Script build bằng JDK của `javac`, sau đó chạy Tomcat riêng ở cổng 8080.
 Các đường dẫn mặc định sử dụng bản cài NetBeans 17 và Tomcat 10.1 trên máy này.
 Có thể truyền `-JdkPath`, `-AntPath`, `-TomcatPath` hoặc `-Port` khi cần.
+Mặc định Tomcat chỉ nghe `127.0.0.1`. Muốn quét QR của cổng VNPay giả bằng điện thoại cùng
+Wi‑Fi thì chạy `.\scripts\run-local.ps1 -ListenAddress 0.0.0.0` (Windows Firewall sẽ hỏi cho
+phép Java; khi đó máy khác trong mạng LAN cũng mở được web).
 
 - Chi tiết phòng: <http://127.0.0.1:8080/Project_NhaTro/rooms/detail?roomId=1>
 
