@@ -12,10 +12,13 @@ import java.util.Properties;
 public final class VnPayConfig {
 
     public static final String SANDBOX_PAY_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+    /** API truy vấn giao dịch (querydr) của sandbox, theo tài liệu "Truy vấn và hoàn tiền" của VNPay. */
+    public static final String SANDBOX_API_URL = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
 
     private final String tmnCode;
     private final String hashSecret;
     private final String payUrl;
+    private final String apiUrl;
     private final String returnUrl;
     private final String ipnUrl;
     private final boolean fakeGateway;
@@ -24,6 +27,7 @@ public final class VnPayConfig {
         tmnCode = read(file, "VNPAY_TMN_CODE", "vnp_TmnCode", null);
         hashSecret = read(file, "VNPAY_HASH_SECRET", "vnp_HashSecret", null);
         payUrl = read(file, "VNPAY_PAY_URL", "vnp_PayUrl", SANDBOX_PAY_URL);
+        apiUrl = read(file, "VNPAY_API_URL", "vnp_ApiUrl", SANDBOX_API_URL);
         returnUrl = read(file, "VNPAY_RETURN_URL", "vnp_ReturnUrl", null);
         ipnUrl = read(file, "VNPAY_IPN_URL", "vnp_IpnUrl", null);
         fakeGateway = Boolean.parseBoolean(read(file, "VNPAY_FAKE_GATEWAY", "vnp_FakeGateway", "false"));
@@ -73,6 +77,11 @@ public final class VnPayConfig {
 
     public String getPayUrl() {
         return payUrl;
+    }
+
+    /** URL API querydr; trang return gọi để tự xác nhận giao dịch khi IPN không tới được máy local. */
+    public String getApiUrl() {
+        return apiUrl;
     }
 
     public String getReturnUrl() {

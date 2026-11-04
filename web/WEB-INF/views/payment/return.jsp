@@ -3,7 +3,7 @@
 <c:set var="pageTitle" value="RoomRent | Kết quả thanh toán" scope="request" />
 <c:set var="activeNav" value="/tenant/invoices" scope="request" />
 <%@ include file="/WEB-INF/views/common/_top.jspf" %>
-<%-- Trang này chỉ HIỂN THỊ. Trạng thái hóa đơn chỉ đổi khi IPN của VNPay gọi máy chủ. --%>
+<%-- Trang này chỉ HIỂN THỊ. Trạng thái hóa đơn chỉ đổi theo IPN của VNPay hoặc phản hồi querydr máy chủ tự hỏi VNPay. --%>
 <c:set var="payment" value="${result.payment}" />
 
 <h1 class="h3 fw-bold mb-4">Kết quả thanh toán</h1>
@@ -64,7 +64,7 @@
                 </dl>
                 <c:if test="${payment.status eq 'PENDING'}">
                     <p class="small text-secondary mt-3 mb-0">
-                        Hóa đơn chỉ chuyển sang "Đã trả" khi VNPay gửi xác nhận tới máy chủ. Hãy tải lại trang sau ít phút.
+                        Hóa đơn chỉ chuyển sang "Đã trả" khi VNPay xác nhận với máy chủ. Hãy tải lại trang sau ít phút.
                     </p>
                 </c:if>
             </div>

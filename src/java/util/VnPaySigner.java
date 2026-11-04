@@ -56,6 +56,27 @@ public final class VnPaySigner {
         return MessageDigest.isEqual(expected, actual);
     }
 
+    /**
+     * Checksum kiểu API merchant (querydr): các giá trị nối bằng '|' theo đúng thứ tự
+     * tài liệu VNPay quy định, null thành chuỗi rỗng, rồi HMAC-SHA512.
+     */
+    public static String pipeChecksum(String hashSecret, String... values) {
+        StringJoiner joiner = new StringJoiner("|");
+        for (String value : values) {
+            joiner.add(value == null ? "" : value);
+        }
+        return hmacSha512(hashSecret, joiner.toString());
+    }
+
+    /** So sánh chữ ký trong thời gian cố định, không phân biệt hoa thường. */
+    public static boolean sameHash(String expected, String actual) {
+        if (expected == null || actual == null) {
+            return false;
+        }
+        return MessageDigest.isEqual(expected.toLowerCase().getBytes(StandardCharsets.US_ASCII),
+                actual.toLowerCase().getBytes(StandardCharsets.US_ASCII));
+    }
+
     static String canonicalQuery(Map<String, String> params) {
         StringJoiner joiner = new StringJoiner("&");
         for (Map.Entry<String, String> entry : new TreeMap<>(params).entrySet()) {

@@ -60,13 +60,19 @@ public class TenantPaymentController extends HttpServlet {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
+        // Thiếu tham số = để VNPay cho người dùng chọn phương thức; giá trị lạ bị service từ chối.
+        String bankCode = request.getParameter("bankCode");
+        bankCode = bankCode == null ? "" : bankCode.trim();
         try {
-            String paymentUrl = paymentService.createPaymentUrl(tenantId, invoiceId, request.getRemoteAddr());
+            String paymentUrl = paymentService.createPaymentUrl(tenantId, invoiceId, request.getRemoteAddr(),
+                    bankCode);
             if (paymentUrl == null) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
             response.sendRedirect(paymentUrl);
+        } catch (IllegalArgumentException ex) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
         } catch (IllegalStateException ex) {
             request.getSession(false).setAttribute(FLASH_ERROR, ex.getMessage());
             response.sendRedirect(request.getContextPath() + "/tenant/pay?invoiceId=" + invoiceId);

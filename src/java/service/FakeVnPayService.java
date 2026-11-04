@@ -50,7 +50,9 @@ public class FakeVnPayService {
         result.put("vnp_Amount", single(paymentParams, "vnp_Amount"));
         result.put("vnp_TxnRef", single(paymentParams, "vnp_TxnRef"));
         result.put("vnp_OrderInfo", single(paymentParams, "vnp_OrderInfo"));
-        result.put("vnp_BankCode", "NCB");
+        // Người thuê chọn VNPAY-QR thì kết quả ghi đúng phương thức đó, còn lại giả lập thẻ NCB.
+        boolean qr = PaymentService.BANK_QR.equals(single(paymentParams, "vnp_BankCode"));
+        result.put("vnp_BankCode", qr ? PaymentService.BANK_QR : "NCB");
         result.put("vnp_PayDate", VNP_TIME.format(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"))));
         if (success) {
             String transactionNo = String.valueOf(10_000_000 + RANDOM.nextInt(90_000_000));
@@ -58,7 +60,7 @@ public class FakeVnPayService {
             result.put("vnp_TransactionStatus", "00");
             result.put("vnp_TransactionNo", transactionNo);
             result.put("vnp_BankTranNo", "VNP" + transactionNo);
-            result.put("vnp_CardType", "ATM");
+            result.put("vnp_CardType", qr ? "QRCODE" : "ATM");
         } else {
             result.put("vnp_ResponseCode", "24");
             result.put("vnp_TransactionStatus", "02");

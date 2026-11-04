@@ -1,16 +1,20 @@
 # Chép file này thành web/WEB-INF/VNPay.properties (đã nằm trong .gitignore, KHÔNG commit).
 # Biến môi trường cùng nghĩa được ưu tiên hơn file:
-#   VNPAY_TMN_CODE, VNPAY_HASH_SECRET, VNPAY_PAY_URL, VNPAY_RETURN_URL, VNPAY_IPN_URL, VNPAY_FAKE_GATEWAY
+#   VNPAY_TMN_CODE, VNPAY_HASH_SECRET, VNPAY_PAY_URL, VNPAY_API_URL, VNPAY_RETURN_URL, VNPAY_IPN_URL, VNPAY_FAKE_GATEWAY
 
-# --- VNPay sandbox thật: lấy TmnCode/HashSecret trong email đăng ký sandbox ---
+# --- VNPay sandbox thật: đăng ký tại https://sandbox.vnpayment.vn/devreg/ ---
+# TmnCode (8 ký tự) và HashSecret nằm trong email VNPay gửi sau khi đăng ký.
 vnp_TmnCode=YOUR_TMN_CODE
 vnp_HashSecret=YOUR_HASH_SECRET
 vnp_PayUrl=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+# API querydr: sau khi VNPay đưa trình duyệt về ReturnUrl, máy chủ tự hỏi VNPay kết quả
+# (máy local gọi ra ngoài được), nên hoá đơn chuyển PAID mà không cần IPN tới 127.0.0.1.
+vnp_ApiUrl=https://sandbox.vnpayment.vn/merchant_webapi/api/transaction
 vnp_ReturnUrl=http://127.0.0.1:8080/Project_NhaTro/payment/return
-# IPN URL của sandbox khai trong trang quản trị merchant VNPay (phải là địa chỉ công khai).
+# IPN URL khai trong trang quản trị merchant sandbox, chỉ cần khi có địa chỉ công khai (tunnel).
 vnp_FakeGateway=false
 
-# --- Chạy local bằng cổng giả (VNPay không gọi được IPN về máy dev) ---
+# --- Chạy local bằng cổng giả (không cần tài khoản VNPay) ---
 # vnp_TmnCode=LOCALTEST
 # vnp_HashSecret=chuoi-bi-mat-bat-ky-chi-dung-o-may-minh
 # vnp_PayUrl=http://127.0.0.1:8080/Project_NhaTro/payment/fake-vnpay
