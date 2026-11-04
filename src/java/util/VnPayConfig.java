@@ -23,6 +23,7 @@ public final class VnPayConfig {
     private final String ipnUrl;
     private final boolean fakeGateway;
     private final String fakeQrBaseUrl;
+    private final boolean trustReturnUrl;
 
     private VnPayConfig(Properties file) {
         fakeQrBaseUrl = read(file, "VNPAY_FAKE_QR_BASE_URL", "vnp_FakeQrBaseUrl", null);
@@ -33,6 +34,7 @@ public final class VnPayConfig {
         returnUrl = read(file, "VNPAY_RETURN_URL", "vnp_ReturnUrl", null);
         ipnUrl = read(file, "VNPAY_IPN_URL", "vnp_IpnUrl", null);
         fakeGateway = Boolean.parseBoolean(read(file, "VNPAY_FAKE_GATEWAY", "vnp_FakeGateway", "false"));
+        trustReturnUrl = Boolean.parseBoolean(read(file, "VNPAY_TRUST_RETURN_URL", "vnp_TrustReturnUrl", "false"));
     }
 
     /** Đọc lại mỗi lần gọi để sửa file cấu hình không cần khởi động lại (Tomcat cache tài nguyên khoảng 5 giây). */
@@ -101,5 +103,13 @@ public final class VnPayConfig {
 
     public boolean isFakeGateway() {
         return fakeGateway;
+    }
+
+    /**
+     * Chỉ bật khi chạy local với VNPay sandbox: IPN không tới được máy local và querydr của
+     * sandbox đang trả 99, nên cho ghi kết quả từ tham số return ĐÃ KIỂM CHỮ KÝ. Mặc định tắt.
+     */
+    public boolean isTrustReturnUrl() {
+        return trustReturnUrl;
     }
 }

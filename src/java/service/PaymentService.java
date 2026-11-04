@@ -30,7 +30,8 @@ import util.VnPaySigner;
 /**
  * UC07 thanh toán hoá đơn qua VNPay. Luật chính: chỉ dữ liệu máy chủ-với-máy chủ
  * đã kiểm chữ ký và đúng số tiền mới chuyển hoá đơn sang PAID — IPN do VNPay gọi,
- * hoặc phản hồi querydr do máy chủ tự hỏi VNPay. Tham số trên URL return không bao giờ đủ.
+ * hoặc phản hồi querydr do máy chủ tự hỏi VNPay. Tham số trên URL return chỉ được dùng khi
+ * bật vnp_TrustReturnUrl (chạy local với sandbox, mặc định tắt).
  */
 public class PaymentService {
 
@@ -205,9 +206,9 @@ public class PaymentService {
     }
 
     /**
-     * Trang return: kiểm chữ ký rồi đọc trạng thái. Tham số return KHÔNG bao giờ được
-     * dùng để ghi PAID. Nếu lần thử còn PENDING (VNPay sandbox không gọi được IPN về
-     * máy local), máy chủ tự hỏi VNPay qua API querydr và chỉ tin phản hồi có checksum đúng.
+     * Trang return: kiểm chữ ký rồi đọc trạng thái. Nếu lần thử còn PENDING (VNPay sandbox
+     * không gọi được IPN về máy local), máy chủ tự hỏi VNPay qua API querydr và chỉ tin phản hồi
+     * có checksum đúng; vẫn PENDING mà bật vnp_TrustReturnUrl thì ghi theo tham số return đã ký.
      */
     public ReturnResult readReturn(Map<String, String[]> params) throws SQLException {
         VnPayConfig config = VnPayConfig.load().requireMerchant();
@@ -221,8 +222,36 @@ public class PaymentService {
         if (payment != null && "PENDING".equals(payment.getStatus()) && !config.isFakeGateway()) {
             confirmByQueryDr(config, payment, single(params, "vnp_TransactionNo"), responseCode);
             payment = findPayment(txnRef);
+            if (payment != null && "PENDING".equals(payment.getStatus()) && config.isTrustReturnUrl()) {
+                confirmByReturn(config, params, txnRef);
+                payment = findPayment(txnRef);
+            }
         }
         return new ReturnResult(true, responseCode, payment);
+    }
+
+    /**
+     * Chế độ local với sandbox (vnp_TrustReturnUrl=true): ghi kết quả từ tham số return đã kiểm
+     * chữ ký HashSecret và đúng TmnCode. Số tiền và trạng thái PENDING vẫn do applyIpn kiểm như IPN,
+     * nên tải lại trang return không ghi lần hai. Tắt mặc định vì người dùng có thể không quay về.
+     */
+    private void confirmByReturn(VnPayConfig config, Map<String, String[]> params, String txnRef) {
+        String responseCode = single(params, "vnp_ResponseCode");
+        if (responseCode == null || !config.getTmnCode().equals(single(params, "vnp_TmnCode"))) {
+            LOGGER.log(Level.WARNING, "return {0}: thiếu vnp_ResponseCode hoặc sai vnp_TmnCode", txnRef);
+            return;
+        }
+        BigDecimal amount;
+        try {
+            amount = new BigDecimal(single(params, "vnp_Amount"));
+        } catch (NumberFormatException | NullPointerException ex) {
+            LOGGER.log(Level.WARNING, "return {0}: vnp_Amount không hợp lệ", txnRef);
+            return;
+        }
+        IpnResult result = applyInTransaction(txnRef, amount, responseCode, single(params, "vnp_TransactionStatus"),
+                single(params, "vnp_TransactionNo"), single(params, "vnp_BankCode"));
+        LOGGER.log(Level.INFO, "return {0}: mã {1}, ghi kết quả {2}",
+                new Object[]{txnRef, responseCode, result.getCode()});
     }
 
     private Payment findPayment(String txnRef) throws SQLException {

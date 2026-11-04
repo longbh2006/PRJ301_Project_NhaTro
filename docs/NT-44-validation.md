@@ -7,7 +7,7 @@
 | `GET /tenant/pay?invoiceId=N` | người thuê | Xem tóm tắt hoá đơn và nút "Thanh toán qua VNPay". Hoá đơn người khác/không tồn tại trả 404, id sai trả 400. |
 | `POST /tenant/pay` (`invoiceId`) | người thuê | Hoá đơn phải của mình + `UNPAID` ⇒ tạo `Payment` PENDING (`txnRef = INV<id>-<yyyyMMddHHmmss>`, số tiền lấy từ `Invoice.total` trong CSDL) ⇒ dựng URL VNPay 2.1.0, ký HMAC-SHA512 ⇒ redirect. Hoá đơn đã trả: redirect về trang GET kèm thông báo. |
 | `GET /payment/ipn` | VNPay (server → server) | Kiểm chữ ký ⇒ tìm `Payment` theo `vnp_TxnRef` (khoá `UPDLOCK, HOLDLOCK`) ⇒ kiểm `vnp_Amount = amount × 100` ⇒ đã xử lý rồi thì trả `02` ⇒ ghi `Payment` SUCCESS/FAILED + `Invoice` PAID trong **một** transaction. Trả JSON `{"RspCode","Message"}`: `00` · `01` không thấy đơn · `02` đã xác nhận · `04` sai số tiền · `97` sai chữ ký · `99` lỗi khác. |
-| `GET /payment/return` | trình duyệt | Kiểm chữ ký rồi **chỉ đọc**: hiện thông báo theo `vnp_ResponseCode` và trạng thái `Payment` trong CSDL. Không bao giờ ghi PAID. |
+| `GET /payment/return` | trình duyệt | Kiểm chữ ký rồi hiện thông báo theo `vnp_ResponseCode` và trạng thái `Payment` trong CSDL. Lần thử còn PENDING thì hỏi querydr; chỉ khi bật `vnp_TrustReturnUrl` mới ghi theo tham số return đã ký (xem cuối file). |
 | `/payment/fake-vnpay` | trình duyệt (local) | Cổng VNPay giả, xem bên dưới. Tắt (mặc định) thì trả 404. |
 
 `POST /tenant/pay` nhận `invoiceId` từ query hoặc form, nên form của NT-38
@@ -124,5 +124,9 @@ Dữ liệu CSDL local đã đổi: hoá đơn 11 PAID; chạy lại `database/s
 - IPN không tới được `127.0.0.1`. Code có gọi API querydr khi trang return thấy lần thử còn
   PENDING (chỉ ghi khi checksum phản hồi đúng), nhưng ngày 04/11/2026 sandbox trả
   `{"vnp_ResponseCode":"99","vnp_Message":"Unexpected error"}` cho **mọi** yêu cầu querydr,
-  kể cả chữ ký sai hay TmnCode sai, nên chưa xác nhận được đường này. Với sandbox thật,
-  hoá đơn chỉ chuyển PAID khi có tunnel công khai cho IPN (khai trong merchant admin).
+  kể cả chữ ký sai hay TmnCode sai, nên chưa xác nhận được đường này.
+- Chạy local không tunnel: đặt `vnp_TrustReturnUrl=true` (mặc định `false`). Khi querydr không
+  xác nhận được, trang return ghi kết quả từ chính tham số return **đã kiểm chữ ký HashSecret**,
+  đúng `vnp_TmnCode`; số tiền và trạng thái PENDING vẫn kiểm như IPN nên tải lại trang không ghi
+  lần hai. Điểm yếu: người dùng đóng trình duyệt trước khi VNPay chuyển về thì lần thử giữ
+  PENDING. Server thật để `false` và dùng IPN.

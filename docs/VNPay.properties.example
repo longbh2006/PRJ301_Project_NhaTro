@@ -23,3 +23,6 @@ vnp_FakeGateway=true
 # vnp_ApiUrl=https://sandbox.vnpayment.vn/merchant_webapi/api/transaction
 # vnp_ReturnUrl=http://127.0.0.1:8080/Project_NhaTro/payment/return
 # vnp_FakeGateway=false
+# Chỉ dùng khi chạy local không có IPN: ghi kết quả từ tham số return đã kiểm chữ ký. Server thật để false.
+# vnp_TrustReturnUrl=true
+# Thẻ test sandbox: NCB 9704198526191432198, NGUYEN VAN A, ngày phát hành 07/15, OTP 123456.

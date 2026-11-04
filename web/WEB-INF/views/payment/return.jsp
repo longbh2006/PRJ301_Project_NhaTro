@@ -3,7 +3,8 @@
 <c:set var="pageTitle" value="RoomRent | Kết quả thanh toán" scope="request" />
 <c:set var="activeNav" value="/tenant/invoices" scope="request" />
 <%@ include file="/WEB-INF/views/common/_top.jspf" %>
-<%-- Trang này chỉ HIỂN THỊ. Trạng thái hóa đơn chỉ đổi theo IPN của VNPay hoặc phản hồi querydr máy chủ tự hỏi VNPay. --%>
+<%-- Trang này chỉ HIỂN THỊ. Trạng thái hóa đơn chỉ đổi theo IPN của VNPay hoặc phản hồi querydr máy chủ tự hỏi VNPay
+     (chạy local với sandbox có thể bật vnp_TrustReturnUrl, xem docs/NT-44-validation.md). --%>
 <c:set var="payment" value="${result.payment}" />
 
 <h1 class="h3 fw-bold mb-4">Kết quả thanh toán</h1>
