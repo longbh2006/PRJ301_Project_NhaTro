@@ -24,6 +24,7 @@ public final class VnPayConfig {
     private final boolean fakeGateway;
     private final String fakeQrBaseUrl;
     private final boolean trustReturnUrl;
+    private final String bankCodes;
 
     private VnPayConfig(Properties file) {
         fakeQrBaseUrl = read(file, "VNPAY_FAKE_QR_BASE_URL", "vnp_FakeQrBaseUrl", null);
@@ -35,6 +36,7 @@ public final class VnPayConfig {
         ipnUrl = read(file, "VNPAY_IPN_URL", "vnp_IpnUrl", null);
         fakeGateway = Boolean.parseBoolean(read(file, "VNPAY_FAKE_GATEWAY", "vnp_FakeGateway", "false"));
         trustReturnUrl = Boolean.parseBoolean(read(file, "VNPAY_TRUST_RETURN_URL", "vnp_TrustReturnUrl", "false"));
+        bankCodes = read(file, "VNPAY_BANK_CODES", "vnp_BankCodes", null);
     }
 
     /** Đọc lại mỗi lần gọi để sửa file cấu hình không cần khởi động lại (Tomcat cache tài nguyên khoảng 5 giây). */
@@ -111,5 +113,10 @@ public final class VnPayConfig {
      */
     public boolean isTrustReturnUrl() {
         return trustReturnUrl;
+    }
+
+    /** Danh sách phương thức terminal đã bật, cách nhau dấu phẩy (VNPAYQR, VNBANK, INTCARD, ANY); null = mặc định. */
+    public String getBankCodes() {
+        return bankCodes;
     }
 }

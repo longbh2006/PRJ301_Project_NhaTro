@@ -14,10 +14,11 @@ import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,7 +38,12 @@ public class PaymentService {
 
     /** Phương thức gửi trong vnp_BankCode; "" = để VNPay cho người dùng chọn. */
     public static final String BANK_QR = "VNPAYQR";
-    public static final Set<String> BANK_CODES = Set.of("", BANK_QR, "VNBANK", "INTCARD");
+    public static final String BANK_ATM = "VNBANK";
+    public static final String BANK_INTL = "INTCARD";
+    public static final String BANK_ANY = "";
+    private static final List<String> ALL_BANK_CODES = List.of(BANK_QR, BANK_ATM, BANK_INTL, BANK_ANY);
+    // Terminal sandbox 9K605ALU chỉ chạy được thẻ nội địa: VNPAYQR báo mã 76, thẻ quốc tế báo mã 01.
+    private static final List<String> DEFAULT_REAL_BANK_CODES = List.of(BANK_ATM);
 
     private static final Logger LOGGER = Logger.getLogger(PaymentService.class.getName());
     private static final String VNP_VERSION = "2.1.0";
@@ -60,17 +66,46 @@ public class PaymentService {
     }
 
     /**
+     * Phương thức hiện cho người thuê, theo thứ tự hiển thị. Cổng giả local chạy được cả bốn;
+     * cổng VNPay thật lấy từ vnp_BankCodes (vd. "VNPAYQR,VNBANK,INTCARD,ANY"), thiếu thì chỉ VNBANK
+     * để không hiện phương thức terminal chưa bật.
+     */
+    public List<String> availableBankCodes() {
+        return availableBankCodes(VnPayConfig.load());
+    }
+
+    private static List<String> availableBankCodes(VnPayConfig config) {
+        if (config.isFakeGateway()) {
+            return ALL_BANK_CODES;
+        }
+        String configured = config.getBankCodes();
+        if (configured == null) {
+            return DEFAULT_REAL_BANK_CODES;
+        }
+        List<String> codes = new ArrayList<>();
+        for (String token : configured.split(",")) {
+            String code = "ANY".equalsIgnoreCase(token.trim()) ? BANK_ANY : token.trim().toUpperCase();
+            if (!token.isBlank() && ALL_BANK_CODES.contains(code) && !codes.contains(code)) {
+                codes.add(code);
+            }
+        }
+        return codes.isEmpty() ? DEFAULT_REAL_BANK_CODES : List.copyOf(codes);
+    }
+
+    /**
      * Tạo lần thử PENDING rồi dựng URL cổng thanh toán đã ký.
      * Trả null khi hoá đơn không tồn tại hoặc không thuộc người thuê này.
      */
     public String createPaymentUrl(int tenantId, int invoiceId, String clientIp, String bankCode)
             throws SQLException {
         requirePositive(tenantId, invoiceId);
-        if (bankCode == null || !BANK_CODES.contains(bankCode)) {
+        VnPayConfig loaded = VnPayConfig.load();
+        // Phương thức đã ẩn trên giao diện cũng bị chặn ở máy chủ.
+        if (bankCode == null || !availableBankCodes(loaded).contains(bankCode)) {
             throw new IllegalArgumentException("Phương thức thanh toán không hợp lệ.");
         }
         // Kiểm cấu hình trước khi ghi CSDL để không để lại lần thử PENDING không dùng được.
-        VnPayConfig config = VnPayConfig.load().requireMerchant();
+        VnPayConfig config = loaded.requireMerchant();
         ZonedDateTime now = ZonedDateTime.now(VN_ZONE);
         String txnRef = "INV" + invoiceId + "-" + VNP_TIME.format(now);
         Payment payment;

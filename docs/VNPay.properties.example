@@ -26,3 +26,7 @@ vnp_FakeGateway=true
 # Chỉ dùng khi chạy local không có IPN: ghi kết quả từ tham số return đã kiểm chữ ký. Server thật để false.
 # vnp_TrustReturnUrl=true
 # Thẻ test sandbox: NCB 9704198526191432198, NGUYEN VAN A, ngày phát hành 07/15, OTP 123456.
+# Phương thức hiện trên trang thanh toán (VNPAYQR, VNBANK, INTCARD, ANY = chọn trên VNPay).
+# Bỏ trống = chỉ VNBANK, vì sandbox chưa bật VNPAY-QR (mã 76) và thẻ quốc tế báo lỗi (mã 01).
+# Cổng giả luôn hiện đủ bốn phương thức.
+# vnp_BankCodes=VNBANK

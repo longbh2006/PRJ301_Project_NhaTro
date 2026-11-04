@@ -130,3 +130,6 @@ Dữ liệu CSDL local đã đổi: hoá đơn 11 PAID; chạy lại `database/s
   đúng `vnp_TmnCode`; số tiền và trạng thái PENDING vẫn kiểm như IPN nên tải lại trang không ghi
   lần hai. Điểm yếu: người dùng đóng trình duyệt trước khi VNPay chuyển về thì lần thử giữ
   PENDING. Server thật để `false` và dùng IPN.
+- Trang `/tenant/pay` chỉ hiện phương thức chạy được: cổng giả hiện đủ VNPAY-QR, ATM, thẻ quốc tế,
+  "Chọn trên trang VNPay"; cổng thật đọc `vnp_BankCodes`, bỏ trống thì chỉ "Thẻ ATM" vì trên
+  sandbox `VNPAYQR` báo mã 76 và thẻ quốc tế test báo mã 01. Gửi phương thức đang ẩn ⇒ 400.
