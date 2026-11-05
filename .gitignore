@@ -1,5 +1,4 @@
 web/WEB-INF/ConnectDB.properties
-web/WEB-INF/VNPay.properties
 
 # Generated files and local workspace data
 build/
