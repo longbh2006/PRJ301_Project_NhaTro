@@ -18,12 +18,18 @@
 `TmnCode`, `HashSecret`, `PayUrl`, `ReturnUrl`, `IpnUrl` đọc bởi `util.VnPayConfig`:
 biến môi trường `VNPAY_*` được ưu tiên, thiếu thì đọc `web/WEB-INF/VNPay.properties`
 (đã thêm vào `.gitignore`). Mẫu: [`docs/VNPay.properties.example`](VNPay.properties.example).
-Thiếu TmnCode/HashSecret/ReturnUrl thì không tạo lần thử PENDING và báo lỗi cấu hình.
+Thiếu TmnCode/HashSecret thì không tạo lần thử PENDING và báo lỗi cấu hình.
+
+`ReturnUrl`, `IpnUrl`, `PayUrl` không cố định cổng: bỏ trống hoặc ghi đường dẫn bắt đầu bằng `/`
+thì ghép với `scheme://host:cổng/contextPath` của request (`util.AppUrl`). Mặc định
+`ReturnUrl = /payment/return`, `IpnUrl = /payment/ipn`; máy chạy Tomcat cổng 8080 hay 7777
+đều quay về đúng máy đó. URL tuyệt đối vẫn dùng được khi cần cố định (tên miền công khai).
 
 ## Cổng giả khi chạy local
 
 VNPay sandbox không gọi được IPN về `127.0.0.1`. Đặt `vnp_FakeGateway=true`,
-`vnp_PayUrl=.../payment/fake-vnpay`, `vnp_IpnUrl=.../payment/ipn` (mẫu ở file example).
+`vnp_PayUrl=/payment/fake-vnpay` (mẫu ở file example). Cổng giả đưa trình duyệt về
+`vnp_ReturnUrl` có trong URL thanh toán đã ký và gọi IPN qua `127.0.0.1` đúng cổng đang chạy.
 Cổng giả làm phần việc của VNPay bằng cùng HashSecret:
 
 1. Kiểm chữ ký URL thanh toán; URL bị sửa ⇒ "Sai chữ ký (mã lỗi 70)".

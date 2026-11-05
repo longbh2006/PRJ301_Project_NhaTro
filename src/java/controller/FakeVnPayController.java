@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import service.FakeVnPayService;
+import util.AppUrl;
 
 /**
  * /payment/fake-vnpay: cổng VNPay giả cho máy local (xem FakeVnPayService).
@@ -22,6 +23,7 @@ public class FakeVnPayController extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private static final String RESULT_QUERY = "fakeVnpResultQuery";
     private static final String IPN_LOG = "fakeVnpIpnLog";
+    private static final String RETURN_URL = "fakeVnpReturnUrl";
     private final FakeVnPayService fakeService = new FakeVnPayService();
 
     @Override
@@ -39,7 +41,8 @@ public class FakeVnPayController extends HttpServlet {
                 return;
             }
             request.setAttribute("ipnLog", session.getAttribute(IPN_LOG));
-            request.setAttribute("returnUrl", fakeService.returnUrl((String) resultQuery));
+            request.setAttribute("returnUrl", fakeService.returnUrl((String) session.getAttribute(RETURN_URL),
+                    (String) resultQuery));
             request.getRequestDispatcher("/WEB-INF/views/payment/fake-vnpay.jsp").forward(request, response);
             return;
         }
@@ -79,6 +82,8 @@ public class FakeVnPayController extends HttpServlet {
             }
             resultQuery = fakeService.buildResultQuery(request.getParameterMap(), "pay".equals(action));
             session.setAttribute(RESULT_QUERY, resultQuery);
+            // vnp_ReturnUrl đã nằm trong chữ ký vừa kiểm nên không bị sửa thành địa chỉ lạ.
+            session.setAttribute(RETURN_URL, request.getParameter("vnp_ReturnUrl"));
             session.setAttribute(IPN_LOG, new ArrayList<String>());
         } else if ("resend".equals(action) && session.getAttribute(RESULT_QUERY) instanceof String) {
             resultQuery = (String) session.getAttribute(RESULT_QUERY);
@@ -88,7 +93,7 @@ public class FakeVnPayController extends HttpServlet {
         }
         @SuppressWarnings("unchecked")
         List<String> ipnLog = (List<String>) session.getAttribute(IPN_LOG);
-        ipnLog.add(fakeService.callIpn(resultQuery));
+        ipnLog.add(fakeService.callIpn(resultQuery, AppUrl.loopback(request)));
         response.sendRedirect(request.getContextPath() + "/payment/fake-vnpay?view=result");
     }
 

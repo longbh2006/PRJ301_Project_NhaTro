@@ -5,9 +5,11 @@
 # --- Chạy local bằng cổng giả (không cần tài khoản VNPay), có QR giả khi chọn VNPAY-QR ---
 vnp_TmnCode=LOCALTEST
 vnp_HashSecret=chuoi-bi-mat-bat-ky-chi-dung-o-may-minh
-vnp_PayUrl=http://127.0.0.1:8080/Project_NhaTro/payment/fake-vnpay
-vnp_ReturnUrl=http://127.0.0.1:8080/Project_NhaTro/payment/return
-vnp_IpnUrl=http://127.0.0.1:8080/Project_NhaTro/payment/ipn
+# Đường dẫn bắt đầu bằng / được ghép với scheme://host:cổng/contextPath của request đang xử lý,
+# nên không phải sửa theo cổng Tomcat của từng máy. vnp_ReturnUrl bỏ trống = /payment/return,
+# vnp_IpnUrl bỏ trống = /payment/ipn (cổng giả gọi qua 127.0.0.1 và đúng cổng đang chạy).
+# Chỉ ghi URL tuyệt đối khi cần cố định (vd. tên miền công khai).
+vnp_PayUrl=/payment/fake-vnpay
 vnp_FakeGateway=true
 # Địa chỉ gốc đưa vào mã QR cho điện thoại; bỏ trống thì tự đổi 127.0.0.1 sang IP LAN.
 # Cần chạy .\scripts\run-local.ps1 -ListenAddress 0.0.0.0 để điện thoại cùng Wi-Fi mở được.
@@ -21,7 +23,6 @@ vnp_FakeGateway=true
 # vnp_PayUrl=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
 # Trang return tự gọi querydr khi lần thử còn PENDING (sandbox đang trả 99, xem NT-44-validation.md).
 # vnp_ApiUrl=https://sandbox.vnpayment.vn/merchant_webapi/api/transaction
-# vnp_ReturnUrl=http://127.0.0.1:8080/Project_NhaTro/payment/return
 # vnp_FakeGateway=false
 # Chỉ dùng khi chạy local không có IPN: ghi kết quả từ tham số return đã kiểm chữ ký. Server thật để false.
 # vnp_TrustReturnUrl=true

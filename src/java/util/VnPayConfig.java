@@ -14,6 +14,9 @@ public final class VnPayConfig {
     public static final String SANDBOX_PAY_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
     /** API truy vấn giao dịch (querydr) của sandbox, theo tài liệu "Truy vấn và hoàn tiền" của VNPay. */
     public static final String SANDBOX_API_URL = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
+    // Đường dẫn mặc định trong ứng dụng; ghép với địa chỉ gốc của request nên không cố định host/cổng.
+    private static final String DEFAULT_RETURN_PATH = "/payment/return";
+    private static final String DEFAULT_IPN_PATH = "/payment/ipn";
 
     private final String tmnCode;
     private final String hashSecret;
@@ -30,7 +33,7 @@ public final class VnPayConfig {
         fakeQrBaseUrl = read(file, "VNPAY_FAKE_QR_BASE_URL", "vnp_FakeQrBaseUrl", null);
         tmnCode = read(file, "VNPAY_TMN_CODE", "vnp_TmnCode", null);
         hashSecret = read(file, "VNPAY_HASH_SECRET", "vnp_HashSecret", null);
-        payUrl = read(file, "VNPAY_PAY_URL", "vnp_PayUrl", SANDBOX_PAY_URL);
+        payUrl = read(file, "VNPAY_PAY_URL", "vnp_PayUrl", null);
         apiUrl = read(file, "VNPAY_API_URL", "vnp_ApiUrl", SANDBOX_API_URL);
         returnUrl = read(file, "VNPAY_RETURN_URL", "vnp_ReturnUrl", null);
         ipnUrl = read(file, "VNPAY_IPN_URL", "vnp_IpnUrl", null);
@@ -66,8 +69,8 @@ public final class VnPayConfig {
 
     /** Gọi trước khi ký hoặc kiểm chữ ký để thiếu cấu hình thì báo rõ thay vì ký bằng khoá rỗng. */
     public VnPayConfig requireMerchant() {
-        if (tmnCode == null || hashSecret == null || returnUrl == null) {
-            throw new IllegalStateException("Thiếu cấu hình VNPay: cần vnp_TmnCode, vnp_HashSecret, vnp_ReturnUrl"
+        if (tmnCode == null || hashSecret == null) {
+            throw new IllegalStateException("Thiếu cấu hình VNPay: cần vnp_TmnCode, vnp_HashSecret"
                     + " (biến môi trường VNPAY_* hoặc WEB-INF/VNPay.properties).");
         }
         return this;
@@ -81,8 +84,9 @@ public final class VnPayConfig {
         return hashSecret;
     }
 
-    public String getPayUrl() {
-        return payUrl;
+    /** baseUrl = scheme://host:cổng/contextPath của request đang xử lý (xem AppUrl). */
+    public String getPayUrl(String baseUrl) {
+        return resolve(payUrl, SANDBOX_PAY_URL, baseUrl);
     }
 
     /** URL API querydr; trang return gọi để tự xác nhận giao dịch khi IPN không tới được máy local. */
@@ -90,12 +94,25 @@ public final class VnPayConfig {
         return apiUrl;
     }
 
-    public String getReturnUrl() {
-        return returnUrl;
+    /**
+     * Bỏ trống hoặc ghi đường dẫn tương đối (vd. /payment/return) thì ghép với địa chỉ máy đang
+     * chạy, nên mỗi máy dùng cổng Tomcat nào cũng được. URL tuyệt đối chỉ dùng khi cần cố định.
+     */
+    public String getReturnUrl(String baseUrl) {
+        return resolve(returnUrl, DEFAULT_RETURN_PATH, baseUrl);
     }
 
-    public String getIpnUrl() {
-        return ipnUrl;
+    public String getIpnUrl(String baseUrl) {
+        return resolve(ipnUrl, DEFAULT_IPN_PATH, baseUrl);
+    }
+
+    private static String resolve(String configured, String fallback, String baseUrl) {
+        String value = configured == null ? fallback : configured;
+        if (value.startsWith("/")) {
+            String base = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
+            return base + value;
+        }
+        return value;
     }
 
     /** Địa chỉ gốc (vd. http://192.168.1.5:8080/Project_NhaTro) cho mã QR của cổng giả; null = tự dò. */
