@@ -106,11 +106,8 @@ public class FakeVnPayService {
     }
 
     /** Gọi IPN máy chủ như VNPay (server → server); trả nội dung phản hồi để hiển thị. */
-    public String callIpn(String resultQuery) {
-        String ipnUrl = VnPayConfig.load().getIpnUrl();
-        if (ipnUrl == null) {
-            throw new IllegalStateException("Cổng giả cần vnp_IpnUrl (hoặc VNPAY_IPN_URL) để gọi IPN.");
-        }
+    public String callIpn(String resultQuery, String baseUrl) {
+        String ipnUrl = VnPayConfig.load().getIpnUrl(baseUrl);
         HttpRequest request = HttpRequest.newBuilder(URI.create(ipnUrl + "?" + resultQuery))
                 .timeout(Duration.ofSeconds(10)).GET().build();
         try {
@@ -124,9 +121,19 @@ public class FakeVnPayService {
         }
     }
 
-    /** VNPay đưa trình duyệt về ReturnUrl kèm đúng bộ tham số đã gửi cho IPN. */
-    public String returnUrl(String resultQuery) {
-        return VnPayConfig.load().requireMerchant().getReturnUrl() + "?" + resultQuery;
+    /**
+     * VNPay đưa trình duyệt về vnp_ReturnUrl của URL thanh toán (đã kiểm chữ ký) kèm đúng
+     * bộ tham số đã gửi cho IPN; nhờ vậy về đúng host/cổng máy đã tạo giao dịch.
+     */
+    public String returnUrl(String vnpReturnUrl, String resultQuery) {
+        if (vnpReturnUrl == null || vnpReturnUrl.isBlank()) {
+            throw new IllegalStateException("URL thanh toán thiếu vnp_ReturnUrl.");
+        }
+        return vnpReturnUrl + "?" + resultQuery;
+    }
+
+    public String returnUrl(QrTicket ticket) {
+        return returnUrl(single(ticket.paymentParams, "vnp_ReturnUrl"), ticket.getResultQuery());
     }
 
     /** Số tiền VND thật để hiển thị (vnp_Amount là số tiền × 100). */
@@ -180,7 +187,7 @@ public class FakeVnPayService {
      * Xác nhận (success) hoặc huỷ một vé QR: ký kết quả rồi gọi IPN như VNPay.
      * Mỗi vé chỉ dùng một lần; trả false khi vé đã được xử lý trước đó.
      */
-    public boolean completeQrTicket(QrTicket ticket, boolean success) {
+    public boolean completeQrTicket(QrTicket ticket, boolean success, String baseUrl) {
         synchronized (ticket) {
             if (ticket.resultQuery != null) {
                 return false;
@@ -191,7 +198,7 @@ public class FakeVnPayService {
             }
             ticket.resultQuery = buildResultQuery(ticket.paymentParams, success);
             ticket.paid = success;
-            ticket.ipnLog = callIpn(ticket.resultQuery);
+            ticket.ipnLog = callIpn(ticket.resultQuery, baseUrl);
             return true;
         }
     }

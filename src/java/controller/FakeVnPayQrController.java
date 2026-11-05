@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import service.FakeVnPayService;
 import service.FakeVnPayService.QrTicket;
+import util.AppUrl;
 import util.FlatJson;
 
 /**
@@ -59,13 +60,13 @@ public class FakeVnPayQrController extends HttpServlet {
         }
         try {
             // false = vé đã được xử lý (quét lại / bấm hai lần): không gọi IPN lần nữa, chỉ hiện kết quả cũ.
-            fakeService.completeQrTicket(ticket, "pay".equals(action));
+            fakeService.completeQrTicket(ticket, "pay".equals(action), AppUrl.loopback(request));
         } catch (IllegalStateException ex) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
             return;
         }
         if ("desktop".equals(request.getParameter("from"))) {
-            response.sendRedirect(fakeService.returnUrl(ticket.getResultQuery()));
+            response.sendRedirect(fakeService.returnUrl(ticket));
             return;
         }
         response.sendRedirect(request.getContextPath() + "/payment/fake-vnpay/qr?token=" + token);
@@ -78,7 +79,7 @@ public class FakeVnPayQrController extends HttpServlet {
         status.put("done", String.valueOf(done));
         if (done) {
             status.put("paid", String.valueOf(ticket.isPaid()));
-            status.put("returnUrl", fakeService.returnUrl(ticket.getResultQuery()));
+            status.put("returnUrl", fakeService.returnUrl(ticket));
         }
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

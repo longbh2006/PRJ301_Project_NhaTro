@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import model.Invoice;
 import service.PaymentService;
+import util.AppUrl;
 
 /**
  * GET /tenant/pay?invoiceId=N: xác nhận trước khi trả.
@@ -66,8 +67,9 @@ public class TenantPaymentController extends HttpServlet {
         String bankCode = request.getParameter("bankCode");
         bankCode = bankCode == null ? "" : bankCode.trim();
         try {
+            // ReturnUrl theo host/cổng trình duyệt đang dùng nên máy nào chạy cổng nào cũng quay về đúng.
             String paymentUrl = paymentService.createPaymentUrl(tenantId, invoiceId, request.getRemoteAddr(),
-                    bankCode);
+                    bankCode, AppUrl.of(request));
             if (paymentUrl == null) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;

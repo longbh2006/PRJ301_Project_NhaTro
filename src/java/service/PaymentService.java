@@ -96,7 +96,7 @@ public class PaymentService {
      * Tạo lần thử PENDING rồi dựng URL cổng thanh toán đã ký.
      * Trả null khi hoá đơn không tồn tại hoặc không thuộc người thuê này.
      */
-    public String createPaymentUrl(int tenantId, int invoiceId, String clientIp, String bankCode)
+    public String createPaymentUrl(int tenantId, int invoiceId, String clientIp, String bankCode, String baseUrl)
             throws SQLException {
         requirePositive(tenantId, invoiceId);
         VnPayConfig loaded = VnPayConfig.load();
@@ -144,7 +144,7 @@ public class PaymentService {
         params.put("vnp_OrderInfo", "Thanh toan hoa don " + invoiceId);
         params.put("vnp_OrderType", "other");
         params.put("vnp_Locale", "vn");
-        params.put("vnp_ReturnUrl", config.getReturnUrl());
+        params.put("vnp_ReturnUrl", config.getReturnUrl(baseUrl));
         params.put("vnp_IpAddr", clientIp);
         params.put("vnp_CreateDate", VNP_TIME.format(now));
         params.put("vnp_ExpireDate", VNP_TIME.format(now.plusMinutes(PAYMENT_TIMEOUT_MINUTES)));
@@ -152,7 +152,7 @@ public class PaymentService {
         if (!bankCode.isEmpty()) {
             params.put("vnp_BankCode", bankCode);
         }
-        return config.getPayUrl() + "?" + VnPaySigner.signedQuery(params, config.getHashSecret());
+        return config.getPayUrl(baseUrl) + "?" + VnPaySigner.signedQuery(params, config.getHashSecret());
     }
 
     /**
