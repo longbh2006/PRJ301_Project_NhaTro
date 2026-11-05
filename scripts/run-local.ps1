@@ -1,5 +1,6 @@
 param(
-    [ValidateRange(1024, 65535)][int]$Port = 8080,
+    # 8090 thay vì 8080: cổng 8080 để dành cho Tomcat do NetBeans 17 quản lý, hai server chạy song song được.
+    [ValidateRange(1024, 65535)][int]$Port = 8090,
     # 0.0.0.0 cho điện thoại cùng Wi-Fi mở được trang quét QR của cổng VNPay giả; mặc định chỉ máy này.
     [ValidateSet('127.0.0.1', '0.0.0.0')][string]$ListenAddress = '127.0.0.1',
     [string]$TomcatPath = 'C:/Program Files/Apache Software Foundation/Tomcat 10.1',
